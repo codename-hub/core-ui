@@ -3,7 +3,7 @@ namespace codename\core\ui;
 use \codename\core\app;
 
 /**
- * Forms can either hold instances of \codename\core\field or \codename\core\fieldset
+ * Forms can either hold instances of \codename\core\ui\field or \codename\core\ui\fieldset
  * Frontend resources are being used here. Create the file paths in your application to override them
  * @package core
  * @since 2016-01-11
@@ -81,7 +81,7 @@ class form {
 
     /**
      * Contains all the fieldsets that will be displayed in the CRUD generator
-     * @var \codename\core\fieldset[]
+     * @var \codename\core\ui\fieldset[]
      */
     public $fieldsets = array();
 
@@ -93,8 +93,8 @@ class form {
 
     /**
      * Contains a list of callbacks
-     * @example form->addCallback(\codename\core\form::CALLBACK_FORM_NOT_SENT, function($form) {});
-     * @example form->addCallback(\codename\core\form::CALLBACK_FORM_NOT_VALID, function($form) {});
+     * @example form->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function($form) {});
+     * @example form->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_VALID, function($form) {});
      * @var array
      */
     protected $callbacks = array();
@@ -117,10 +117,10 @@ class form {
           $this->config['form_text_requiredfields'] = app::translate('CRUD.REQUIREDFIELDS');
         }
 
-        $this->addCallback(\codename\core\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\form $form) {
+        $this->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\ui\form $form) {
             app::getResponse()->setData('form', $form->output());
             return;
-        })->addCallback(\codename\core\form::CALLBACK_FORM_NOT_VALID, function(\codename\core\form $form) {
+        })->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_VALID, function(\codename\core\ui\form $form) {
             app::getResponse()->setData('errors', $form->getErrorstack()->getErrors());
             app::getResponse()->setData('context', 'form');
             app::getResponse()->setData('view', 'error');
@@ -227,7 +227,7 @@ class form {
       }
 
       // FIRE ON VALIDATION HOOK
-      $this->fireCallback(\codename\core\form::CALLBACK_FORM_VALIDATION);
+      $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_VALIDATION);
 
       return $this->errorstack->isSuccess();
     }
@@ -237,10 +237,10 @@ class form {
     /**
      * Returns true if the given $field has been submitted in the las request
      * <br />Uses the request object to find the fields's name
-     * @param \codename\core\field $field
+     * @param \codename\core\ui\field $field
      * @return boolean
      */
-    public function fieldSent(\codename\core\field $field) : bool {
+    public function fieldSent(\codename\core\ui\field $field) : bool {
         switch ($field->getProperty('field_type')) {
             case 'file' :
                 return array_key_exists($field->getProperty('field_name'), $_FILES);
@@ -261,7 +261,7 @@ class form {
      * Returns the given $field instance's value depending on it's datatype
      * @return mixed
      */
-    public function fieldValue(\codename\core\field $field) {
+    public function fieldValue(\codename\core\ui\field $field) {
         switch ($field->getProperty('field_type')) {
             case 'checkbox' :
                 return app::getInstance('request')->isDefined($field->getProperty('field_name'));
@@ -362,22 +362,22 @@ class form {
 
     /**
      * I will overwrite the $callback for the given $identifier.
-     * <br />Please add Callbacks by requiring an instance of \codename\core\form named $form.
-     * @example ->addCallback(\codename\core\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\form $form) {die('OK!');});
-     * @return \codename\core\form
+     * <br />Please add Callbacks by requiring an instance of \codename\core\ui\form named $form.
+     * @example ->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\ui\form $form) {die('OK!');});
+     * @return \codename\core\ui\form
      */
-    public function addCallback(string $identifier, callable $callback) : \codename\core\form {
+    public function addCallback(string $identifier, callable $callback) : \codename\core\ui\form {
         $this->callbacks[$identifier] = $callback;
         return $this;
     }
 
     /**
      * I will try accessing the callback identified by the given $identifier.
-     * <br />I will pass the current instance of \codename\core\form to the callback method named $form
+     * <br />I will pass the current instance of \codename\core\ui\form to the callback method named $form
      * <br />If the desired callback does not exist, I will do nothing.
-     * @return \codename\core\form
+     * @return \codename\core\ui\form
      */
-    private function fireCallback(string $identifier) : \codename\core\form {
+    private function fireCallback(string $identifier) : \codename\core\ui\form {
         if(array_key_exists($identifier, $this->callbacks)) {
             call_user_func($this->callbacks[$identifier], $this);
         }
@@ -388,20 +388,20 @@ class form {
      * I am a standardized method for working off an existing form instance.
      * <br />By default, the FORM_NOT_SENT callback will use the form template to output it.
      * <br />By default, the FORM_NOT_VALID callback will output the occured errors using the standard outputs.
-     * @return \codename\core\form
+     * @return \codename\core\ui\form
      */
-    public function work() : \codename\core\form {
+    public function work() : \codename\core\ui\form {
         if(!$this->isSent()) {
-            $this->fireCallback(\codename\core\form::CALLBACK_FORM_NOT_SENT);
+            $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT);
             return $this;
         }
 
         if(!$this->isValid()) {
-            $this->fireCallback(\codename\core\form::CALLBACK_FORM_NOT_VALID);
+            $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_VALID);
             return $this;
         }
 
-        $this->fireCallback(\codename\core\form::CALLBACK_FORM_VALID);
+        $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_VALID);
 
         return $this;
     }
