@@ -1,6 +1,6 @@
 <?php
 namespace codename\core\ui;
-use \codename\core\ui;
+use \codename\core\app;
 
 /**
  * Instances of this class are utilized by the \codename\core\ui\form class for displaying and validating input data

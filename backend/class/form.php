@@ -1,6 +1,6 @@
 <?php
 namespace codename\core\ui;
-use \codename\core\ui\app;
+use \codename\core\app;
 
 /**
  * Forms can either hold instances of \codename\core\ui\field or \codename\core\ui\fieldset
@@ -142,7 +142,10 @@ class form {
                 'field_name' => 'formSent' . $this->config['form_id'],
                 'field_type' => 'hidden'
         )));
-        return app::parseFile(app::getInheritedPath('frontend/form/' . $this->type . '/form.php'), $this);
+
+        return app::getTemplateEngine()->render('form/' . $this->type . '/form', $this);
+
+        // return app::parseFile(app::getInheritedPath('frontend/form/' . $this->type . '/form.php'), $this);
     }
 
     /**
