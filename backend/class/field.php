@@ -1,6 +1,6 @@
 <?php
 namespace codename\core\ui;
-use \codename\core\app;
+use \codename\core\ui;
 
 /**
  * Instances of this class are utilized by the \codename\core\ui\form class for displaying and validating input data
@@ -16,7 +16,7 @@ class field {
      * the type of output to generate
      * @var string $type
      */
-    protected $type = 'compact';
+    protected $type = 'default';
 
     /**
      * Contains all the properties that can be loaded into a field
@@ -54,7 +54,7 @@ class field {
         }
 
         // Create config instance
-        $this->config = new config($field);
+        $this->config = new \codename\core\config($field);
 
         return $this;
     }

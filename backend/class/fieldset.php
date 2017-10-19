@@ -15,7 +15,7 @@ class fieldset {
      * Contains the display type of the instance
      * @var string $type
      */
-    private $type = 'compact';
+    private $type = 'default';
 
     /**
      * Contains all the data for the form element

@@ -1,6 +1,6 @@
 <?php
 namespace codename\core\ui;
-use \codename\core\app;
+use \codename\core\ui\app;
 
 /**
  * Forms can either hold instances of \codename\core\ui\field or \codename\core\ui\fieldset
@@ -77,7 +77,7 @@ class form {
      * Defines what form and field objects shall be used when generating output
      * @var string
      */
-    private $type = 'compact';
+    private $type = 'default';
 
     /**
      * Contains all the fieldsets that will be displayed in the CRUD generator
@@ -113,9 +113,9 @@ class form {
         $this->config = $data;
         $this->errorstack = new \codename\core\errorstack("VALIDATION");
 
-        if(!isset($this->config['form_text_requiredfields'])) {
-          $this->config['form_text_requiredfields'] = app::translate('CRUD.REQUIREDFIELDS');
-        }
+        // if(!isset($this->config['form_text_requiredfields'])) {
+        //   $this->config['form_text_requiredfields'] = app::translate('CRUD.REQUIREDFIELDS');
+        // }
 
         $this->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\ui\form $form) {
             app::getResponse()->setData('form', $form->output());
@@ -142,7 +142,7 @@ class form {
                 'field_name' => 'formSent' . $this->config['form_id'],
                 'field_type' => 'hidden'
         )));
-        return app::parseFile(app::getInheritedPath('frontend/form/' . $this->type . '.php'), $this);
+        return app::parseFile(app::getInheritedPath('frontend/form/' . $this->type . '/form.php'), $this);
     }
 
     /**
