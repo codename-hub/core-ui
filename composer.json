@@ -1,0 +1,22 @@
+{
+    "name": "codename/core-ui",
+    "description": "This is going to be the core UI framework.",
+    "version": "0.0.1",
+    "type": "package",
+    "keywords": ["architect", "manager", "codename", "core", "ui"],
+    "time": "2017-10-19",
+    "authors": [
+        {
+            "name": "Kevin Dargel",
+            "role": "Software Developer"
+        }
+    ],
+    "require": {
+      "codename/core" : "*"
+    },
+    "autoload": {
+      "psr-4": {
+          "codename\\core\\ui\\": "backend/class/"
+      }
+    }
+}
