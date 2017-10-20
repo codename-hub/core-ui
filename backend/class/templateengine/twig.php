@@ -38,6 +38,7 @@ class twig extends \codename\core\templateengine {
     $paths[] = app::getHomedir() . 'frontend/';
 
     // collect appstack paths
+    // to search for views in
     foreach(app::getAppstack() as $parentapp) {
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
@@ -45,9 +46,23 @@ class twig extends \codename\core\templateengine {
     }
 
     $this->twigLoader = new \Twig\Loader\FilesystemLoader($paths, CORE_VENDORDIR);
-    $this->twigInstance = new \Twig\Environment($this->twigLoader, $config['environment'] ?? array());
+
+    /**
+     * Important Note:
+     * we're using a custom class as template base
+     * to support relative paths in embed/include/... twig blocks
+     */
+    $options = array_merge(
+      array(
+        'base_template_class' => '\\codename\\core\\ui\\templateengine\\twig\\template\\baseTemplate'
+      ),
+      $config['environment'] ?? array()
+    );
+
+    $this->twigInstance = new \Twig\Environment($this->twigLoader, $options);
     $this->twigInstance->addExtension(new extension\routing);
 
+    // Add request and response containers, globally
     $this->twigInstance->addGlobal('request', app::getRequest());
     $this->twigInstance->addGlobal('response', app::getResponse());
 
