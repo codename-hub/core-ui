@@ -66,11 +66,13 @@ class twig extends \codename\core\templateengine {
    * @inheritDoc
    *
    * twig loads a custom element/partial/whatever like this (fixed:)
-   * frontend/<referencePath>.html.twig
+   * frontend/<referencePath>.twig
    */
-  public function render(string $referencePath, $data): string {
-    $twigTemplate = $this->twigInstance->load($referencePath . '.html.twig');
-    return $twigTemplate->render($data->getData());
+  public function render(string $referencePath, $data = null): string {
+    $twigTemplate = $this->twigInstance->load($referencePath . '.twig');
+    return $twigTemplate->render(array(
+      'data' => $data
+    ));
   }
 
   /**
@@ -78,10 +80,10 @@ class twig extends \codename\core\templateengine {
    *
    * twig loads a view like this (fixed:)
    * frontend/view/<context>/<viewPath>.html.twig
-   * NOTE: extension .html.twig added by render()
+   * NOTE: extension .twig added by render()
    */
-  public function renderView(string $viewPath, $data) : string {
-    return $this->render('view/' . $data->getData('context') . '/' . $viewPath, $data);
+  public function renderView(string $viewPath, $data = null) : string {
+    return $this->render('view/' . $viewPath, $data);
   }
 
   /**
@@ -89,9 +91,9 @@ class twig extends \codename\core\templateengine {
    *
    * twig loads a template like this (fixed:)
    * frontend/template/<name>/template.html.twig
-   * NOTE: extension .html.twig added by render()
+   * NOTE: extension .twig added by render()
    */
-  public function renderTemplate(string $templatePath, $data) : string {
+  public function renderTemplate(string $templatePath, $data = null) : string {
     return $this->render('template/' . $templatePath . '/template', $data);
   }
 
