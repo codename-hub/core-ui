@@ -1,0 +1,26 @@
+{
+	"defaultview":"crud_list",
+	"view":{
+		"crud_list":{
+			"icon":"icon-list"
+		},
+		"crud_create":{
+			"icon":"icon-plus"
+		},
+		"crud_edit":{
+			"icon":"icon-edit"
+		},
+		"crud_show":{
+			"icon":"icon-eye-open"
+		},
+		"crud_delete":{
+			"icon":"icon-trash"
+		},
+		"bulk_edit":{
+			"icon":"icon-trash"
+		},
+		"bulk_delete":{
+			"icon":"icon-trash"
+		}
+	}
+}
