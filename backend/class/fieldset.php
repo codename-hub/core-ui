@@ -55,7 +55,19 @@ class fieldset {
      * @return string
      */
     public function output() : string {
-        return app::getTemplateEngine($this->templateEngine)->render('fieldset/' . $this->type, $this->getData());
+        $templateEngine = $this->templateEngine;
+        if($templateEngine == null) {
+          $templateEngine = app::getTemplateEngine();
+        }
+
+        // override field template engines on a weak basis
+        foreach($this->getFields() as $field) {
+          if($field->getTemplateEngine() == null) {
+            $field->setTemplateEngine($templateEngine);
+          }
+        }
+
+        return $templateEngine->render('fieldset/' . $this->type, $this->getData());
     }
 
     /**
@@ -79,18 +91,26 @@ class fieldset {
 
     /**
      * Defines which template engine to use
-     * @var string
+     * @var \codename\core\templateengine
      */
-    protected $templateEngine = 'default';
+    protected $templateEngine = null;
 
     /**
      * Setter for the templateEngine to use
-     * @param  string $templateEngine [description]
-     * @return fieldset               [description]
+     * @param  \codename\core\templateengine $templateEngine [description]
+     * @return fieldset                   [description]
      */
-    public function setTemplateEngine(string $templateEngine) : fieldset {
+    public function setTemplateEngine(\codename\core\templateengine $templateEngine) : fieldset {
       $this->templateEngine = $templateEngine;
       return $this;
+    }
+
+    /**
+     * [getTemplateEngine description]
+     * @return \codename\core\templateengine|null [description]
+     */
+    public function getTemplateEngine() : ?\codename\core\templateengine {
+      return $this->templateEngine;
     }
 
     /**

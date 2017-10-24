@@ -131,6 +131,12 @@ class form {
     }
 
     /**
+     * [protected description]
+     * @var field
+     */
+    protected $formSentField = null;
+
+    /**
      * Outputs the form HTML code
      * @return string
      */
@@ -138,12 +144,34 @@ class form {
         if(count($this->fields) == 0 && count($this->fieldsets) == 0) {
             throw new \codename\core\exception(self::EXCEPTION_OUTPUT_FORMISEMPTY, \codename\core\exception::$ERRORLEVEL_FATAL, null);
         }
-        $this->addField(new field(array(
-                'field_name' => 'formSent' . $this->config['form_id'],
-                'field_type' => 'hidden'
-        )));
 
-        return app::getTemplateEngine($this->templateEngine)->render('form/' . $this->type . '/form', $this);
+        if($this->formSentField == null) {
+          $this->addField($this->formSentField = new field(array(
+                  'field_name' => 'formSent' . $this->config['form_id'],
+                  'field_type' => 'hidden'
+          )));
+        }
+
+        $templateEngine = $this->templateEngine;
+        if($templateEngine == null) {
+          $templateEngine = app::getTemplateEngine();
+        }
+
+        // override field template engines on a weak basis
+        foreach($this->fields as $field) {
+          if($field->getTemplateEngine() == null) {
+            $field->setTemplateEngine($templateEngine);
+          }
+        }
+
+        // override fieldset template engines on a weak basis
+        foreach($this->fieldsets as $fieldset) {
+          if($fieldset->getTemplateEngine() == null) {
+            $fieldset->setTemplateEngine($templateEngine);
+          }
+        }
+
+        return $templateEngine->render('form/' . $this->type . '/form', $this);
     }
 
     /**
@@ -317,18 +345,26 @@ class form {
 
     /**
      * Defines which template engine to use
-     * @var string
+     * @var \codename\core\templateengine
      */
-    protected $templateEngine = 'default';
+    protected $templateEngine = null;
 
     /**
      * Setter for the templateEngine to use
-     * @param  string $templateEngine [description]
+     * @param  \codename\core\templateengine $templateEngine [description]
      * @return form                   [description]
      */
-    public function setTemplateEngine(string $templateEngine) : form {
+    public function setTemplateEngine(\codename\core\templateengine $templateEngine) : form {
       $this->templateEngine = $templateEngine;
       return $this;
+    }
+
+    /**
+     * [getTemplateEngine description]
+     * @return \codename\core\templateengine\null [description]
+     */
+    public function getTemplateEngine() : ?\codename\core\templateengine {
+      return $this->templateEngine;
     }
 
     /**

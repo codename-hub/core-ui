@@ -76,7 +76,14 @@ class field {
           $data['field_elements'] = $data['field_elements']();
         }
 
-        return app::getTemplateEngine($this->templateEngine)->render('field/' . $this->type . '/' . $this->config->get('field_type'), $data);
+        $templateEngine = $this->templateEngine;
+
+        // Fallback to default engine, if nothing set
+        if($this->templateEngine == null) {
+          $templateEngine = app::getTemplateEngine();
+        }
+
+        return $templateEngine->render('field/' . $this->type . '/' . $this->config->get('field_type'), $data);
     }
 
     /**
@@ -92,18 +99,26 @@ class field {
 
     /**
      * Defines which template engine to use
-     * @var string
+     * @var \codename\core\templateengine
      */
-    protected $templateEngine = 'default';
+    protected $templateEngine = null;
 
     /**
      * Setter for the templateEngine to use
-     * @param  string $templateEngine [description]
+     * @param  \codename\core\templateengine $templateEngine [description]
      * @return field                   [description]
      */
-    public function setTemplateEngine(string $templateEngine) : field {
+    public function setTemplateEngine(\codename\core\templateengine $templateEngine) : field {
       $this->templateEngine = $templateEngine;
       return $this;
+    }
+
+    /**
+     * [getTemplateEngine description]
+     * @return \codename\core\templateengine|null [description]
+     */
+    public function getTemplateEngine() : ?\codename\core\templateengine {
+      return $this->templateEngine;
     }
 
     /**
