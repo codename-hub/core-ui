@@ -4,12 +4,11 @@
 <div id="core_ui_form_container_{{ data.config.form_id }}" class="hcForm">
   <form enctype="multipart/form-data" accept-charset="UTF-8" id="{{ data.config.form_id }}" action="{{ data.config.form_action }}" method="{{ data.config.form_method }}" class="separate-sections validatable form-horizontal">
       {% for fieldset in data.fieldsets %}
-          {{ fieldset.output() }}
+          {{ fieldset.output()|raw }}
       {% endfor %}
       {% for field in data.fields %}
-          {{ field.output() }}
+          {{ field.output()|raw }}
       {% endfor %}
-      ?>
   </form>
 </div>
 
