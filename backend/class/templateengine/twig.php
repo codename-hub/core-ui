@@ -35,14 +35,17 @@ class twig extends \codename\core\templateengine {
     $paths = array();
 
     // add current app home frontend to paths
-    $paths[] = app::getHomedir() . 'frontend/';
+    // $paths[] = app::getHomedir() . 'frontend/';
 
     // collect appstack paths
     // to search for views in
     foreach(app::getAppstack() as $parentapp) {
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
-      $filename = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
+      if($vendor != 'corename' && $app != 'core') {
+        $filename = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
+        $paths[] = $filename;
+      }
     }
 
     $this->twigLoader = new \Twig\Loader\FilesystemLoader($paths, CORE_VENDORDIR);
