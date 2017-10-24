@@ -7,11 +7,38 @@ use \codename\core\ui\templateengine\twig\extension;
 /**
  * Twig Template Engine Abstractor
  */
-class twig extends \codename\core\templateengine {
+class twig extends \codename\core\templateengine implements \codename\core\clientInterface {
+
+  /**
+   * its very own client name
+   * @var [type]
+   */
+  protected $clientName = null;
+
+  /**
+   * @inheritDoc
+   */
+  public function setClientName(string $name)
+  {
+    if($this->clientName == null) {
+      $this->clientName = $name;
+      $this->twigInstance->setTemplateClassPrefixPrefix($this->clientName);
+    } else {
+      throw new exception("EXCEPTION_CORE_CLIENT_INTERFACE_CANNOT_RENAME_CLIENT", exception::$ERRORLEVEL_FATAL, $this->clientName);
+    }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getClientName(string $name)
+  {
+    return $this->clientName;
+  }
 
   /**
    * twig instance
-   * @var \Twig\Environment
+   * @var \codename\core\ui\templateengine\twig\environment\core
    */
   protected $twigInstance = null;
 
@@ -34,11 +61,10 @@ class twig extends \codename\core\templateengine {
     parent::__construct($config);
     $paths = array();
 
-    // add current app home frontend to paths
-    // $paths[] = app::getHomedir() . 'frontend/';
-
     // collect appstack paths
     // to search for views in
+    // this includes the current app
+    // so, no need to add it explicitly
     foreach(app::getAppstack() as $parentapp) {
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
@@ -62,7 +88,7 @@ class twig extends \codename\core\templateengine {
       $config['environment'] ?? array()
     );
 
-    $this->twigInstance = new \Twig\Environment($this->twigLoader, $options);
+    $this->twigInstance = new \codename\core\ui\templateengine\twig\environment\core($this->twigLoader, $options);
     $this->twigInstance->addExtension(new extension\routing);
 
     // Add request and response containers, globally
