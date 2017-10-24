@@ -21,18 +21,15 @@
 
 <div style="clear:both;"></div>
 
-<?php
-  // additional scripts paths defined
-  if(isset($data->config['form_scripts'])) {
-    if(isset($data->config['form_scripts']['path'])) {
-      foreach($data->config['form_scripts']['path'] as $scriptPath) {
-        echo(app::parseFile(app::getInheritedPath($scriptPath), $data));
-      }
-    }
-    if(isset($data->config['form_scripts']['code'])) {
-      foreach($data->config['form_scripts']['code'] as $code) {
-        echo($code);
-      }
-    }
-  }
-?>
+{% if data.config.form_scripts %}
+  {% if data.config.form_scripts.path %}
+    {% for scriptPath in data.config.form_scripts.path %}
+      {% include scriptPath %}
+    {% endfor %}
+  {% endif %}
+  {% if data.config.form_scripts.code %}
+  {% for code in data.config.form_scripts.code %}
+    {{ code|raw }}
+  {% endfor %}
+  {% endif %}
+{% endif %}
