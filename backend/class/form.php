@@ -71,13 +71,13 @@ class form {
      * @todo make this an instance of (idea) \codename\core\data
      * @var \codename\core\datacontainer
      */
-    private $data = null;
+    protected $data = null;
 
     /**
      * Defines what form and field objects shall be used when generating output
      * @var string
      */
-    private $type = 'default';
+    protected $type = 'default';
 
     /**
      * Contains all the fieldsets that will be displayed in the CRUD generator
@@ -308,7 +308,7 @@ class form {
     /**
      * Setter for the type of output to generate
      * @param string $type
-     * @return model
+     * @return form
      */
     public function setType(string $type) : form {
         $this->type = $type;
