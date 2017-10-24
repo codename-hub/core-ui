@@ -75,7 +75,8 @@ class field {
           // Replace field_value with its callable result
           $data['field_elements'] = $data['field_elements']();
         }
-        return app::parseFile(app::getInheritedPath('frontend/field/' . $this->type . '/' . $this->config->get('field_type') . '.php'), $data);
+
+        return app::getTemplateEngine($this->templateEngine)->render('field/' . $this->type . '/' . $this->config->get('field_type'), $data);
     }
 
     /**
@@ -87,6 +88,22 @@ class field {
     public function setType(string $type) : field {
         $this->type = $type;
         return $this;
+    }
+
+    /**
+     * Defines which template engine to use
+     * @var string
+     */
+    protected $templateEngine = 'default';
+
+    /**
+     * Setter for the templateEngine to use
+     * @param  string $templateEngine [description]
+     * @return field                   [description]
+     */
+    public function setTemplateEngine(string $templateEngine) : field {
+      $this->templateEngine = $templateEngine;
+      return $this;
     }
 
     /**

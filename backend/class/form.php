@@ -143,9 +143,7 @@ class form {
                 'field_type' => 'hidden'
         )));
 
-        return app::getTemplateEngine()->render('form/' . $this->type . '/form', $this);
-
-        // return app::parseFile(app::getInheritedPath('frontend/form/' . $this->type . '/form.php'), $this);
+        return app::getTemplateEngine($this->templateEngine)->render('form/' . $this->type . '/form', $this);
     }
 
     /**
@@ -315,6 +313,22 @@ class form {
     public function setType(string $type) : form {
         $this->type = $type;
         return $this;
+    }
+
+    /**
+     * Defines which template engine to use
+     * @var string
+     */
+    protected $templateEngine = 'default';
+
+    /**
+     * Setter for the templateEngine to use
+     * @param  string $templateEngine [description]
+     * @return form                   [description]
+     */
+    public function setTemplateEngine(string $templateEngine) : form {
+      $this->templateEngine = $templateEngine;
+      return $this;
     }
 
     /**

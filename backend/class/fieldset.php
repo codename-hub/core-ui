@@ -55,7 +55,7 @@ class fieldset {
      * @return string
      */
     public function output() : string {
-        return app::parseFile(app::getInheritedPath('frontend/fieldset/' . $this->type . '.php'), $this->getData());
+        return app::getTemplateEngine($this->templateEngine)->render('fieldset/' . $this->type, $this->getData());
     }
 
     /**
@@ -75,6 +75,22 @@ class fieldset {
     public function setType(string $type) : fieldset {
         $this->type = $type;
         return $this;
+    }
+
+    /**
+     * Defines which template engine to use
+     * @var string
+     */
+    protected $templateEngine = 'default';
+
+    /**
+     * Setter for the templateEngine to use
+     * @param  string $templateEngine [description]
+     * @return fieldset               [description]
+     */
+    public function setTemplateEngine(string $templateEngine) : fieldset {
+      $this->templateEngine = $templateEngine;
+      return $this;
     }
 
     /**
