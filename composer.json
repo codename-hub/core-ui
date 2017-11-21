@@ -1,7 +1,7 @@
 {
     "name": "codename/core-ui",
     "description": "This is going to be the core UI framework.",
-    "version": "0.0.1",
+    "version": "0.0.4",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
     "time": "2017-10-19",
@@ -13,7 +13,16 @@
     ],
     "require": {
       "codename/core" : "*",
-      "twig/twig" : "2.*"
+      "twig/twig" : "2.*",
+      "codename/core-ui-assets": "*",
+      "oomphinc/composer-installers-extender" : "^1.1",
+      "codename/composer-requirejs-config" : "*",
+      "npm-asset/requirejs-domready" : "*",
+      "npm-asset/requirejs" : "2.*",
+      "npm-asset/jquery" : "~3.2",
+      "npm-asset/bootstrap" : "~3.3",
+      "npm-asset/bootstrap-datepicker" : "~1.7",
+      "npm-asset/select2" : "4.*"
     },
     "autoload": {
       "psr-4": {
