@@ -1,6 +1,9 @@
 <?php namespace codename\core\ui;
-app::getResponse()->requireResource('js', '/assets/plugins/jquery.loadinganim/jquery.loadinganim.js');
-app::getResponse()->requireResource('css', '/assets/plugins/jquery.loadinganim/jquery.loadinganim.css');
+// app::getResponse()->requireResource('js', '/assets/plugins/jquery.loadinganim/jquery.loadinganim.js');
+// app::getResponse()->requireResource('css', '/assets/plugins/jquery.loadinganim/jquery.loadinganim.css');
+
+app::requireAsset('requirejs', ['jquery']);
+
 ?>
 <div id="core_ui_form_result_<?=$data->config['form_id']?>">
 </div>
@@ -28,7 +31,9 @@ app::getResponse()->requireResource('css', '/assets/plugins/jquery.loadinganim/j
 <div style="clear:both;"></div>
 
 <script type="text/javascript">
-    $(document).ready(function () {
+
+require(['jquery'], function($) {
+    define(['domReady!'], function () {
 
         // Default response handling, if enabled.
         $(document).on('form_container_<?=$data->config['form_id']?>_default', function(event, data, callbackData) {
@@ -141,6 +146,7 @@ app::getResponse()->requireResource('css', '/assets/plugins/jquery.loadinganim/j
             return false;
         });
     });
+});
 </script>
 
 <?php
