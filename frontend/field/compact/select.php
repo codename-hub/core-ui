@@ -1,4 +1,8 @@
-<?php namespace codename\core\ui;?>
+<?php namespace codename\core\ui;
+app::requireAsset('requirejs', ['select2']);
+app::requireAsset('requirecss', '/assets/select2/dist/css/select2.css');
+?>
+
 <div class="form-group">
     <label
         title="<?=$data['field_description']?>"
@@ -49,3 +53,9 @@
 
     </div>
 </div>
+
+<script>
+require(['select2'], function() {
+  $('.chzn-select').select2();
+});
+</script>
