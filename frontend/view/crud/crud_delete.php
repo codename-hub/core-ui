@@ -18,7 +18,7 @@
 </div>
 
 <script>
-    $(document).on('ready', function(){
-        $('#btnConfirm').focus();
-    });
+define(['domReady!', 'jquery'], function () {
+  $('#btnConfirm').focus();
+});
 </script>

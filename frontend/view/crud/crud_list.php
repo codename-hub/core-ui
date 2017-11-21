@@ -1,7 +1,15 @@
 <?php namespace codename\core\ui;
 
-app::getResponse()->requireResource('js', '/assets/plugins/jquery.bsmodal/jquery.bsmodal.js');
-app::getResponse()->requireResource('js', '/assets/plugins/jquery.bsmodal/jquery.bsmodal.init.js');
+app::requireAsset('requirecss', [
+  '/assets/bootstrap/dist/css/bootstrap.css',
+  '/assets/core-ui-assets/css/coreadmin/stylesheets/application.css'
+]);
+app::requireAsset('requirejs', [
+  'bootstrap', 'bootstrap-datepicker'
+]);
+
+// app::getResponse()->requireResource('js', '/assets/plugins/jquery.bsmodal/jquery.bsmodal.js');
+// app::getResponse()->requireResource('js', '/assets/plugins/jquery.bsmodal/jquery.bsmodal.init.js');
 
 // data
 $data_rows = app::getResponse()->getData('rows');
@@ -425,65 +433,81 @@ $url_baseurl = app::getResponse()->getData('url_baseurl');
 
 <script>
 
-function initPlugins() {
-  $('.datepicker-db').datepicker({
-    format : 'yyyy-mm-dd',
-    language : 'de',
-    autoUpdateInput : false
-  });
-  $('select.chzn-select').select2();
-}
-$(document).bind('ready', function() {
+require(['jquery'], function($) {
 
-    initPlugins();
+  console.log("bepelep");
 
-    $('body').delegate('.btnBulk', 'click', function(event) {
-        var keys = '';
-        var delimiter = '';
-        event.preventDefault();
-        $( 'input:checkbox[class=chkbxPrimary]:checked' ).each(function( index ) {
-            if($(this).prop('checked')) {
-              keys = keys + delimiter + $(this).data('id');
-              delimiter  = ',';
-            }
-        });
-        $(this).attr('href', $(this).attr('href') + '&<?=$model->getPrimarykey()?>=' + keys);
-        setModalClickAction(this);
+  function initPlugins() {
+    require(['bootstrap-datepicker'], function() {
+      $('.datepicker-db').datepicker({
+        format : 'yyyy-mm-dd',
+        language : 'de',
+        autoUpdateInput : false
+      });
     });
-    $(document).delegate('.btnAdder', 'click', function() {
-        var filterfield = $(this).data('filterfield');
-        var fieldname = $(this).data('fieldname');
-        var filteroptions = $(this).data('filteroptions');
-        var filtertype = $(this).data('filtertype');
-        var multiple = $(this).data('multiple');
-        html = '';
-        if(typeof filteroptions != 'undefined') {
-          var options = '';
-          $.each(filteroptions, function(key,value) {
-            options += '<option value="' + key + '">' + value + '</option>'
+
+    require(['select2'], function() {
+      $('select.chzn-select').select2();
+    });
+  }
+
+  define(['domReady!'], function () {
+  // $(document).bind('ready', function() {
+
+      console.log("document ready");
+
+      initPlugins();
+
+      console.log("beeeep");
+
+      $('body').delegate('.btnBulk', 'click', function(event) {
+          var keys = '';
+          var delimiter = '';
+          event.preventDefault();
+          $( 'input:checkbox[class=chkbxPrimary]:checked' ).each(function( index ) {
+              if($(this).prop('checked')) {
+                keys = keys + delimiter + $(this).data('id');
+                delimiter  = ',';
+              }
           });
+          $(this).attr('href', $(this).attr('href') + '&<?=$model->getPrimarykey()?>=' + keys);
+          setModalClickAction(this);
+      });
+      $(document).delegate('.btnAdder', 'click', function() {
+          var filterfield = $(this).data('filterfield');
+          var fieldname = $(this).data('fieldname');
+          var filteroptions = $(this).data('filteroptions');
+          var filtertype = $(this).data('filtertype');
+          var multiple = $(this).data('multiple');
+          html = '';
+          if(typeof filteroptions != 'undefined') {
+            var options = '';
+            $.each(filteroptions, function(key,value) {
+              options += '<option value="' + key + '">' + value + '</option>'
+            });
 
-          var multipleAttr = '';
-          var fieldArray = '';
-          if(multiple) {
-            multipleAttr = 'multiple="multiple"';
-            fieldArray = '[]';
-          }
-          html = '<select class="chzn-select" id="crudFilter' + filterfield + '" style="width:100px;" name="<?=$crud_filter_identifier?>[' + filterfield + ']'+fieldArray+'" ' + multipleAttr + '>' + options + '</select>'
-        } else {
-          if(typeof filtertype != 'undefined' && (filtertype == 'date_range')) {
-            html = '<input id="crudFilter' + filterfield + '_0" class="datepicker-db" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + '][0]" placeholder="' + fieldname + '" value="" />';
-            html += '<input id="crudFilter' + filterfield + '_1" class="datepicker-db" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + '][1]" placeholder="' + fieldname + '" value="" />';
+            var multipleAttr = '';
+            var fieldArray = '';
+            if(multiple) {
+              multipleAttr = 'multiple="multiple"';
+              fieldArray = '[]';
+            }
+            html = '<select class="chzn-select" id="crudFilter' + filterfield + '" style="width:100px;" name="<?=$crud_filter_identifier?>[' + filterfield + ']'+fieldArray+'" ' + multipleAttr + '>' + options + '</select>'
           } else {
-            html = '<input id="crudFilter' + filterfield + '" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + ']" placeholder="' + fieldname + '" value="" />';
+            if(typeof filtertype != 'undefined' && (filtertype == 'date_range')) {
+              html = '<input id="crudFilter' + filterfield + '_0" class="datepicker-db" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + '][0]" placeholder="' + fieldname + '" value="" />';
+              html += '<input id="crudFilter' + filterfield + '_1" class="datepicker-db" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + '][1]" placeholder="' + fieldname + '" value="" />';
+            } else {
+              html = '<input id="crudFilter' + filterfield + '" style="width:100px;" type="text" name="<?=$crud_filter_identifier?>[' + filterfield + ']" placeholder="' + fieldname + '" value="" />';
+            }
           }
-        }
-        $('#crudFilterList').append('<div class="col-md-2 alert-info">' + fieldname + ':<br />' + html + '<button type="button" class="close" data-dismiss="alert">×</button></div>');
-        $('#crudFilter' + filterfield + '.chzn-select').select2();
-        initPlugins();
-        $(this).remove();
-        $('#crudFilter' + filterfield).focus();
-    });
-});
+          $('#crudFilterList').append('<div class="col-md-2 alert-info">' + fieldname + ':<br />' + html + '<button type="button" class="close" data-dismiss="alert">×</button></div>');
+          $('#crudFilter' + filterfield + '.chzn-select').select2();
+          initPlugins();
+          $(this).remove();
+          $('#crudFilter' + filterfield).focus();
+      });
+  });
 
+});
 </script>
