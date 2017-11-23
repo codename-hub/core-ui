@@ -1,4 +1,4 @@
-<?php namespace codename\core\ui; ?>
+<?php namespace codename\core\ui;?>
 <div class="row">
     <div class="col-md-12">
         <div class="box">
@@ -18,7 +18,7 @@
 </div>
 
 <script>
-define(['domReady!', 'jquery'], function () {
+require(['domReady!', 'jquery'], function () {
   $('#btnConfirm').focus();
 });
 </script>

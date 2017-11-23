@@ -55,7 +55,7 @@ app::requireAsset('requirecss', '/assets/select2/dist/css/select2.css');
 </div>
 
 <script>
-require(['select2'], function() {
+require(['!select2'], function() {
   $('.chzn-select').select2();
 });
 </script>

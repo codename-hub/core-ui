@@ -7,14 +7,14 @@
     <?=app::translate("CRUD.". app::getResponse()->getData('CRUD_FEEDBACK'))?>
 </div>
 <script>
-    $(document).ready(function() {
-        $('html, body').animate({
-        	scrollTop: $('#crudAlert').offset().top
-        });
-        window.setTimeout('$(\'#crudAlert\').fadeOut(300, function(){ $(this).remove();});', 2500);
+require(['domReady!', 'jquery'], function () {
+  $('html, body').animate({
+  	scrollTop: $('#crudAlert').offset().top
+  });
+  window.setTimeout('$(\'#crudAlert\').fadeOut(300, function(){ $(this).remove();});', 2500);
 
-        <?php if(app::getRequest()->getData('crud_success_prevent_default') != true) { ?>
-        window.setTimeout('window.history.back();', 3000);
-        <?php } ?>
-    });
+  <?php if(app::getRequest()->getData('crud_success_prevent_default') != true) { ?>
+  window.setTimeout('window.history.back();', 3000);
+  <?php } ?>
+});
 </script>

@@ -451,7 +451,7 @@ require(['jquery'], function($) {
     });
   }
 
-  define(['domReady!'], function () {
+  require(['domReady!'], function () {
   // $(document).bind('ready', function() {
 
       console.log("document ready");

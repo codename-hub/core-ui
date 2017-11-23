@@ -60,7 +60,7 @@ class crud extends \codename\core\context implements \codename\core\context\cont
      */
     public function __construct() {
         $this->getResponse()->setData('primarykey', $this->getModelinstance()->getPrimarykey());
-        $this->getResponse()->setData('template', 'basic');
+        // $this->getResponse()->setData('template', 'basic');
 
         $this->setCrudinstance(new \codename\core\ui\crud($this->getModelinstance()));
         return $this;
