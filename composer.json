@@ -1,7 +1,7 @@
 {
     "name": "codename/core-ui",
     "description": "This is going to be the core UI framework.",
-    "version": "0.0.4",
+    "version": "0.0.6",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
     "time": "2017-10-19",
@@ -15,8 +15,6 @@
       "codename/core" : "*",
       "twig/twig" : "2.*",
       "codename/core-ui-assets": "*",
-      "oomphinc/composer-installers-extender" : "^1.1",
-      "codename/composer-requirejs-config" : "*",
       "npm-asset/requirejs-domready" : "*",
       "npm-asset/requirejs" : "2.*",
       "npm-asset/jquery" : "~3.2",
