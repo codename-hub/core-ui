@@ -49,6 +49,12 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   protected $twigLoader = null;
 
   /**
+   * File extension automatically added for finding extensions
+   * @var string
+   */
+  protected $templateFileExtension = '.twig';
+
+  /**
    * @inheritDoc
    */
   public function __construct(array $config = array())
@@ -59,6 +65,11 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     }
 
     parent::__construct($config);
+
+    if(!empty($config['template_file_extension'])) {
+      $this->templateFileExtension = $config['template_file_extension'];
+    }
+
     $paths = array();
 
     // collect appstack paths
@@ -113,7 +124,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * frontend/<referencePath>.twig
    */
   public function render(string $referencePath, $data = null): string {
-    $twigTemplate = $this->twigInstance->load($referencePath . '.twig');
+    $twigTemplate = $this->twigInstance->load($referencePath . $this->templateFileExtension);
     return $twigTemplate->render(array(
       'data' => $data
     ));
