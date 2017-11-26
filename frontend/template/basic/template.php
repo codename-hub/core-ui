@@ -1,4 +1,4 @@
-<?php namespace codename\demo; ?>
+<?php namespace codename\core\ui; ?>
 <!DOCTYPE html>
 <html>
     <head>
