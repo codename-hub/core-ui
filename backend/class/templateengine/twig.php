@@ -115,6 +115,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $this->twigInstance->addTest(new \Twig\TwigTest('string', function ($value) {
       return is_string($value);
     }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadleft', function($string, $pad_length, $pad_string = " ") {
+      return str_pad($string, $pad_length, $pad_string, STR_PAD_LEFT);
+    }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadright', function($string, $pad_length, $pad_string = " ") {
+      return str_pad($string, $pad_length, $pad_string, STR_PAD_RIGHT);
+    }));
   }
 
   /**
