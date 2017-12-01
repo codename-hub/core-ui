@@ -100,6 +100,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     );
 
     $this->twigInstance = new \codename\core\ui\templateengine\twig\environment\core($this->twigLoader, $options);
+    $this->twigInstance->templateFileSuffix = $this->templateFileExtension;
     $this->twigInstance->addExtension(new extension\routing);
 
     // Add request and response containers, globally
@@ -140,7 +141,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * frontend/<referencePath>.twig
    */
   public function render(string $referencePath, $data = null): string {
-    $twigTemplate = $this->twigInstance->load($referencePath . $this->templateFileExtension);
+    $twigTemplate = $this->twigInstance->load($referencePath);
     return $twigTemplate->render(array(
       'data' => $data
     ));
