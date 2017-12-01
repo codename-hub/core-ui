@@ -132,6 +132,13 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $this->twigInstance->addFunction(new \Twig\TwigFunction('print_r', function($value) {
       return print_r($value, true);
     }));
+
+
+    if(app::getRequest() instanceof \codename\core\request\cli) {
+      $this->twigInstance->addFunction(new \Twig\TwigFunction('cli_format', function($value, $color) {
+        return \codename\core\helper\clicolors::getInstance()->getColoredString($value, $color);
+      }));
+    }
   }
 
   /**
