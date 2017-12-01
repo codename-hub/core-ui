@@ -22,13 +22,10 @@ class table extends \codename\core\ui\frontend\element {
     {
       // we assume rows and key => value data in this table by default. @TODO: change this to auto-recognize it? (e.g. assoc array)
 
-
       $columns = array();
       $rows = array();
 
-
       $data = $this->data->getData();
-
 
       if($this->config->exists('columns')) {
         // defined columns
@@ -39,7 +36,6 @@ class table extends \codename\core\ui\frontend\element {
           if(!is_string($key) && is_numeric($key)) {
             // numeric index => ROWS!
             //
-
             $columns = array_unique(array_merge($columns, array_keys($value)));
           } else {
             // ASSOC array!
@@ -51,7 +47,6 @@ class table extends \codename\core\ui\frontend\element {
 
       // generate table
       //
-
       $table = [
         'max' => [],
         'header' => $columns,
@@ -68,6 +63,11 @@ class table extends \codename\core\ui\frontend\element {
         $rowValues = [];
         foreach($indexValue as $key => $value) {
           if(in_array($key, $columns)) {
+
+            // convert non-string to string, somehow
+            if(!is_string($value)) {
+              $value = print_r($value, true);
+            }
 
             // detect max column value length
             // for cli output...
