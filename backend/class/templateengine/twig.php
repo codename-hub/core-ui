@@ -123,6 +123,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadright', function($string, $pad_length, $pad_string = " ") {
       return str_pad($string, $pad_length, $pad_string, STR_PAD_RIGHT);
     }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('var_export', function($value) {
+      return var_export($value, true);
+    }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('print_r', function($value) {
+      return print_r($value, true);
+    }));
   }
 
   /**
