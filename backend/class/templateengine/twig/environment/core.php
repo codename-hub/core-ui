@@ -37,4 +37,19 @@ class core extends \Twig\Environment {
   {
     return ($this->templateClassPrefixPrefix ?? '').parent::getTemplateClass($name, $index);
   }
+
+  /**
+   * default template file suffix (e.g. .twig)
+   * @var [type]
+   */
+  public $templateFileSuffix = '';
+
+  /**
+   * @inheritDoc
+   */
+  public function loadTemplate($name, $index = null)
+  {
+    return parent::loadTemplate($name . $this->templateFileSuffix, $index);
+  }
+  
 }

@@ -475,7 +475,14 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if($addSubmitButton) {
-          $this->getForm()->addField((new field(array('field_name' => 'name','field_title' => 'submit', 'field_description' => 'description','field_id' => 'submit','field_type' => 'submit','field_value' => 'speichern')))->setType('compact'));
+          $this->getForm()->addField((new field(array(
+            'field_name' => 'name',
+            'field_title' => 'submit',
+            'field_description' => 'description',
+            'field_id' => 'submit',
+            'field_type' => 'submit',
+            'field_value' => app::getTranslate()->translate('BUTTON.BTN_SAVE')
+          )))->setType('compact'));
         }
 
         return $this->getForm();

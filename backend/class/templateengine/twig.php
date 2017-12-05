@@ -100,6 +100,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     );
 
     $this->twigInstance = new \codename\core\ui\templateengine\twig\environment\core($this->twigLoader, $options);
+    $this->twigInstance->templateFileSuffix = $this->templateFileExtension;
     $this->twigInstance->addExtension(new extension\routing);
 
     // Add request and response containers, globally
@@ -123,6 +124,21 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadright', function($string, $pad_length, $pad_string = " ") {
       return str_pad($string, $pad_length, $pad_string, STR_PAD_RIGHT);
     }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('var_export', function($value) {
+      return var_export($value, true);
+    }));
+
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('print_r', function($value) {
+      return print_r($value, true);
+    }));
+
+
+    if(app::getRequest() instanceof \codename\core\request\cli) {
+      $this->twigInstance->addFunction(new \Twig\TwigFunction('cli_format', function($value, $color) {
+        return \codename\core\helper\clicolors::getInstance()->getColoredString($value, $color);
+      }));
+    }
   }
 
   /**
@@ -132,7 +148,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * frontend/<referencePath>.twig
    */
   public function render(string $referencePath, $data = null): string {
-    $twigTemplate = $this->twigInstance->load($referencePath . $this->templateFileExtension);
+    $twigTemplate = $this->twigInstance->load($referencePath);
     return $twigTemplate->render(array(
       'data' => $data
     ));
