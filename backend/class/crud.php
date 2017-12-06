@@ -1250,7 +1250,7 @@ class crud extends \codename\core\bootstrapInstance {
             $ret = implode(', ', $vals);
           } else {
             // $field should be $obj['key']. check dependencies, correct mistakes and do it right!
-            $element = $this->getModel($obj['model'])->loadByUnique($obj['key'], $row[$field]);
+            $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
             eval('$ret = "' . $obj['display'] . '";');
           }
           return array($row[$field], $ret);
