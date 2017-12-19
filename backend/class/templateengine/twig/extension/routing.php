@@ -46,7 +46,7 @@ class routing extends AbstractExtension
     public function getPath($name, $parameters = array(), $relative = false)
     {
         // return $this->generator->generate($name, $parameters, $relative ? UrlGeneratorInterface::RELATIVE_PATH : UrlGeneratorInterface::ABSOLUTE_PATH);
-        return $this->generator->generate($name, $parameters, $relative ? urlGeneratorInterface::RELATIVE_PATH : urlGeneratorInterface::ABSOLUTE_PATH);
+        return $this->generator->generateFromRoute($name, $parameters, $relative ? urlGeneratorInterface::RELATIVE_PATH : urlGeneratorInterface::ABSOLUTE_PATH);
     }
     /**
      * @param string $name
@@ -58,7 +58,7 @@ class routing extends AbstractExtension
     public function getUrl($name, $parameters = array(), $schemeRelative = false)
     {
         // return $this->generator->generate($name, $parameters, $schemeRelative ? UrlGeneratorInterface::NETWORK_PATH : UrlGeneratorInterface::ABSOLUTE_URL);
-        return $this->generator->generate($name, $parameters, $schemeRelative ? urlGeneratorInterface::NETWORK_PATH : urlGeneratorInterface::ABSOLUTE_URL);
+        return $this->generator->generateFromRoute($name, $parameters, $schemeRelative ? urlGeneratorInterface::NETWORK_PATH : urlGeneratorInterface::ABSOLUTE_URL);
     }
 
     /**
