@@ -648,7 +648,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(!$form->isSent()) {
-            $this->getResponse()->setData('form', $form->output());
+            $this->getResponse()->setData('form', $form->output($this->outputFormConfig));
             return;
         }
 
@@ -721,7 +721,7 @@ class crud extends \codename\core\bootstrapInstance {
       // use modified makeForm function, that allows $addSubmitButton = false (second argument)
       $form = $this->makeForm($primaryKey, false);
 
-      $this->getResponse()->setData('form', $form->output());
+      $this->getResponse()->setData('form', $form->output($this->outputFormConfig));
     }
 
     /**
