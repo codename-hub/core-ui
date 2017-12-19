@@ -100,4 +100,29 @@ class app extends \codename\core\app {
     }
   }
 
+  /**
+   * [protected description]
+   * @var \codename\core\generator\urlGeneratorInterface
+   */
+  protected static $urlGenerator = null;
+
+  /**
+   * [getUrlGenerator description]
+   * @return \codename\core\generator\urlGeneratorInterface [description]
+   */
+  public static function getUrlGenerator() : \codename\core\generator\urlGeneratorInterface {
+    if(self::$urlGenerator == null) {
+      self::$urlGenerator = new \codename\core\generator\urlGenerator();
+    }
+    return self::$urlGenerator;
+  }
+
+  /**
+   * [setUrlGenerator description]
+   * @param \codename\core\generator\urlGeneratorInterface $generator [description]
+   */
+  public static function setUrlGenerator(\codename\core\generator\urlGeneratorInterface $generator) {
+    self::$urlGenerator = $generator;
+  }
+
 }

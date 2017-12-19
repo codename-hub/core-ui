@@ -63,6 +63,13 @@ class crud extends \codename\core\context implements \codename\core\context\cont
         // $this->getResponse()->setData('template', 'basic');
 
         $this->setCrudinstance(new \codename\core\ui\crud($this->getModelinstance()));
+
+        // hook into crud instance init
+        // we need to change the output type to bare json config
+        if($this->getResponse() instanceof \codename\rest\response\json) {
+          $this->getCrudinstance()->outputFormConfig = true;
+        }
+
         return $this;
     }
 

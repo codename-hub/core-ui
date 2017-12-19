@@ -1,6 +1,7 @@
 <?php
 namespace codename\core\ui;
 use \codename\core\event;
+use \codename\core\ui;
 
 /**
  * The CRUD generator uses it's model to display the model's content.
@@ -113,6 +114,13 @@ class crud extends \codename\core\bootstrapInstance {
     protected $rowModifiers = array();
 
     /**
+     * If true, does not render the form
+     * Instead, output form config
+     * @var bool
+     */
+    public $outputFormConfig = false;
+
+    /**
      * Creates the instance and sets the $model of this instance. Also creates the form instance
      * @param model $model
      * @return crud
@@ -128,7 +136,7 @@ class crud extends \codename\core\bootstrapInstance {
         $this->model = $model;
         $this->setConfig();
         $this->form = new \codename\core\ui\form(array(
-          'form_action' => '/?' . http_build_query(array(
+          'form_action' => ui\app::getUrlGenerator()->generateFromParameters(array(
             'context' => $this->getRequest()->getData('context'),
             'view' => $this->getRequest()->getData('view')
           )),
@@ -550,7 +558,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(!$form->isSent()) {
-            $this->getResponse()->setData('form', $form->output());
+            $this->getResponse()->setData('form', $form->output($this->outputFormConfig));
             return;
         }
 
@@ -1245,13 +1253,13 @@ class crud extends \codename\core\bootstrapInstance {
             $vals = array();
             foreach($row[$field] as $val) {
               $element = $this->getModel($obj['model'])->loadByUnique($obj['key'], $val);
-              eval('$vals[] = "' . $obj['display'] . '";');
+              @eval('$vals[] = "' . $obj['display'] . '";');
             }
             $ret = implode(', ', $vals);
           } else {
             // $field should be $obj['key']. check dependencies, correct mistakes and do it right!
             $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
-            eval('$ret = "' . $obj['display'] . '";');
+            @eval('$ret = "' . $obj['display'] . '";');
           }
           return array($row[$field], $ret);
         } else {

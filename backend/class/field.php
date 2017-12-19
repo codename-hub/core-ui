@@ -8,7 +8,7 @@ use \codename\core\app;
  * @since 2016-02-06
  * @todo add functions to manage lists (listAddelement, listSetelements, listGetelements)
  */
-class field {
+class field implements \JsonSerializable {
 
     CONST EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID = 'EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID';
 
@@ -61,9 +61,10 @@ class field {
 
     /**
      * Generates the output for the form and returns it.
-     * @return string
+     * @param   bool          $outputConfig   [optional: do not render, but output config]
+     * @return  string|array
      */
-    public function output () : string {
+    public function output (bool $outputConfig = false) {
         $data = $this->config->get();
         // @TODO: this may be used to check other array keys for callables, too.
         // this NEEDS to check for string or function first, as we may have a value called 'Max' ...
@@ -76,14 +77,24 @@ class field {
           $data['field_elements'] = $data['field_elements']();
         }
 
-        $templateEngine = $this->templateEngine;
+        if($outputConfig) {
 
-        // Fallback to default engine, if nothing set
-        if($this->templateEngine == null) {
-          $templateEngine = app::getTemplateEngine();
+          // bare config
+          return $data;
+
+        } else {
+
+          // render
+          $templateEngine = $this->templateEngine;
+
+          // Fallback to default engine, if nothing set
+          if($this->templateEngine == null) {
+            $templateEngine = app::getTemplateEngine();
+          }
+
+          return $templateEngine->render('field/' . $this->type . '/' . $this->config->get('field_type'), $data);
+
         }
-
-        return $templateEngine->render('field/' . $this->type . '/' . $this->config->get('field_type'), $data);
     }
 
     /**
@@ -234,5 +245,14 @@ class field {
       $cfg['field_value'] = $value;
       $this->config = new \codename\core\config($cfg);
       return;
+    }
+
+    /**
+     * @inheritDoc
+     * custom serialization to allow bare config field output
+     */
+    public function jsonSerialize()
+    {
+      return $this->config->get();
     }
 }

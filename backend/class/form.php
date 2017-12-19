@@ -10,7 +10,7 @@ use \codename\core\app;
  * @todo create and implement \codename\core\data
  * @todo centralized view for outputting errors
  */
-class form {
+class form implements \JsonSerializable {
 
     /**
      * This exception is thrown when you misconfigured the array for the form constructor.
@@ -138,9 +138,10 @@ class form {
 
     /**
      * Outputs the form HTML code
-     * @return string
+     * @param  bool          $outputConfig   [optional: do not render, but output config]
+     * @return string|array
      */
-    public function output() : string {
+    public function output(bool $outputConfig = false) {
         if(count($this->fields) == 0 && count($this->fieldsets) == 0) {
             throw new \codename\core\exception(self::EXCEPTION_OUTPUT_FORMISEMPTY, \codename\core\exception::$ERRORLEVEL_FATAL, null);
         }
@@ -152,26 +153,30 @@ class form {
           )));
         }
 
-        $templateEngine = $this->templateEngine;
-        if($templateEngine == null) {
-          $templateEngine = app::getTemplateEngine();
-        }
-
-        // override field template engines on a weak basis
-        foreach($this->fields as $field) {
-          if($field->getTemplateEngine() == null) {
-            $field->setTemplateEngine($templateEngine);
+        if($outputConfig) {
+          return $this;
+        } else {
+          $templateEngine = $this->templateEngine;
+          if($templateEngine == null) {
+            $templateEngine = app::getTemplateEngine();
           }
-        }
 
-        // override fieldset template engines on a weak basis
-        foreach($this->fieldsets as $fieldset) {
-          if($fieldset->getTemplateEngine() == null) {
-            $fieldset->setTemplateEngine($templateEngine);
+          // override field template engines on a weak basis
+          foreach($this->fields as $field) {
+            if($field->getTemplateEngine() == null) {
+              $field->setTemplateEngine($templateEngine);
+            }
           }
-        }
 
-        return $templateEngine->render('form/' . $this->type . '/form', $this);
+          // override fieldset template engines on a weak basis
+          foreach($this->fieldsets as $fieldset) {
+            if($fieldset->getTemplateEngine() == null) {
+              $fieldset->setTemplateEngine($templateEngine);
+            }
+          }
+
+          return $templateEngine->render('form/' . $this->type . '/form', $this);
+        }
     }
 
     /**
@@ -457,6 +462,20 @@ class form {
         $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_VALID);
 
         return $this;
+    }
+
+    /**
+     * @inheritDoc
+     * custom serialization to allow bare config form output
+     */
+    public function jsonSerialize()
+    {
+      return [
+        'config' => $this->config,
+        'fields' => $this->fields,
+        'fieldsets' => $this->fieldsets,
+        'errorstack' => $this->errorstack
+      ];
     }
 
 }
