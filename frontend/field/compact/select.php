@@ -46,7 +46,7 @@ app::requireAsset('requirecss', '/assets/select2/dist/css/select2.css');
                         if(!is_array($data['field_value']) && $element[$data['field_valuefield']] == $data['field_value']) { echo 'selected'; }
                         if(is_array($data['field_value']) && in_array($element[$data['field_valuefield']], $data['field_value'])) {echo 'selected'; }
                     ?>
-                ><?=eval('echo "' . $data['field_displayfield'] . '";');?></option>
+                ><?=$element[$data['field_displayfield']]?></option>
             <?php } ?>
         </select>
         <div id="<?=$data['field_id']?>error" class="joCrudValidation"></div>

@@ -22,8 +22,8 @@
                 if(!is_array($data['field_value']) && $element[$data['field_valuefield']] == $data['field_value']) { echo 'checked'; }
                 if(is_array($data['field_value']) && in_array($element[$data['field_valuefield']], $data['field_value'])) {echo 'checked'; }
                 ?>>
-              <label for="<?= $data['field_name']?>___<?= $index++ ?>"">
-                <?= eval('echo "' . $data['field_displayfield'] . '";'); ?>
+              <label for="<?= $data['field_name']?>___<?= $index++ ?>">
+                <?= $element[$data['field_displayfield']] ?>
               </label>
             </div>
         <?php } ?>

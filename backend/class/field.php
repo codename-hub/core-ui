@@ -77,6 +77,22 @@ class field implements \JsonSerializable {
           $data['field_elements'] = $data['field_elements']();
         }
 
+        // re-structure field configuration for output
+        if(!empty($data['field_elements'])) {
+          $renderedElements = [];
+          foreach($data['field_elements'] as $element) {
+            $ret = null;
+            eval('$ret = "' . $data['field_displayfield'] . '";');
+            $renderedElements[] = [
+              'name' => $ret,
+              'value' => $element[$data['field_valuefield']]
+            ];
+          }
+          $data['field_elements'] = $renderedElements;
+          $data['field_valuefield'] = 'value';
+          $data['field_displayfield'] = 'name';
+        }
+
         if($outputConfig) {
 
           // bare config
@@ -253,6 +269,6 @@ class field implements \JsonSerializable {
      */
     public function jsonSerialize()
     {
-      return $this->config->get();
+      return $this->output(true);
     }
 }

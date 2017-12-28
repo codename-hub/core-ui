@@ -18,7 +18,7 @@
           name="<?=$data['field_name']?>[]"
           type="checkbox"
           class="icheck validate[<?=$data['field_validator']?>] form-control <?= $data['field_class'] ?>"
-          title="<?=$element[$data['field_displayfield']];?><?php /* eval('echo "' . $data['field_displayfield'] . '";'); /* $data['field_title'] */ ?>"
+          title="<?=$element[$data['field_displayfield']];?>"
           value="<?=$element[$data['field_valuefield']]?>"
           data-prompt-position="topLeft"
           <?php
