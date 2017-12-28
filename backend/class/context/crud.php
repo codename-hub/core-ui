@@ -136,8 +136,8 @@ class crud extends \codename\core\context implements \codename\core\context\cont
         // If confirmed, delete action
         if($this->getRequest()->isDefined('__confirm')) {
             $this->getModelinstance()->delete($this->getRequest()->getData($primaryKey));
-            $this->getRequest()->setRedirect('', $this->getRequest()->getData('context'), 'crud_list');
-            $this->getRequest()->doRedirect();
+            $this->getResponse()->setRedirect('', $this->getRequest()->getData('context'), 'crud_list');
+            $this->getResponse()->doRedirect();
         }
 
         // Load stuff to show
