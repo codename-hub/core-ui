@@ -80,8 +80,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
       if($vendor != 'corename' && $app != 'core') {
-        $filename = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
-        $paths[] = $filename;
+        $dir = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
+
+        // the frontend root dir has to exist
+        // otherwise, we're adding it to the paths
+        // for Twig to search for templates in
+        if(app::getFilesystem()->dirAvailable($dir)) {
+          $paths[] = $dir;
+        }
       }
     }
 
