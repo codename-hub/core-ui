@@ -143,7 +143,7 @@ $url_baseurl = app::getResponse()->getData('url_baseurl');
 <form  method="GET">
   <input type="hidden" name="context" value="<?=app::getRequest()->getData('context')?>" />
   <input type="hidden" name="view" value="<?=app::getRequest()->getData('view')?>" />
-  <input type="hidden" name="prev_page" value="<?=$crud_pagination_page?>" />
+  <input type="hidden" name="crud_pagination_page_prev" value="<?=$crud_pagination_page?>" />
 
   <?php if($enable_filters || $enable_displayfieldselection) { ?>
 
@@ -402,7 +402,7 @@ $url_baseurl = app::getResponse()->getData('url_baseurl');
                       <br />
                       <?php if ($crud_pagination_pages > 1) { ?>
                           <?php for($page = 1;$page <= $crud_pagination_pages; $page++) { ?>
-                              <button type="submit" name="page" value="<?=$page?>" class="btn btn-xs <?php if($page == $crud_pagination_page) { ?> btn-success <?php } else {?> btn-default <?php } ?>"><?=$page?></button>
+                              <button type="submit" name="crud_pagination_page" value="<?=$page?>" class="btn btn-xs <?php if($page == $crud_pagination_page) { ?> btn-success <?php } else {?> btn-default <?php } ?>"><?=$page?></button>
                           <?php } ?>
                       <?php } ?>
 

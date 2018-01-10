@@ -805,12 +805,12 @@ class crud extends \codename\core\bootstrapInstance {
 
         // default value, if none of the below works:
         $page = 1;
-        if($this->getRequest()->isDefined('page')) {
+        if($this->getRequest()->isDefined('crud_pagination_page')) {
           // explicit page request
-          $page = (int) $this->getRequest()->getData('page');
-        } else if($this->getRequest()->isDefined('prev_page')) {
+          $page = (int) $this->getRequest()->getData('crud_pagination_page');
+        } else if($this->getRequest()->isDefined('crud_pagination_page_prev')) {
           // fallback to previous page value, if page hasn't been submitted
-          $page = (int) $this->getRequest()->getData('prev_page');
+          $page = (int) $this->getRequest()->getData('crud_pagination_page_prev');
         }
 
         if($this->getRequest()->isDefined('crud_pagination_limit')) {
