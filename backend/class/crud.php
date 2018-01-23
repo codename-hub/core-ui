@@ -819,7 +819,7 @@ class crud extends \codename\core\bootstrapInstance {
           $limit = $this->config->get("pagination>limit", 10);
         }
 
-        $pages = $limit==0 ? 1 : ceil($count / $limit);
+        $pages = ($limit==0||$count==0) ? 1 : ceil($count / $limit);
 
         // pagination limit change with present page param, that is out of range:
         if($page > $pages) {
