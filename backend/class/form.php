@@ -149,7 +149,8 @@ class form implements \JsonSerializable {
         if($this->formSentField == null) {
           $this->addField($this->formSentField = new field(array(
                   'field_name' => 'formSent' . $this->config['form_id'],
-                  'field_type' => 'hidden'
+                  'field_type' => 'hidden',
+                  'field_value' => 1
           )));
         }
 
