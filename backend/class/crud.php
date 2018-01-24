@@ -3,6 +3,8 @@ namespace codename\core\ui;
 use \codename\core\event;
 use \codename\core\ui;
 
+use codename\core\exception;
+
 /**
  * The CRUD generator uses it's model to display the model's content.
  * <br />It is capable of Creating, Reading, Updating and Deleting data in the models.
@@ -135,6 +137,7 @@ class crud extends \codename\core\bootstrapInstance {
         $this->eventCrudSuccess = new event('EVENT_CRUD_SUCCESS');
         $this->model = $model;
         $this->setConfig();
+        $this->setChildCruds();
         $this->form = new \codename\core\ui\form(array(
           'form_action' => ui\app::getUrlGenerator()->generateFromParameters(array(
             'context' => $this->getRequest()->getData('context'),
@@ -145,6 +148,52 @@ class crud extends \codename\core\bootstrapInstance {
         ));
         return $this;
     }
+
+    /**
+     * [protected description]
+     * @var \codename\core\ui\crud[]
+     */
+    protected $childCruds = [];
+
+    /**
+     * reads config from the 'children' key
+     * and creates instances for those children (cruds)
+     */
+    protected function setChildCruds() {
+      // apply nested children config
+      if($this->config->exists('children')) {
+        foreach($this->config->get('children') as $child) {
+          $childConfig = $this->model->config->get('children>'.$child);
+          if($childConfig != null) {
+            // we handle a single-ref foreign key field as base
+            // for a nested model as a virtual object key
+            if($childConfig['type'] == 'foreign') {
+
+              // get the foreign key config
+              $foreignConfig = $this->model->config->get('foreign>'.$childConfig['field']);
+              // get the respective model
+              $childModel = $this->getModel($foreignConfig['model'], $foreignConfig['app'] ?? '', $foreignConfig['vendor'] ?? '');
+              // build a child crud
+              $crud = new \codename\core\ui\crud($childModel);
+              // store it for later
+              $this->childCruds[$child] = $crud;
+
+              // join the model upon the current
+              $this->getMyModel()->addModel($crud->getMyModel(), \codename\core\model\plugin\join::TYPE_LEFT, $childConfig['field'], $foreignConfig['key']);
+            }
+          } else {
+            throw new exception(self::EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL, exception::$ERRORLEVEL_ERROR, $child);
+          }
+        }
+      }
+    }
+
+    /**
+     * exception thrown if a given model does not define child configuration
+     * but crud tries to use it
+     * @var string
+     */
+    const EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL = 'EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL';
 
     /**
      * loads the crud config
@@ -426,6 +475,21 @@ class crud extends \codename\core\bootstrapInstance {
                 throw new \codename\core\exception(self::EXCEPTION_MAKEFORM_FIELDNOTFOUNDINMODEL, \codename\core\exception::$ERRORLEVEL_ERROR, $field);
             }
 
+            // exclude child model fields that have an active children config for this crud
+            if($this->config->exists('children') && $this->getMyModel()->config->exists('children')) {
+              // if field exists in a child config field reference
+              $found = false;
+              foreach($this->getMyModel()->config->get('children') as $childConfig) {
+                if($childConfig['field'] == $field) {
+                  $found = true;
+                  break;
+                }
+              }
+              if($found) {
+                continue;
+              }
+            }
+
             if($field == $this->getMyModel()->table . '_flag') {
                 $flags = $this->getMyModel()->config->get('flag');
                 if(!is_array($flags)) {
@@ -601,7 +665,7 @@ class crud extends \codename\core\bootstrapInstance {
         // OLD: app::getHook()->fire(\codename\core\hook::EVENT_CRUD_CREATE_BEFORE_SAVE, $data);
         $this->eventCrudBeforeSave->invoke($this, $data);
 
-        $this->getMyModel()->save($data);
+        $this->getMyModel()->saveWithChildren($data);
 
         // OLD: app::getHook()->fire(\codename\core\hook::EVENT_CRUD_CREATE_SUCCESS, $data);
         $this->eventCrudSuccess->invoke($this, $data);
@@ -986,7 +1050,29 @@ class crud extends \codename\core\bootstrapInstance {
             if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
                 $fielddata['field_multiple'] = true;
             }
+        }
 
+        //
+        // nested crud / submodel
+        //
+        if($this->config->exists("children") && in_array($field, $this->config->get("children"))) {
+            $fielddata['field_type'] = 'form';
+
+            // provide a sub-form config !
+            // $crud = new \codename\core\ui\crud($this->getModel($foreign['model'], $foreign['app'] ?? '', $foreign['vendor'] ?? ''));
+            $crud = $this->childCruds[$field];
+            $childConfig = $this->model->config->get('children>'.$field);
+            // available child config keys:
+            // - type (e.g. foreign)
+            // - field (reference field)
+            $childIdentifierValue = ($this->data && $this->data->isDefined($childConfig['field']) ? $this->getMyModel()->exportField(new \codename\core\value\text\modelfield($childConfig['field']), $this->data->getData($childConfig['field'])) : null);
+            $form = $crud->makeForm($childIdentifierValue, false); // make form without submit
+            $fielddata['form'] = $form;
+            $formdata = [];
+            foreach($form->getFields() as $field) {
+              $formdata[$field->getProperty('field_name')] = $field->getProperty('field_value');
+            }
+            $fielddata['field_value'] = $formdata;
         }
 
         $c = &$this->onCreateFormfield;
