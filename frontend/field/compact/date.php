@@ -28,7 +28,7 @@
 
 <script>
 $('.datepickers').datepicker({
-	format : '<?= $data['field_format'] ?? 'dd.mm.yyyy' ?>',
+	format : '<?= $data['field_format'] ?? 'yyyy-mm-dd' ?>',
 	language : 'de',
 	autoUpdateInput : false
 });
