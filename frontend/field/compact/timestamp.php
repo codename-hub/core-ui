@@ -15,7 +15,7 @@ app::getResponse()->requireResource('js', 'assets/plugins/datetimepicker/jquery.
             id="<?=$data['field_id']?>"
             name="<?=$data['field_name']?>"
             value<?php if(!is_null($data['field_value'])) { ?>="<?= date($data['field_formatinternal'] ?? 'Y-m-d H:i:s', strtotime($data['field_value'])) ?>"<?php } ?>
-            type="text"
+            type="datetime-local"
             class="validate[<?=$data['field_validator']?>] form-control <?=$data['field_class']?> datetimepickers"
             title="<?=$data['field_title']?>"
             data-datatype="<?=$data['field_validator']?>"

@@ -10,8 +10,8 @@
         <input
             id="<?=$data['field_id']?>"
             name="<?=$data['field_name']?>"
-            value="<?=!is_null($data['field_value']) ? date($data['field_valueformat'] ?? app::translate('DATETIME.FORMAT_DATE'), strtotime($data['field_value'])) : ''?>"
-            type="text"
+            value="<?= $data['field_value'] ?>"
+            type="date"
             class="validate[<?=$data['field_validator']?>] form-control <?=$data['field_class']?> datepickers"
             title="<?=$data['field_title']?>"
             data-datatype="<?=$data['field_validator']?>"
