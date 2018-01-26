@@ -277,6 +277,21 @@ class crud extends \codename\core\bootstrapInstance {
           $visibleFields[] = $this->getMyModel()->getPrimarykey();
         }
 
+        $formattedFields = [];
+        if(!is_null($this->getMyModel()->config->get('foreign'))) {
+          $foreignKeys = $this->getMyModel()->config->get('foreign');
+          /*
+          $formattedFields = array_map(function($key, $foreign) {
+            return [ $key => $key.'_FORMATTED' ];
+          }, array_keys($foreignKeys), $foreignKeys);
+          */
+          $formattedFields = array_reduce(array_keys($foreignKeys), function ($carry, $key) use ($foreignKeys){
+              $carry[$key] = $key.'_FORMATTED'; // $foreignKeys[$key];
+              return $carry;
+          }, $foreignKeys);
+        }
+        $this->getResponse()->setData('formattedFields', $formattedFields);
+
         $this->getResponse()->setData('enable_displayfieldselection', ($this->config->exists('displayFieldSelection') ? $this->config->get('displayFieldSelection') : false));
 
         if($this->config->exists('availableFields')) {
@@ -1055,7 +1070,7 @@ class crud extends \codename\core\bootstrapInstance {
         //
         // nested crud / submodel
         //
-        if($this->config->exists("children") && in_array($field, $this->config->get("children"))) {
+        if($this->config->exists('children') && in_array($field, $this->config->get('children'))) {
             $fielddata['field_type'] = 'form';
 
             // provide a sub-form config !
@@ -1344,6 +1359,8 @@ class crud extends \codename\core\bootstrapInstance {
             $ret = implode(', ', $vals);
           } else {
             // $field should be $obj['key']. check dependencies, correct mistakes and do it right!
+            // TODO: wrap this in a try/catch statement
+            // bare/json datasources may lose unique keys. fallback to null or "undefined"?
             $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
             @eval('$ret = "' . $obj['display'] . '";');
           }
