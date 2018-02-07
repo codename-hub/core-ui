@@ -1239,7 +1239,7 @@ class crud extends \codename\core\bootstrapInstance {
     protected function makeFields(array $rows, array $fields) : array {
 
         // simply return dataset, if there is no modifier (row, field) and no foreign key data to be fetched
-        if(count($this->rowModifiers) == 0 && count($this->modifiers) == 0 && is_null($this->getMyModel()->config->get('foreign'))) {
+        if(count($this->rowModifiers) == 0 && count($this->modifiers) == 0 /*&& is_null($this->getMyModel()->config->get('foreign'))*/) {
             return $rows;
         }
 
@@ -1247,15 +1247,19 @@ class crud extends \codename\core\bootstrapInstance {
         foreach($rows as $row) {
             $object = array();
 
-            if(count($this->modifiers) > 0 || !is_null($this->getMyModel()->config->get('foreign'))) {
+            if(count($this->modifiers) > 0/* || !is_null($this->getMyModel()->config->get('foreign'))*/) {
 
               $searchForFields = $fields;
               if(count($this->modifiers) > 0) { // merge or replace?
                 $searchForFields = array_merge($searchForFields, array_keys($this->modifiers));
               }
+              /*
               if(!is_null($this->getMyModel()->config->get('foreign'))) { // merge or replace?
-                $searchForFields = array_merge($searchForFields, array_keys($this->getMyModel()->config->get('foreign')));
+                // do not add foreign keys as defaults to this one
+                // as it causes a lot of extra queries.
+                // $searchForFields = array_merge($searchForFields, array_keys($this->getMyModel()->config->get('foreign')));
               }
+              */
 
               foreach($searchForFields as $field) {
                   $o = $this->getFieldoutput($row, $field);
