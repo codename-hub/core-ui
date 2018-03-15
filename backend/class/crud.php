@@ -470,6 +470,11 @@ class crud extends \codename\core\bootstrapInstance {
     public function makeForm($primarykey = null, $addSubmitButton = true) : \codename\core\ui\form {
         $this->useEntry($primarykey);
 
+        // use "field", if defined in crud config
+        if($this->config->exists('field')) {
+          $this->fields = $this->config->get('field');
+        }
+
         if(count($this->fields) == 0 && count($this->getForm()->getFieldsets()) == 0) {
             $this->fields = $this->getMyModel()->config->get('field');
         }
@@ -576,7 +581,7 @@ class crud extends \codename\core\bootstrapInstance {
 
         // pass the output config type to the form instance
         $form->outputConfig = $this->outputFormConfig;
-        
+
         return $form;
     }
 
