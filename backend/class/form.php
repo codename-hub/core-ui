@@ -92,6 +92,13 @@ class form implements \JsonSerializable {
     public $errorstack = null;
 
     /**
+     * determines the output type
+     * either false (rendered) or true (pure config)
+     * @var bool
+     */
+    public $outputConfig = false;
+
+    /**
      * Contains a list of callbacks
      * @example form->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function($form) {});
      * @example form->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_VALID, function($form) {});
@@ -118,7 +125,7 @@ class form implements \JsonSerializable {
         // }
 
         $this->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_SENT, function(\codename\core\ui\form $form) {
-            app::getResponse()->setData('form', $form->output());
+            app::getResponse()->setData('form', $form->output($this->outputConfig));
             return;
         })->addCallback(\codename\core\ui\form::CALLBACK_FORM_NOT_VALID, function(\codename\core\ui\form $form) {
             app::getResponse()->setData('errors', $form->getErrorstack()->getErrors());

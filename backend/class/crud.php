@@ -572,7 +572,12 @@ class crud extends \codename\core\bootstrapInstance {
           )))->setType('compact'));
         }
 
-        return $this->getForm();
+        $form = $this->getForm();
+
+        // pass the output config type to the form instance
+        $form->outputConfig = $this->outputFormConfig;
+        
+        return $form;
     }
 
     /**
