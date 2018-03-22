@@ -9,7 +9,7 @@ use \codename\core\app;
  * @package core
  * @since 2016-03-17
  */
-class fieldset {
+class fieldset implements \JsonSerializable {
 
     /**
      * Contains the display type of the instance
@@ -52,9 +52,14 @@ class fieldset {
 
     /**
      * Will output the fieldset's content
-     * @return string
+     * @param   bool          $outputConfig   [optional: do not render, but output config]
+     * @return string|array
      */
-    public function output() : string {
+    public function output(bool $outputConfig = false) {
+      if($outputConfig) {
+        // just data for pure-data output (e.g. serializer)
+        return $this->data;
+      } else {
         $templateEngine = $this->templateEngine;
         if($templateEngine == null) {
           $templateEngine = app::getTemplateEngine();
@@ -68,6 +73,7 @@ class fieldset {
         }
 
         return $templateEngine->render('fieldset/' . $this->type, $this->getData());
+      }
     }
 
     /**
@@ -118,6 +124,15 @@ class fieldset {
      */
     public function getFields() : array {
       return $this->data['fields'];
+    }
+
+    /**
+     * @inheritDoc
+     * custom serialization to allow bare config field output
+     */
+    public function jsonSerialize()
+    {
+      return $this->output(true);
     }
 
 }
