@@ -462,10 +462,12 @@ class crud extends \codename\core\bootstrapInstance {
         return;
     }
 
-
     /**
      * Adds the important fields to the form instance of this crud editor
-     * @return \codename\core\ui\form
+     *
+     * @param  string|null          $primarykey      [primary key of the entry to be used as value base or null]
+     * @param  bool                 $addSubmitButton [whether the form should add a submit button field by default]
+     * @return \codename\core\ui\form                [the form (also contained in this cru dinstance)]
      */
     public function makeForm($primarykey = null, $addSubmitButton = true) : \codename\core\ui\form {
         $this->useEntry($primarykey);
