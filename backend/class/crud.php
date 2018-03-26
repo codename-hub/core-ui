@@ -470,6 +470,10 @@ class crud extends \codename\core\bootstrapInstance {
     public function makeForm($primarykey = null, $addSubmitButton = true) : \codename\core\ui\form {
         $this->useEntry($primarykey);
 
+        if($this->config->exists('tag')) {
+          $this->getForm()->config['form_tag'] = $this->config->get('tag');
+        }
+
         // use "field", if defined in crud config
         if($this->config->exists('field')) {
           $this->fields = $this->config->get('field');
@@ -823,6 +827,11 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getForm()->setId($identifier);
 
         $formConfig = new \codename\core\config\json('config/crud/form_' . $identifier . '.json');
+
+        if($formConfig->exists('tag')) {
+          $this->getForm()->config['form_tag'] = $formConfig->get('tag');
+        }
+
         if($formConfig->exists('fieldset')) {
             foreach($formConfig->get('fieldset') as $key => $fieldset) {
                 $newFieldset = new fieldset(array('fieldset_name' => $key));
