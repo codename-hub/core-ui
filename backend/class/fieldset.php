@@ -30,6 +30,7 @@ class fieldset implements \JsonSerializable {
      * @return fieldset
      */
     public function __CONSTRUCT(array $fieldset) {
+        $fieldset['fieldset_id'] = $fieldset['fieldset_id'] ?? $fieldset['fieldset_name'];
         if(isset($fieldset['fieldset_name_override'])) {
           $fieldset['fieldset_name'] = $fieldset['fieldset_name_override'];
         } else {
