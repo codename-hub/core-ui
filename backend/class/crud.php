@@ -1260,25 +1260,34 @@ class crud extends \codename\core\bootstrapInstance {
     protected function makeFields(array $rows, array $fields) : array {
 
         // simply return dataset, if there is no modifier (row, field) and no foreign key data to be fetched
-        if(count($this->rowModifiers) == 0 && count($this->modifiers) == 0 /*&& is_null($this->getMyModel()->config->get('foreign'))*/) {
+        if(count($this->rowModifiers) == 0
+          && count($this->modifiers) == 0
+          && is_null($this->getMyModel()->config->get('foreign'))
+        ) {
             return $rows;
+        }
+
+        $searchForFields = $fields;
+        if(count($this->modifiers) > 0) { // merge or replace?
+          $searchForFields = array_merge($searchForFields, array_keys($this->modifiers));
         }
 
         $myRows = array();
         foreach($rows as $row) {
             $object = array();
 
-            if(count($this->modifiers) > 0/* || !is_null($this->getMyModel()->config->get('foreign'))*/) {
+            if(count($this->modifiers) > 0 || !is_null($this->getMyModel()->config->get('foreign'))) {
 
-              $searchForFields = $fields;
+              /* $searchForFields = $fields;
               if(count($this->modifiers) > 0) { // merge or replace?
                 $searchForFields = array_merge($searchForFields, array_keys($this->modifiers));
-              }
+              }*/
+
               /*
               if(!is_null($this->getMyModel()->config->get('foreign'))) { // merge or replace?
                 // do not add foreign keys as defaults to this one
                 // as it causes a lot of extra queries.
-                // $searchForFields = array_merge($searchForFields, array_keys($this->getMyModel()->config->get('foreign')));
+                $searchForFields = array_merge($searchForFields, array_keys($this->getMyModel()->config->get('foreign')));
               }
               */
 
@@ -1386,8 +1395,19 @@ class crud extends \codename\core\bootstrapInstance {
             // $field should be $obj['key']. check dependencies, correct mistakes and do it right!
             // TODO: wrap this in a try/catch statement
             // bare/json datasources may lose unique keys. fallback to null or "undefined"?
-            $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
-            @eval('$ret = "' . $obj['display'] . '";');
+
+            // first: try to NOT perform an additional query
+            $element = $row;
+            $evalResult = false;
+            try {
+              $evalResult = @eval('$ret = "' . $obj['display'] . '";');
+            } catch (\Exception $e) {
+              $evalResult = false;
+            }
+            if($evalResult === false) {
+              $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
+              @eval('$ret = "' . $obj['display'] . '";');
+            }
           }
           return array($row[$field], $ret);
         } else {
