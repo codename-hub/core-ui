@@ -62,7 +62,7 @@ class form implements \JsonSerializable {
 
     /**
      * Contains the form fields for the form
-     * @var array $fields
+     * @var \codename\core\ui\field[] $fields
      */
     public $fields = array();
 
@@ -108,7 +108,7 @@ class form implements \JsonSerializable {
 
     /**
      * Stores the configuration and fields in the instance
-     * @param array $config
+     * @param array $data [config]
      * @return form
      */
     public function __CONSTRUCT(array $data) {
@@ -256,6 +256,13 @@ class form implements \JsonSerializable {
               continue;
           }
 
+          if($displaytype == 'form') {
+            $subform = $field->getProperty('form');
+            if(!$subform->isValid()) {
+              $this->errorstack->addError($fieldname, 'FIELD_INVALID', $subform->getErrorstack()->getErrors());
+            }
+            continue;
+          }
           $validation = app::getValidator($fieldtype)->reset()->validate($this->fieldValue($field));
 
           if(count($validation) != 0) {
@@ -274,13 +281,17 @@ class form implements \JsonSerializable {
       return $this->errorstack->isSuccess();
     }
 
+    /**
+     * [EXCEPTION_FORM_VALIDATION_SELECTIVE_UNKNOWN_FIELD_IDS description]
+     * @var string
+     */
     const EXCEPTION_FORM_VALIDATION_SELECTIVE_UNKNOWN_FIELD_IDS = "EXCEPTION_FORM_VALIDATION_SELECTIVE_UNKNOWN_FIELD_IDS";
 
     /**
      * Returns true if the given $field has been submitted in the las request
      * <br />Uses the request object to find the fields's name
      * @param \codename\core\ui\field $field
-     * @return boolean
+     * @return bool
      */
     public function fieldSent(\codename\core\ui\field $field) : bool {
         switch ($field->getProperty('field_type')) {
@@ -300,19 +311,45 @@ class form implements \JsonSerializable {
     }
 
     /**
+     * [protected description]
+     * @var \codename\core\datacontainer
+     */
+    protected $requestData = null;
+
+    /**
+     * [getFormRequest description]
+     * @return \codename\core\request [description]
+     */
+    protected function getFormRequest() : \codename\core\datacontainer {
+      if($this->requestData == null) {
+        $this->setFormRequest(app::getRequest()->getData());
+      }
+      return $this->requestData;
+    }
+
+    /**
+     * [setFormRequest description]
+     * @param array $requestData [description]
+     */
+    public function setFormRequest(array $requestData) {
+      $this->requestData = new \codename\core\datacontainer( $requestData );
+    }
+
+    /**
      * Returns the given $field instance's value depending on it's datatype
-     * @return mixed
+     * @param  \codename\core\ui\field $field  [description]
+     * @return mixed                           [description]
      */
     public function fieldValue(\codename\core\ui\field $field) {
         switch ($field->getProperty('field_type')) {
             case 'checkbox' :
-                return app::getInstance('request')->isDefined($field->getProperty('field_name'));
+                return $this->getFormRequest()->isDefined($field->getProperty('field_name'));
                 break;
             case 'file' :
                 return $_FILES[$field->getProperty('field_name')] ?? null;
                 break;
             default:
-                return app::getInstance('request')->getData($field->getProperty('field_name'));
+                return $this->getFormRequest()->getData($field->getProperty('field_name'));
                 break;
         }
         return null;
@@ -338,7 +375,7 @@ class form implements \JsonSerializable {
                 $this->data->setData($field->getConfig()->get('field_name'), $this->fieldValue($field));
             }
         }
-        $data = app::getRequest()->getData();
+        $data = $this->getFormRequest()->getData();
         if(isset($_FILES)) {
             $data = array_merge($data, $_FILES);
         }

@@ -128,7 +128,7 @@ class crud extends \codename\core\bootstrapInstance {
      * @return crud
      * @todo USE CACHE FOR CONFIGS
      */
-    public function __CONSTRUCT(\codename\core\model $model) {
+    public function __CONSTRUCT(\codename\core\model $model, array $requestData = null) {
         $this->eventCrudFormInit = new event('EVENT_CRUD_FORM_INIT');
         $this->eventCrudBeforeValidation = new event('EVENT_CRUD_BEFORE_VALIDATION');
         $this->eventCrudAfterValidation = new event('EVENT_CRUD_AFTER_VALIDATION');
@@ -136,6 +136,9 @@ class crud extends \codename\core\bootstrapInstance {
         $this->eventCrudBeforeSave = new event('EVENT_CRUD_BEFORE_SAVE');
         $this->eventCrudSuccess = new event('EVENT_CRUD_SUCCESS');
         $this->model = $model;
+        if($requestData != null) {
+          $this->setFormNormalizationData($requestData);
+        }
         $this->setConfig();
         $this->setChildCruds();
         $this->form = new \codename\core\ui\form(array(
@@ -174,7 +177,13 @@ class crud extends \codename\core\bootstrapInstance {
               // get the respective model
               $childModel = $this->getModel($foreignConfig['model'], $foreignConfig['app'] ?? '', $foreignConfig['vendor'] ?? '');
               // build a child crud
-              $crud = new \codename\core\ui\crud($childModel);
+              $crud = new \codename\core\ui\crud($childModel, $this->getFormNormalizationData()[$child] ?? []);
+
+              // make only a part of the request visible to the crud instance
+              // DEBUG
+              // $this->getResponse()->setData('debug_crud_'.$child, $this->getFormNormalizationData()[$child] ?? []);
+              $crud->setFormNormalizationData($this->getFormNormalizationData()[$child] ?? []);
+
               // store it for later
               $this->childCruds[$child] = $crud;
 
@@ -472,6 +481,11 @@ class crud extends \codename\core\bootstrapInstance {
     public function makeForm($primarykey = null, $addSubmitButton = true) : \codename\core\ui\form {
         $this->useEntry($primarykey);
 
+        // set request data only visible for this form
+        // usually, this is the complete request
+        // but it may only be a part of it.
+        $this->getForm()->setFormRequest($this->getFormNormalizationData());
+
         if($this->config->exists('tag')) {
           $this->getForm()->config['form_tag'] = $this->config->get('tag');
         }
@@ -720,7 +734,25 @@ class crud extends \codename\core\bootstrapInstance {
      * @return array
      */
     protected function getFormNormalizationData() : array {
-      return $this->getRequest()->getData();
+      if($this->formNormalizationData == null) {
+        $this->setFormNormalizationData($this->getRequest()->getData());
+      }
+      return $this->formNormalizationData;
+    }
+
+    /**
+     * [protected description]
+     * @var array
+     */
+    protected $formNormalizationData = null;
+
+    /**
+     * sets the underlying data used during normalization
+     * in the normal use case, this is the pure request data
+     * @param array $data [description]
+     */
+    public function setFormNormalizationData(array $data) {
+      $this->formNormalizationData = $data;
     }
 
     /**
@@ -789,6 +821,7 @@ class crud extends \codename\core\bootstrapInstance {
         $newData = $this->eventCrudBeforeSave->invokeWithResult($this, $data);
         if(is_array($newData)) {
             $data = $newData;
+            $this->getMyModel()->entryUpdate($data);
         }
 
         $this->getMyModel()->entrySave();
@@ -1103,6 +1136,10 @@ class crud extends \codename\core\bootstrapInstance {
             // - field (reference field)
             $childIdentifierValue = ($this->data && $this->data->isDefined($childConfig['field']) ? $this->getMyModel()->exportField(new \codename\core\value\text\modelfield($childConfig['field']), $this->data->getData($childConfig['field'])) : null);
             $form = $crud->makeForm($childIdentifierValue, false); // make form without submit
+
+            // $this->getResponse()->setData('debug_crud_form_' . $field, $crud->getFormNormalizationData());
+            // $form->setFormRequest($crud->getFormNormalizationData());
+
             $fielddata['form'] = $form;
             $formdata = [];
             foreach($form->getFields() as $field) {
