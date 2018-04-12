@@ -548,7 +548,7 @@ class crud extends \codename\core\bootstrapInstance {
                   $c($fielddata);
                 }
 
-                $formField = new \codename\core\field($fielddata);
+                $formField = new \codename\core\ui\field($fielddata);
 
                 $c = &$this->onFormfieldCreated;
                 if($c !== null && is_callable($c)) {
@@ -571,7 +571,7 @@ class crud extends \codename\core\bootstrapInstance {
                       $c($fielddata);
                     }
 
-                    $formField = new \codename\core\field($fielddata);
+                    $formField = new \codename\core\ui\field($fielddata);
 
                     $c = &$this->onFormfieldCreated;
                     if($c !== null && is_callable($c)) {
@@ -877,7 +877,7 @@ class crud extends \codename\core\bootstrapInstance {
                     if($field == $this->getMyModel()->table . '_flag') {
                         $flags = $this->getMyModel()->config->get('flag');
                         foreach($flags as $flagname => $flag) {
-                            $newFieldset->addField(new \codename\core\field(
+                            $newFieldset->addField(new \codename\core\ui\field(
                                     array (
                                         'field_name' => $this->getMyModel()->table . '_flag[' . $flagname . ']',
                                         'field_type' => 'checkbox',
@@ -888,7 +888,7 @@ class crud extends \codename\core\bootstrapInstance {
                                 )
                             );
                         }
-                        $newFieldset->addField( new \codename\core\field(
+                        $newFieldset->addField( new \codename\core\ui\field(
                             array (
                                 'field_name' => $this->getMyModel()->table . '_flag[__empty]',
                                 'field_type' => 'hidden',
