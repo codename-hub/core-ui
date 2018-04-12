@@ -83,18 +83,33 @@ class field implements \JsonSerializable {
           foreach($data['field_elements'] as $element) {
             $ret = null;
             eval('$ret = "' . $data['field_displayfield'] . '";');
-            $renderedElements[] = [
-              'name' => $ret,
-              'value' => $element[$data['field_valuefield']]
-            ];
+
+            if(isset($data['field_idfield'])) {
+              $rendered = [
+                'id'    => $element[$data['field_idfield']],
+                'name'  => $ret,
+                'value' => $element[$data['field_valuefield']]
+              ];
+            } else {
+              $rendered = [
+                'name' => $ret,
+                'value' => $element[$data['field_valuefield']]
+              ];
+            }
+            $renderedElements[] = $rendered;
           }
           $data['field_elements'] = $renderedElements;
           $data['field_valuefield'] = 'value';
           $data['field_displayfield'] = 'name';
+          if(isset($data['field_idfield'])) {
+            $data['field_idfield'] = 'id';
+          } else {
+
+          }
         }
 
         if($outputConfig) {
-
+          
           // bare config
           return $data;
 
