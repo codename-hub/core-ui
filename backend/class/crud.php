@@ -536,11 +536,28 @@ class crud extends \codename\core\bootstrapInstance {
                     continue;
                 }
 
+                $value = [];
+                $elements = [];
+
+                foreach($flags as $flagname => $flag) {
+                  $value[$flagname] = !is_null($this->data) ? $this->getMyModel()->isFlag($flag, $this->data->getData()) : false;
+                  $elements[] = [
+                    'name'    => $flagname,
+                    'display' => app::getTranslate()->translate('DATAFIELD.' . $field . '_' . $flagname),
+                    'value'   => $flag
+                  ];
+                }
+
                 $fielddata = array (
-                    'field_name' => $this->getMyModel()->table . '_flag[__empty]',
-                    'field_type' => 'hidden',
-                    'field_title' => '',
-                    'field_value' => ''
+                    'field_name' => $this->getMyModel()->table . '_flag',
+                    'field_type' => 'multicheckbox',
+                    'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field),
+                    'field_multiple' => true,
+                    'field_value' => $value,
+                    'field_elements' => $elements,
+                    'field_idfield' => 'name',
+                    'field_displayfield' => '{$element["display"]}', // todo: translate!
+                    'field_valuefield' => 'value'
                 );
 
                 $c = &$this->onCreateFormfield;
@@ -557,30 +574,6 @@ class crud extends \codename\core\bootstrapInstance {
 
                 $this->getForm()->addField($formField);
 
-                foreach($flags as $flagname => $flag) {
-
-                    $fielddata = array (
-                        'field_name' => $this->getMyModel()->table . '_flag[' . $flagname . ']',
-                        'field_type' => 'checkbox',
-                        'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field . '_' . $flagname),
-                        'field_value' => !is_null($this->data) ? $this->getMyModel()->isFlag($flag, $this->data->getData()) : false
-                    );
-
-                    $c = &$this->onCreateFormfield;
-                    if($c !== null && is_callable($c)) {
-                      $c($fielddata);
-                    }
-
-                    $formField = new \codename\core\ui\field($fielddata);
-
-                    $c = &$this->onFormfieldCreated;
-                    if($c !== null && is_callable($c)) {
-                      $c($formField);
-                    }
-
-                    $this->getForm()->addField($formField);
-
-                }
                 continue;
             }
             $this->getForm()->addField($this->makeField($field))->setType('compact');
