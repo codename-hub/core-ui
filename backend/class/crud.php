@@ -705,6 +705,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(!$this->getMyModel()->isValid($data)) {
+            $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
             $this->getResponse()->setData('errors', $this->getMyModel()->getErrors());
             $this->getResponse()->setData('view', 'save_error');
             return;
@@ -726,6 +727,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(count($errors) > 0) {
+          $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
           $this->getResponse()->setData('errors', $errors);
           $this->getResponse()->setData('view', 'save_error');
           return;
@@ -815,6 +817,7 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getMyModel()->entryLoad($primarykey)->entryUpdate($data);
 
         if(count($errors = $this->getMyModel()->entryValidate()) > 0) {
+            $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
             $this->getResponse()->setData('errors', $errors);
             $this->getResponse()->setData('view', 'save_error');
             return;
@@ -836,6 +839,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(count($errors) > 0) {
+          $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
           $this->getResponse()->setData('errors', $errors);
           $this->getResponse()->setData('view', 'save_error');
           return;
