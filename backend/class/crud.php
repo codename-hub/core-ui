@@ -410,10 +410,10 @@ class crud extends \codename\core\bootstrapInstance {
 
         // Send data to the response
         $this->getResponse()->setData('rows', $this->makeFields($this->getMyModel()->search()->getResult(), $visibleFields));
-        $this->getResponse()->setData('topActions', $this->config->get("action>top"));
-        $this->getResponse()->setData('bulkActions', $this->config->get("action>bulk"));
-        $this->getResponse()->setData('elementActions', $this->config->get("action>element"));
-        $this->getResponse()->setData('fieldActions', $fieldActions);
+        $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
+        $this->getResponse()->setData('bulkActions', $this->prepareActionsOutput($this->config->get("action>bulk") ?? []));
+        $this->getResponse()->setData('elementActions', $this->prepareActionsOutput($this->config->get("action>element") ?? []));
+        $this->getResponse()->setData('fieldActions', $this->prepareActionsOutput($fieldActions) ?? []);
         $this->getResponse()->setData('visibleFields', $visibleFields);
         $this->getResponse()->setData('availableFields', $availableFields);
 
@@ -424,6 +424,37 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getResponse()->setData('enable_search_bar', $this->config->exists("visibleFilters>_search"));
         $this->getResponse()->setData('modelinstance', $this->getMyModel());
         return;
+    }
+
+    /**
+     * prepare action configs for output
+     *
+     * @param  array $actions [description]
+     * @return array          [description]
+     */
+    protected function prepareActionsOutput(array $actions) : array {
+      $handled = [];
+      foreach($actions as $key => $value) {
+        // we can't do this at the moment using our Vue App framework
+        // if(!array_key_exists('context', $value)) {
+        //     $value['context'] = app::getRequest()->getData('context');
+        // }
+        if(array_key_exists('_security', $value) && array_key_exists('group', $value['_security'])) {
+          if(!app::getAuth()->memberOf($value['_security']['group'])) {
+            continue;
+          }
+        }
+        if(array_key_exists('condition', $value)) {
+            eval($value['condition']);
+            if(!$condition) {
+                continue;
+            }
+        }
+        $value['display'] = app::getTranslate()->translate("BUTTON.BTN_" . $key);
+
+        $handled[$key] = $value;
+      }
+      return $handled;
     }
 
     /**
