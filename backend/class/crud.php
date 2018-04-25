@@ -984,7 +984,15 @@ class crud extends \codename\core\bootstrapInstance {
      * @return void
      */
     protected function makePagination() {
-        $count = count($this->getMyModel()->search()->getResult());
+
+        //
+        // small HACK:
+        // temporily add a count field
+        // perform the query using the given configuration
+        // and remove it afterwards.
+        //
+        $count = (int) $this->getMyModel()->addCalculatedField('__count', 'count(*)')->search()->getResult()[0]['__count'];
+        $this->getMyModel()->removeCalculatedField('__count');
 
         // default value, if none of the below works:
         $page = 1;
