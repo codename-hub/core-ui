@@ -598,6 +598,10 @@ class crud extends \codename\core\bootstrapInstance {
                     'field_valuefield' => 'value'
                 );
 
+                if($this->readOnly) {
+                  $fielddata['field_readonly'] = true;
+                }
+
                 $c = &$this->onCreateFormfield;
                 if($c !== null && is_callable($c)) {
                   $c($fielddata);
@@ -868,16 +872,27 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * crud is in readonly mode
+     * @var bool
+     */
+    public $readOnly = false;
+
+    /**
      * Returns the form HTML code for showing an existing entry without editing function. Will make sure the given data is compliant to the form's and model's configuration
      * @author Kevin Dargel
      * @param multitype $primarykey
      */
     public function show($primaryKey) {
 
-      // override all created fields by setting them to readonly/disabled
-      $this->onCreateFormfield = function(&$fielddata) {
-        $fielddata['field_readonly'] = true;
-      };
+      $this->readOnly = true;
+
+      // Readonly handling is now done in makeForm
+      if($this->readOnly) {
+        // apply to all nested cruds
+        foreach($this->childCruds as $crud) {
+          $crud->readOnly = true;
+        }
+      }
 
       // @TODO create new hooks for CRUD_SHOW.
 
@@ -1165,6 +1180,10 @@ class crud extends \codename\core\bootstrapInstance {
             // provide a sub-form config !
             // $crud = new \codename\core\ui\crud($this->getModel($foreign['model'], $foreign['app'] ?? '', $foreign['vendor'] ?? ''));
             $crud = $this->childCruds[$field];
+
+            if($this->readOnly) {
+              $crud->readOnly = $this->readOnly;
+            }
             $childConfig = $this->model->config->get('children>'.$field);
             // available child config keys:
             // - type (e.g. foreign)
@@ -1181,6 +1200,10 @@ class crud extends \codename\core\bootstrapInstance {
               $formdata[$field->getProperty('field_name')] = $field->getProperty('field_value');
             }
             $fielddata['field_value'] = $formdata;
+        }
+
+        if($this->readOnly) {
+          $fielddata['field_readonly'] = true;
         }
 
         $c = &$this->onCreateFormfield;
