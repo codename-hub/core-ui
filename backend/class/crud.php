@@ -189,6 +189,13 @@ class crud extends \codename\core\bootstrapInstance {
 
               // join the model upon the current
               $this->getMyModel()->addModel($crud->getMyModel(), \codename\core\model\plugin\join::TYPE_LEFT, $childConfig['field'], $foreignConfig['key']);
+
+              //
+              // Enable virtual field results
+              //
+              if(interface_exists('\\codename\\core\\model\\virtualFieldResultInterface') && $this->getMyModel() instanceof \codename\core\model\virtualFieldResultInterface) {
+                $this->getMyModel()->setVirtualFieldResult(true);
+              }
             }
           } else {
             throw new exception(self::EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL, exception::$ERRORLEVEL_ERROR, $child);
