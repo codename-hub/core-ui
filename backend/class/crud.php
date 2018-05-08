@@ -1172,7 +1172,46 @@ class crud extends \codename\core\bootstrapInstance {
             $fielddata['field_type'] = 'select';
             $fielddata['field_displayfield'] = $foreign['display'];
             $fielddata['field_valuefield'] = $foreign['key'];
-            $fielddata['field_elements'] = $elements->search()->getResult();
+
+            if($elements instanceof \codename\rest\model\exposesRemoteApiInterface && isset($foreign['remote_source'])) {
+              // $fielddata['field_elements'] = $elements->search()->getResult();
+              $apiEndpoint = $elements->getExposedApiEndpoint();
+              $fielddata['field_remote_source'] = $apiEndpoint;
+
+              $remoteSource = $foreign['remote_source'] ?? [];
+
+              //
+              // if(array_key_exists($foreign['model'], $defaultRemoteApiFilters)) {
+              //   $field['field_remote_source_parameter'] = [
+              //     'filter' => array_merge($defaultRemoteApiFilters[$foreign['model']], [] /*($foreign['filter'] ?? [])*/ )
+              //   ];
+              // }
+
+              $filterKeys = [];
+              foreach($remoteSource['filter_key'] as $filterKey => $filterData) {
+                if(is_array($filterData)) {
+                  foreach($filterData as $filterDataKey => $filterDataData) {
+
+                  }
+                } else {
+                  $filterKeys[$filterData] = true;
+                }
+              }
+
+              $fielddata['field_remote_source_filter_key'] = $filterKeys;
+              /*
+              if(array_key_exists($foreign['model'], $remoteApiFilterKeys)) {
+                $field['field_remote_source_filter_key'] = $remoteSource['filter_key'];
+              }
+              */
+              $fielddata['field_remote_source_parameter'] = $remoteSource['parameters'] ?? [];
+              $fielddata['field_remote_source_links'] = $foreign['remote_source']['links'];
+              $fielddata['field_valuefield'] = $foreign['key'];
+              $fielddata['field_displayfield'] = $foreign['key']; // $defaultDisplayField[$foreign['model']] ?? $foreign['key'];
+
+            } else {
+              $fielddata['field_elements'] = $elements->search()->getResult();
+            }
 
             if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
                 $fielddata['field_multiple'] = true;
