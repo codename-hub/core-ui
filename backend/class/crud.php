@@ -1205,7 +1205,7 @@ class crud extends \codename\core\bootstrapInstance {
               }
               */
               $fielddata['field_remote_source_parameter'] = $remoteSource['parameters'] ?? [];
-              $fielddata['field_remote_source_links'] = $foreign['remote_source']['links'];
+              $fielddata['field_remote_source_links'] = $foreign['remote_source']['links'] ?? [];
               $fielddata['field_valuefield'] = $foreign['key'];
               $fielddata['field_displayfield'] = $foreign['key']; // $defaultDisplayField[$foreign['model']] ?? $foreign['key'];
 
