@@ -385,7 +385,7 @@ class crud extends \codename\core\bootstrapInstance {
           }
 
           // field is a foreign key
-          if($useModel->config->exists('foreign>'.$fName)) {
+          if($fData['wildcard'] == false && $useModel->config->exists('foreign>'.$fName)) {
             // modify filter, add filteroptions
             $fConfig = $useModel->config->get('foreign>'.$fName);
             $fModel = $this->getModel($fConfig['model']);
