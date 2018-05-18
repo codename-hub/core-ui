@@ -975,6 +975,18 @@ class crud extends \codename\core\bootstrapInstance {
         return $this;
     }
 
+    /**
+     * [useFormNormalizationData description]
+     * @return crud [description]
+     */
+    public function useFormNormalizationData() : crud {
+      $this->data = new \codename\core\datacontainer($this->getMyModel()->normalizeData( $this->getFormNormalizationData() ));
+      foreach($this->childCruds as $crud) {
+        $crud->useFormNormalizationData();
+      }
+      return $this;
+    }
+
     public function getConfig() : \codename\core\config {
         return $this->config;
     }
