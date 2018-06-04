@@ -296,7 +296,11 @@ class form implements \JsonSerializable {
     public function fieldSent(\codename\core\ui\field $field) : bool {
         switch ($field->getProperty('field_type')) {
             case 'file' :
-                return array_key_exists($field->getProperty('field_name'), $_FILES);
+                if(app::getRequest() instanceof \codename\core\request\filesInterface) {
+                  return array_key_exists($field->getProperty('field_name'), app::getRequest()->getFiles());
+                } else {
+                  return array_key_exists($field->getProperty('field_name'), $_FILES);
+                }
                 break;
             default:
                 $request = app::getInstance('request')->getData($field->getProperty('field_name'));
@@ -377,7 +381,11 @@ class form implements \JsonSerializable {
         }
         $data = $this->getFormRequest()->getData();
         if(isset($_FILES)) {
+          if(app::getRequest() instanceof \codename\core\request\filesInterface) {
+            $data = array_merge($data, app::getRequest()->getFiles());
+          } else {
             $data = array_merge($data, $_FILES);
+          }
         }
         $this->data->addData($data);
         return $this->data->getData($key);
