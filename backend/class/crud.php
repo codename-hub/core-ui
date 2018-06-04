@@ -976,6 +976,19 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [useData description]
+     * @param  array $data [description]
+     * @return crud        [description]
+     */
+    public function useData(array $data) : crud {
+      $this->data = new \codename\core\datacontainer(
+        // $this->getMyModel()->normalizeData($data)
+        $data
+      );
+      return $this;
+    }
+
+    /**
      * [useFormNormalizationData description]
      * @return crud [description]
      */
