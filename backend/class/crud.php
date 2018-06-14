@@ -345,6 +345,12 @@ class crud extends \codename\core\bootstrapInstance {
           $visibleFields[] = $this->getMyModel()->getPrimarykey();
         }
 
+        $fieldLabels = [];
+        foreach(array_merge($availableFields, $formattedFields) as $field) {
+          $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+        }
+        $this->getResponse()->setData('labels', $fieldLabels);
+
         $this->getMyModel()->addField(implode(',', $visibleFields));
 
         $this->applyFilters();
