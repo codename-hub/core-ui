@@ -1174,7 +1174,7 @@ class crud extends \codename\core\bootstrapInstance {
 
             $foreign = $modelconfig['foreign'][$field];
 
-            $elements = $this->getModel($foreign['model'], $foreign['app']);
+            $elements = $this->getModel($foreign['model'], $foreign['app'] ?? app::getApp());
 
             if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
                 foreach ($foreign['order'] as $order) {
