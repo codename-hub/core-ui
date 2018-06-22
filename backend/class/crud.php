@@ -236,8 +236,12 @@ class crud extends \codename\core\bootstrapInstance {
      * access data array currently used by this crud
      * @return array
      */
-    public function getData() : array{
-      return $this->data->getData();
+    public function getData(string $key = '') {
+      if($this->data !== null) {
+        return $this->data->getData($key);
+      } else {
+        return null;
+      }
     }
 
     /**
