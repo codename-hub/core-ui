@@ -1226,7 +1226,7 @@ class crud extends \codename\core\bootstrapInstance {
               foreach($remoteSource['filter_key'] as $filterKey => $filterData) {
                 if(is_array($filterData)) {
                   foreach($filterData as $filterDataKey => $filterDataData) {
-
+                    $filterKeys[$filterKey][$filterDataData] = true;
                   }
                 } else {
                   $filterKeys[$filterData] = true;
