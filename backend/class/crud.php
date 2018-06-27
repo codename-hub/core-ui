@@ -567,10 +567,12 @@ class crud extends \codename\core\bootstrapInstance {
             if($this->config->exists('children') && $this->getMyModel()->config->exists('children')) {
               // if field exists in a child config field reference
               $found = false;
-              foreach($this->getMyModel()->config->get('children') as $childConfig) {
-                if($childConfig['field'] == $field) {
-                  $found = true;
-                  break;
+              foreach($this->config->get('children') as $childField) {
+                if(($childConfig = $this->getMyModel()->config->get('children>'.$childField)) !== null) {
+                  if($childConfig['field'] == $field) {
+                    $found = true;
+                    break;
+                  }
                 }
               }
               if($found) {
