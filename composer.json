@@ -1,7 +1,7 @@
 {
     "name": "codename/core-ui",
     "description": "This is going to be the core UI framework.",
-    "version": "0.0.6",
+    "version": "0.0.8",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
     "time": "2017-10-19",
@@ -14,6 +14,7 @@
     "require": {
       "codename/core" : "*",
       "twig/twig" : "2.*",
+      "twig/extensions" : "^1.5",
       "codename/core-ui-assets": "*",
       "npm-asset/requirejs-domready" : "*",
       "npm-asset/requirejs" : "2.*",
