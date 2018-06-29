@@ -107,7 +107,32 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
 
     $this->twigInstance = new \codename\core\ui\templateengine\twig\environment\core($this->twigLoader, $options);
     $this->twigInstance->templateFileSuffix = $this->templateFileExtension;
-    $this->twigInstance->addExtension(new extension\routing);
+
+    $extensions = [];
+
+    $extensions[] = new extension\routing;
+    // $this->twigInstance->addExtension(new extension\routing);
+
+    if(!empty($config['sandbox_enabled']) && $config['sandbox_enabled']) {
+      $globalSandbox = !empty($config['sandbox_mode']) && $config['sandbox_mode'] == 'global';
+
+      // array $allowedTags = array(),
+      // array $allowedFilters = array(),
+      // array $allowedMethods = array(),
+      // array $allowedProperties = array(),
+      // array $allowedFunctions = array())
+
+      $policy = new \Twig_Sandbox_SecurityPolicy([
+        'tags' => $config['sandbox']['tags'] ?? [],
+        'filters' => $config['sandbox']['filters'] ?? [],
+        'methods' => $config['sandbox']['methods'] ?? [],
+        'properties' => $config['sandbox']['properties'] ?? [],
+        'functions' => $config['sandbox']['functions'] ?? []
+      ]);
+      $extensions[] = new \Twig_Extension_Sandbox($policy, $globalSandbox);
+    }
+
+    $this->twigInstance->setExtensions($extensions);
 
     // Add request and response containers, globally
     $this->twigInstance->addGlobal('request', app::getRequest());
@@ -145,6 +170,17 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
         return \codename\core\helper\clicolors::getInstance()->getColoredString($value, $color);
       }));
     }
+  }
+
+  /**
+   * [renderSandboxed description]
+   * @param  string $referencePath   [description]
+   * @param  array  $variableContext [description]
+   * @return string                  [description]
+   */
+  public function renderSandboxed(string $referencePath, array $variableContext) : string {
+    $twigTemplate = $this->twigInstance->load($referencePath);
+    return $twigTemplate->render($variableContext);
   }
 
   /**
