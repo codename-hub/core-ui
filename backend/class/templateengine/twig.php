@@ -188,6 +188,17 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   }
 
   /**
+   * [renderStringSandboxed description]
+   * @param  string $template        [description]
+   * @param  array  $variableContext [description]
+   * @return string                  [description]
+   */
+  public function renderStringSandboxed(string $template, array $variableContext) : string {
+    $twigTemplate = $this->twigInstance->create($template);
+    return $twigTemplate->render($variableContext);
+  }
+
+  /**
    * @inheritDoc
    *
    * twig loads a custom element/partial/whatever like this (fixed:)
