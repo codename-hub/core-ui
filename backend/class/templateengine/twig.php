@@ -177,6 +177,15 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   }
 
   /**
+   * adds a function available during the render process
+   * @param string   $name     [description]
+   * @param callable $function [description]
+   */
+  public function addFunction(string $name, callable $function) {
+    $this->twigInstance->addFunction(new \Twig\TwigFunction($name, $function));
+  }
+
+  /**
    * [renderSandboxed description]
    * @param  string $referencePath   [description]
    * @param  array  $variableContext [description]
