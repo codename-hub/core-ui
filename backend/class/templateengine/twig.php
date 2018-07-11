@@ -115,7 +115,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
 
     $extensions[] = new extension\routing;
     $extensions[] = new \Twig\Extensions\IntlExtension();
-    // $this->twigInstance->addExtension(new extension\routing);
+    $extensions[] = new \Twig\Extension\StringLoaderExtension();
 
     if(!empty($config['sandbox_enabled']) && $config['sandbox_enabled']) {
       $globalSandbox = !empty($config['sandbox_mode']) && $config['sandbox_mode'] == 'global';
