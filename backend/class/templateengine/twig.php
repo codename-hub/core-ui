@@ -91,7 +91,10 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       }
     }
 
-    $this->twigLoader = new \Twig\Loader\FilesystemLoader($paths, CORE_VENDORDIR);
+    // Configure path suffixing only for FS Loader
+     $fsLoader = new \codename\core\ui\templateengine\twig\loader\filesystem($paths, CORE_VENDORDIR);
+     $fsLoader->templateFileSuffix = $this->templateFileExtension;
+     $this->twigLoader = $fsLoader;
 
     /**
      * Important Note:
@@ -106,7 +109,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     );
 
     $this->twigInstance = new \codename\core\ui\templateengine\twig\environment\core($this->twigLoader, $options);
-    $this->twigInstance->templateFileSuffix = $this->templateFileExtension;
+    // $this->twigInstance->templateFileSuffix = $this->templateFileExtension;
 
     $extensions = [];
 
