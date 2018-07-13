@@ -1,6 +1,8 @@
 <?php
 namespace codename\core\ui\context;
 
+use codename\core\app;
+
 /**
  * CRUD Context base class
  * @package \codename\core\ui
@@ -61,6 +63,19 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     public function __construct() {
         $this->getResponse()->setData('primarykey', $this->getModelinstance()->getPrimarykey());
         // $this->getResponse()->setData('template', 'basic');
+
+        $dict = [
+          'context' => $this->getRequest()->getData('context'),
+          'view'    => $this->getRequest()->getData('context').'_'.$this->getRequest()->getData('view')
+        ];
+
+        foreach($dict as &$d) {
+          if($d !== null) {
+            $d = app::getTranslate()->translate('CRUD.'.$d);
+          }
+        }
+
+        $this->getResponse()->setData('crud_label', $dict);
 
         $this->setCrudinstance(new \codename\core\ui\crud($this->getModelinstance()));
 

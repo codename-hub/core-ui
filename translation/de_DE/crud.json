@@ -1,0 +1,8 @@
+{
+  "CRUD_CRUD" : "CRUD",
+  "CRUD_CRUD_CREATE" : "Erstellen",
+  "CRUD_CRUD_EDIT" : "Bearbeiten",
+  "CRUD_CRUD_SHOW" : "Anzeigen",
+  "CRUD_CRUD_DELETE" : "Löschen",
+  "CRUD_CRUD_LIST" : "Liste"
+}
