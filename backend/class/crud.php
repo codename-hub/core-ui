@@ -440,6 +440,12 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getResponse()->setData('filters_unused', $filters);
         $this->getResponse()->setData('enable_search_bar', $this->config->exists("visibleFilters>_search"));
         $this->getResponse()->setData('modelinstance', $this->getMyModel());
+
+        // editable mode:
+        if($this->getRequest()->getData('crud_editable')) {
+          $form = $this->makeForm(null, false);
+          $this->getResponse()->setData('formconfig', $form->output(true));
+        }
         return;
     }
 
