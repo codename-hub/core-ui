@@ -174,12 +174,12 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     }
 
     /**
-     * Using the CRUD generator to overwrite multiple datasets
+     * Using the CRUD generator to overwrite/edit multiple datasets
      * @return void
-     * @access public
      */
     public function view_bulk_edit() {
         $this->getResponse()->setData('context', 'crud');
+        $this->getCrudinstance()->bulkEdit();
         return;
     }
 
