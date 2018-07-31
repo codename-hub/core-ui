@@ -165,7 +165,6 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     /**
      * Using the CRUD generator to generate the create page
      * @return void
-     * @access public
      */
     public function view_crud_create() {
         $this->getResponse()->setData('context', 'crud');
@@ -186,7 +185,6 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     /**
      * Using the CRUD generator to delete multiple datasets at once
      * @return void
-     * @access public
      */
     public function view_bulk_delete() {
         $this->getResponse()->setData('context', 'crud');
