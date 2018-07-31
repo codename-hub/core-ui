@@ -783,6 +783,51 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [bulkEdit description]
+     * @return void
+     */
+    public function bulkEdit() {
+      if($this->getRequest()->isDefined('data')) {
+        $data = $this->getRequest()->getData('data');
+
+        //
+        // Validate
+        //
+        foreach($data as $entry) {
+
+          // get full entry with modified delta
+          $currentEntry = $this->getMyModel()->load($entry[$this->getMyModel()->getPrimarykey()]);
+          $currentEntry = array_replace_recursive($currentEntry, $entry);
+
+          if(!$this->getMyModel()->isValid($currentEntry)) {
+              $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
+              $this->getResponse()->setData('errors', $this->getMyModel()->getErrors());
+              $this->getResponse()->setData('view', 'save_error');
+              return;
+          }
+        }
+
+        //
+        // Save
+        //
+        $transaction = new \codename\core\transaction('crud_bulk_edit', [ $this->getMyModel() ]);
+        $transaction->start();
+
+        foreach($data as $entry) {
+          //
+          // TODO: how to handle delta edits on nested models?
+          //
+          $this->getMyModel()->saveWithChildren($entry);
+        }
+
+        $transaction->end();
+
+      } else {
+        throw new exception('CRUD_BULK_EDIT_DATA_UNDEFINED', exception::$ERRORLEVEL_ERROR);
+      }
+    }
+
+    /**
      * returns the request data
      * that is used for normalization
      * in form-related functions
