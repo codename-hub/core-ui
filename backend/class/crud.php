@@ -124,9 +124,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Creates the instance and sets the $model of this instance. Also creates the form instance
-     * @param model $model
-     * @return crud
-     * @todo USE CACHE FOR CONFIGS
+     * @param  \codename\core\model   $model       [description]
+     * @param  array|null             $requestData [description]
      */
     public function __CONSTRUCT(\codename\core\model $model, array $requestData = null) {
         $this->eventCrudFormInit = new event('EVENT_CRUD_FORM_INIT');
@@ -214,7 +213,8 @@ class crud extends \codename\core\bootstrapInstance {
     /**
      * loads the crud config
      * defaults to schema_table, if no identifier (or '') is specified
-     * @return \codename\core\config
+     * @param  string                $identifier [description]
+     * @return \codename\core\config             [description]
      */
     protected function loadConfig(string $identifier = '') : \codename\core\config{
       if($identifier == '') {
@@ -225,7 +225,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * set config by identifier
-     * @return \codename\core\ui\crud
+     * @param  string                 $identifier [description]
+     * @return \codename\core\ui\crud             [description]
      */
     public function setConfig(string $identifier = '') : \codename\core\ui\crud {
       $this->config = $this->loadConfig($identifier);
@@ -234,7 +235,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * access data array currently used by this crud
-     * @return array
+     * @param  string $key [description]
+     * @return array|null|mixed
      */
     public function getData(string $key = '') {
       if($this->data !== null) {
@@ -265,7 +267,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * configures column ordering for crud
-     * @param string[] $columns
+     * @param array $columns [description]
+     * @return \codename\core\ui\crud
      */
     public function setColumnOrder(array $columns = array()) : \codename\core\ui\crud {
       $this->columnOrder = $columns;
@@ -276,9 +279,8 @@ class crud extends \codename\core\bootstrapInstance {
      * I will add a ROW modifier
      * which can change the output <tr> elements attributes
      * @example addModifier('status_id', function($row) {return '<span class="pill">'.$row['status_name'].'</span>';});
-     * @param string $field
-     * @param callable $modifier
-     * @return \codename\core\ui\crud
+     * @param  callable               $modifier [description]
+     * @return \codename\core\ui\crud           [description]
      */
     public function addRowModifier(callable $modifier) : \codename\core\ui\crud {
         $this->rowModifiers[] = $modifier;
@@ -482,6 +484,7 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * internal and temporary pagination switch (for exporting)
+     * @var bool
      */
     protected $allowPagination = true;
 
@@ -857,7 +860,7 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Returnes the form HTML code for editing an existing entry. Will make sure the given data is compliant to the form's and model's configuration
-     * @param multitype $primarykey
+     * @param string|int $primarykey
      */
     public function edit($primarykey) {
         $form = $this->makeForm($primarykey);
@@ -942,8 +945,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Returns the form HTML code for showing an existing entry without editing function. Will make sure the given data is compliant to the form's and model's configuration
-     * @author Kevin Dargel
-     * @param multitype $primarykey
+     * @param  string|int $primaryKey [description]
+     * @return void
      */
     public function show($primaryKey) {
 
@@ -1025,7 +1028,7 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Loads one object from the CRUD generator's model if the primary key is defined.
-     * @param unknown $primarykey
+     * @param string|int|null $primarykey
      * @throws \codename\core\exception
      */
     public function useEntry($primarykey = null) {
@@ -1063,6 +1066,11 @@ class crud extends \codename\core\bootstrapInstance {
       return $this;
     }
 
+    /**
+     * returns the current crud configuration
+     * 
+     * @return \codename\core\config [description]
+     */
     public function getConfig() : \codename\core\config {
         return $this->config;
     }
@@ -1148,7 +1156,8 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Creates the field instance for the given field and adds information to it.
-     * @param string $field
+     * @param  string $field   [description]
+     * @param  array  $options [description]
      * @throws \codename\core\exception
      * @return field
      */
@@ -1394,8 +1403,9 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Returns the default CRUD filter for the given filters
-     * @param string $field
-     * @return string
+     * @param  string  $field    [description]
+     * @param  bool    $wildcard [description]
+     * @return string            [description]
      */
     protected function getDefaultoperator(string $field, bool $wildcard = false) : string {
         switch($this->getMyModel()->getFieldtype(new \codename\core\value\text\modelfield($field))) {
@@ -1410,9 +1420,10 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Will return the filterable string that is used for the given field's datatype
-     * @param string $value
-     * @param string $field
-     * @return string
+     * @param  string  $value    [description]
+     * @param  string  $field    [description]
+     * @param  bool    $wildcard [description]
+     * @return string            [description]
      */
     protected function getFilterstring(string $value, string $field, bool $wildcard = false) : string {
         switch($this->getMyModel()->getFieldtype(new \codename\core\value\text\modelfield($field))) {
@@ -1423,10 +1434,6 @@ class crud extends \codename\core\bootstrapInstance {
                 return $wildcard ? "%{$value}%" : "{$value}";
                 break;
         }
-    }
-
-    protected function applySearch() {
-        return;
     }
 
     /**
