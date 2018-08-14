@@ -195,6 +195,23 @@ class crud extends \codename\core\bootstrapInstance {
               if(interface_exists('\\codename\\core\\model\\virtualFieldResultInterface') && $this->getMyModel() instanceof \codename\core\model\virtualFieldResultInterface) {
                 $this->getMyModel()->setVirtualFieldResult(true);
               }
+            } else if($childConfig['type'] === 'collection') {
+
+              // Collection, not a crud.
+
+              // get the collection config
+              $collectionConfig = $this->model->config->get('collection>'.$child);
+              // get the respective model
+              $childModel = $this->getModel($collectionConfig['model'], $collectionConfig['app'] ?? '', $collectionConfig['vendor'] ?? '');
+
+              $this->getMyModel()->addCollectionModel($childModel, $child);
+
+              //
+              // Enable virtual field results
+              //
+              if(interface_exists('\\codename\\core\\model\\virtualFieldResultInterface') && $this->getMyModel() instanceof \codename\core\model\virtualFieldResultInterface) {
+                $this->getMyModel()->setVirtualFieldResult(true);
+              }
             }
           } else {
             throw new exception(self::EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL, exception::$ERRORLEVEL_ERROR, $child);
@@ -578,8 +595,11 @@ class crud extends \codename\core\bootstrapInstance {
               $found = false;
               foreach($this->config->get('children') as $childField) {
                 if(($childConfig = $this->getMyModel()->config->get('children>'.$childField)) !== null) {
-                  if($childConfig['field'] == $field) {
+                  if($childConfig['type'] === 'foreign' && $childConfig['field'] == $field) {
                     $found = true;
+                    break;
+                  } else if($childField === $field && $childConfig['type'] === 'collection') {
+                    // $found = true;
                     break;
                   }
                 }
@@ -639,6 +659,7 @@ class crud extends \codename\core\bootstrapInstance {
 
                 continue;
             }
+
             $this->getForm()->addField($this->makeField($field))->setType('compact');
         }
 
@@ -1316,10 +1337,18 @@ class crud extends \codename\core\bootstrapInstance {
             }
         }
 
+
         //
         // nested crud / submodel
         //
         if($this->config->exists('children') && in_array($field, $this->config->get('children'))) {
+
+          $childConfig = $this->model->config->get('children>'.$field);
+
+          if($childConfig['type'] === 'foreign') {
+            //
+            // Handle nested forms
+            //
             $fielddata['field_type'] = 'form';
 
             // provide a sub-form config !
@@ -1329,7 +1358,7 @@ class crud extends \codename\core\bootstrapInstance {
             if($this->readOnly) {
               $crud->readOnly = $this->readOnly;
             }
-            $childConfig = $this->model->config->get('children>'.$field);
+
             // available child config keys:
             // - type (e.g. foreign)
             // - field (reference field)
@@ -1345,6 +1374,27 @@ class crud extends \codename\core\bootstrapInstance {
               $formdata[$field->getProperty('field_name')] = $field->getProperty('field_value');
             }
             $fielddata['field_value'] = $formdata;
+          } else if($childConfig['type'] === 'collection') {
+            //
+            // Handle collections
+            //
+            $collectionConfig = $this->model->config->get('collection>'.$field);
+            $fielddata['field_type'] = 'table';
+
+            $crud = new \codename\core\ui\crud($this->getModel($collectionConfig['model'], $collectionConfig['app'] ?? '', $collectionConfig['vendor'] ?? ''));
+            // TODO: allow custom crud config somehow?
+            // $crud->setConfig('some-crud-config');
+
+            $fielddata['visibleFields'] = $crud->getConfig()->get('visibleFields');
+
+            $fielddata['labels'] = [];
+            foreach($fielddata['visibleFields'] as $field) {
+              $fielddata['labels'][$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+            }
+
+            $form = $crud->makeForm(null, false);
+            $fielddata['form'] = $form->output(true);
+          }
         }
 
         if($this->readOnly) {
