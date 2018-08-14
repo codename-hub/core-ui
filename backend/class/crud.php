@@ -1583,7 +1583,7 @@ class crud extends \codename\core\bootstrapInstance {
                   $o = $this->getFieldoutput($row, $field);
                   // @NOTE: we're differentiating between a pre-formatted and a raw value here:
                   // if array index 1 is set, this is the formatted value.
-                  if(isset($o[1])) {
+                  if(array_key_exists(1, $o)) {
                     $object[$field.'_FORMATTED'] = $o[1];
                     $object[$field] = $o[0];
                   } else {
