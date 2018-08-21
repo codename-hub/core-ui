@@ -806,6 +806,14 @@ class crud extends \codename\core\bootstrapInstance {
             $data = $newData;
         }
 
+        // form validation before model validation
+        if(!$form->isValid()) {
+          $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
+          $this->getResponse()->setData('errors', $form->getErrorstack()->getErrors());
+          $this->getResponse()->setData('view', 'validation_error');
+          return;
+        }
+
         if(!$this->getMyModel()->isValid($data)) {
             $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
             $this->getResponse()->setData('errors', $this->getMyModel()->getErrors());
@@ -957,13 +965,30 @@ class crud extends \codename\core\bootstrapInstance {
         // we can use $form->getData() here, but then we're receiving a lot more data (e.g. non-input or disabled fields!)
         $data = $this->getMyModel()->normalizeData( $this->getFormNormalizationData() );
 
+        // DEBUG: \codename\core\app::getResponse()->setData('crud_debug_'.$this->model->getIdentifier().'_data_incoming', $data);
+
         // OLD: $newData = app::getHook()->fire(\codename\core\hook::EVENT_CRUD_EDIT_BEFORE_VALIDATION, $data);
         $newData = $this->eventCrudBeforeValidation->invokeWithResult($this, $data);
         if(is_array($newData)) {
             $data = $newData;
         }
 
-        $this->getMyModel()->entryLoad($primarykey)->entryUpdate($data);
+        // form validation before model validation
+        if(!$form->isValid()) {
+          $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
+          $this->getResponse()->setData('errors', $form->getErrorstack()->getErrors());
+          $this->getResponse()->setData('view', 'validation_error');
+          return;
+        }
+
+        // DEBUG: \codename\core\app::getResponse()->setData('crud_debug_'.$this->model->getIdentifier().'_data_new', $newData);
+
+        $this->getMyModel()->entryLoad($primarykey);
+        // DEBUG: \codename\core\app::getResponse()->setData('crud_debug_'.$this->model->getIdentifier().'_entry_loaded', $this->getMyModel()->getData());
+
+        $this->getMyModel()->entryUpdate($data);
+        // DEBUG: \codename\core\app::getResponse()->setData('crud_debug_'.$this->model->getIdentifier().'_entry_updated', $this->getMyModel()->getData());
+
 
         if(count($errors = $this->getMyModel()->entryValidate()) > 0) {
             $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
