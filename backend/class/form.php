@@ -274,10 +274,12 @@ class form implements \JsonSerializable {
             }
             continue;
           }
-          $validation = app::getValidator($fieldtype)->reset()->validate($this->fieldValue($field));
 
-          if(count($validation) != 0) {
-              $this->errorstack->addError($fieldname, 'FIELD_INVALID', $validation);
+          if(($value = $this->fieldValue($field)) != null) {
+            $validation = app::getValidator($fieldtype)->reset()->validate($value);
+            if(count($validation) != 0) {
+                $this->errorstack->addError($fieldname, 'FIELD_INVALID', $validation);
+            }
           }
       }
 
