@@ -212,7 +212,13 @@ class form implements \JsonSerializable {
 
         foreach($tFields as $field) {
 
+          // skip noninput fields
           if($field->getConfig()->get('field_noninput') === true) {
+            continue;
+          }
+
+          // skip internal sent-determination field
+          if($field === $this->formSentField) {
             continue;
           }
 
