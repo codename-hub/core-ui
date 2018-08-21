@@ -264,6 +264,11 @@ class form implements \JsonSerializable {
 
           if($displaytype == 'form') {
             $subform = $field->getProperty('form');
+
+            // provide subform-related data to the subform
+            if($subform instanceof \codename\core\ui\form) {
+              $subform->setFormRequest($this->fieldValue($field));
+            }
             if(!$subform->isValid()) {
               $this->errorstack->addError($fieldname, 'FIELD_INVALID', $subform->getErrorstack()->getErrors());
             }
