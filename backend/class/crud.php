@@ -140,6 +140,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
         $this->setConfig();
         $this->setChildCruds();
+        $this->updateChildCrudConfigs();
         $this->form = new \codename\core\ui\form(array(
           'form_action' => ui\app::getUrlGenerator()->generateFromParameters(array(
             'context' => $this->getRequest()->getData('context'),
@@ -165,7 +166,19 @@ class crud extends \codename\core\bootstrapInstance {
       // apply nested children config
       if($this->config->exists('children')) {
         foreach($this->config->get('children') as $child) {
+
+          //
+          // the master child configuration
+          // in the model
+          //
           $childConfig = $this->model->config->get('children>'.$child);
+
+          //
+          // optional crud/form overrides
+          //
+          $childCrudConfig = $this->config->get('children_config>'.$child);
+          // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_setchildren_'.$child, $childCrudConfig);
+
           if($childConfig != null) {
             // we handle a single-ref foreign key field as base
             // for a nested model as a virtual object key
@@ -178,9 +191,20 @@ class crud extends \codename\core\bootstrapInstance {
               // build a child crud
               $crud = new \codename\core\ui\crud($childModel, $this->getFormNormalizationData()[$child] ?? []);
 
+              //
+              // Handle optional configs
+              //
+              if(isset($childCrudConfig['crud'])) {
+                // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_setchildren_'.$child.'_crud', $childCrudConfig['crud']);
+                $crud->setConfig($childCrudConfig['crud']);
+              }
+              if(isset($childCrudConfig['form'])) {
+                // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_setchildren_'.$child.'_form', $childCrudConfig['form']);
+                $crud->useForm($childCrudConfig['form']);
+              }
+
               // make only a part of the request visible to the crud instance
-              // DEBUG
-              // $this->getResponse()->setData('debug_crud_'.$child, $this->getFormNormalizationData()[$child] ?? []);
+              // DEBUG: $this->getResponse()->setData('debug_crud_'.$child, $this->getFormNormalizationData()[$child] ?? []);
               $crud->setFormNormalizationData($this->getFormNormalizationData()[$child] ?? []);
 
               // store it for later
@@ -247,7 +271,32 @@ class crud extends \codename\core\bootstrapInstance {
      */
     public function setConfig(string $identifier = '') : \codename\core\ui\crud {
       $this->config = $this->loadConfig($identifier);
+
+      if($identifier !== '') {
+        $this->updateChildCrudConfigs();
+      }
+
       return $this;
+    }
+
+    /**
+     * [updateChildCrudConfigs description]
+     * @return [type] [description]
+     */
+    protected function updateChildCrudConfigs() {
+      if($this->config->exists('children_config')) {
+        $childrenConfig = $this->config->get('children_config');
+        foreach($childrenConfig as $childName => $childConfig) {
+          if(isset($this->childCruds[$childName])) {
+            if(isset($childConfig['crud'])) {
+              $this->childCruds[$childName]->setConfig($childConfig['crud']);
+            }
+            if(isset($childConfig['form'])) {
+              $this->childCruds[$childName]->useForm($childConfig['form']);
+            }
+          }
+        }
+      }
     }
 
     /**
@@ -565,7 +614,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         // use "field", if defined in crud config
-        if($this->config->exists('field')) {
+        if($this->config->exists('field') && count($this->fields) === 0) {
           $this->fields = $this->config->get('field');
         }
 
@@ -823,6 +872,8 @@ class crud extends \codename\core\bootstrapInstance {
           $currentEntry = $this->getMyModel()->load($entry[$this->getMyModel()->getPrimarykey()]);
           $currentEntry = array_replace_recursive($currentEntry, $entry);
 
+          // TODO: validate using bulk form?
+
           if(!$this->getMyModel()->isValid($currentEntry)) {
               $this->getResponse()->setStatus(\codename\core\response::STATUS_INTERNAL_ERROR);
               $this->getResponse()->setData('errors', $this->getMyModel()->getErrors());
@@ -999,6 +1050,24 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getForm()->setId($identifier);
 
         $formConfig = new \codename\core\config\json('config/crud/form_' . $identifier . '.json');
+
+        //
+        // update child crud configs
+        //
+        if($formConfig->exists('children_config')) {
+          $childrenConfig = $formConfig->get('children_config');
+          foreach($childrenConfig as $childName => $childConfig) {
+            if(isset($this->childCruds[$childName])) {
+              // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_useform_childconfig_'.$identifier.'_'.$childName, $childConfig);
+              if(isset($childConfig['crud'])) {
+                $this->childCruds[$childName]->setConfig($childConfig['crud']);
+              }
+              if(isset($childConfig['form'])) {
+                $this->childCruds[$childName]->useForm($childConfig['form']);
+              }
+            }
+          }
+        }
 
         if($formConfig->exists('tag')) {
           $this->getForm()->config['form_tag'] = $formConfig->get('tag');
