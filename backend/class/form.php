@@ -316,7 +316,7 @@ class form implements \JsonSerializable {
                 }
                 break;
             default:
-                $request = app::getInstance('request')->getData($field->getProperty('field_name'));
+                $request = $this->getFormRequest()->getData($field->getProperty('field_name'));
                 if(is_array($request)) {
                   return sizeof($request) > 0;
                 } else {
