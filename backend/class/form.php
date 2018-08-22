@@ -266,18 +266,19 @@ class form implements \JsonSerializable {
             $subform = $field->getProperty('form');
 
             // provide subform-related data to the subform
-            if($subform instanceof \codename\core\ui\form) {
+            if($subform instanceof \codename\core\ui\form && $this->fieldValue($field) !== null) {
+              $subform->getErrorstack()->reset();
               $subform->setFormRequest($this->fieldValue($field));
-            }
-            if(!$subform->isValid()) {
-              $this->errorstack->addError($fieldname, 'FIELD_INVALID', $subform->getErrorstack()->getErrors());
+              if(!$subform->isValid()) {
+                $this->errorstack->addError($fieldname, 'FIELD_INVALID', $subform->getErrorstack()->getErrors());
+              }
             }
             continue;
           }
 
           if(($value = $this->fieldValue($field)) != null) {
             $validation = app::getValidator($fieldtype)->reset()->validate($value);
-            if(count($validation) != 0) {
+            if(count($validation) > 0) {
                 $this->errorstack->addError($fieldname, 'FIELD_INVALID', $validation);
             }
           }
