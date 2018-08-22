@@ -451,7 +451,7 @@ class form implements \JsonSerializable {
 
     /**
      * Returns all the fields in the form instance
-     * @return array
+     * @return field[]
      */
     public function getFields() : array {
         return $this->fields;
@@ -479,7 +479,7 @@ class form implements \JsonSerializable {
 
     /**
      * Returns the array of fieldsets here
-     * @return array
+     * @return fieldset[]
      */
     public function getFieldsets() : array {
         return $this->fieldsets;
