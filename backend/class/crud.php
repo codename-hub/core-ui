@@ -1474,6 +1474,7 @@ class crud extends \codename\core\bootstrapInstance {
             //
             $collectionConfig = $this->model->config->get('collection>'.$field);
             $fielddata['field_type'] = 'table';
+            $fielddata['field_datatype'] = 'structure';
 
             $crud = new \codename\core\ui\crud($this->getModel($collectionConfig['model'], $collectionConfig['app'] ?? '', $collectionConfig['vendor'] ?? ''));
             // TODO: allow custom crud config somehow?
