@@ -1183,7 +1183,7 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * returns the current crud configuration
-     * 
+     *
      * @return \codename\core\config [description]
      */
     public function getConfig() : \codename\core\config {
@@ -1301,6 +1301,7 @@ class crud extends \codename\core\bootstrapInstance {
         // Get the displaytype of this field
         if (array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype'])) {
             $fielddata['field_type'] = $this->getDisplaytype($modelconfig['datatype'][$field]);
+            $fielddata['field_datatype'] = $modelconfig['datatype'][$field];
         }
 
         if($fielddata['field_type'] == 'yesno') {
