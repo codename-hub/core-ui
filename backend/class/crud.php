@@ -679,6 +679,7 @@ class crud extends \codename\core\bootstrapInstance {
                 $fielddata = array (
                     'field_name' => $this->getMyModel()->table . '_flag',
                     'field_type' => 'multicheckbox',
+                    'field_datatype' => 'structure',
                     'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field),
                     'field_multiple' => true,
                     'field_value' => $value,
