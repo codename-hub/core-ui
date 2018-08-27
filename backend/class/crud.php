@@ -1155,6 +1155,9 @@ class crud extends \codename\core\bootstrapInstance {
         }
         $this->getResponse()->setData('CRUD_FEEDBACK', 'ENTRY_UPDATE');
         $this->data = new \codename\core\datacontainer($this->getMyModel()->load($primarykey));
+
+        // DEBUG: $this->getResponse()->setData('crud_'.$this->model->getIdentifier().'_entry', $this->data->getData());
+
         return $this;
     }
 
