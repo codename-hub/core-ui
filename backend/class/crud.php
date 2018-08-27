@@ -1138,6 +1138,8 @@ class crud extends \codename\core\bootstrapInstance {
             $this->fields = $formConfig->get("field");
         }
 
+        // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_fields_set_'.($this->getForm()->config['form_tag'] ?? 'no-tag').'_'.$identifier, $this->fields);
+
         return $this;
     }
 
