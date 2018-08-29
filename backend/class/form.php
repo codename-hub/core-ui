@@ -317,12 +317,21 @@ class form implements \JsonSerializable {
                 }
                 break;
             default:
-                $request = $this->getFormRequest()->getData($field->getProperty('field_name'));
-                if(is_array($request)) {
-                  return sizeof($request) > 0;
+                if($this->getFormRequest()->isDefined($field->getProperty('field_name'))) {
+                  if(is_array($value = $this->getFormRequest()->getData($field->getProperty('field_name'))) && count($value) === 0) {
+                    return false;
+                  } else {
+                    return true;
+                  }
                 } else {
-                  return (strlen($request) > 0);
+                  return false;
                 }
+                // $request = $this->getFormRequest()->getData($field->getProperty('field_name'));
+                // if(is_array($request)) {
+                //   return sizeof($request) > 0;
+                // } else {
+                //   return (strlen($request) > 0);
+                // }
                 break;
         }
         return false;
