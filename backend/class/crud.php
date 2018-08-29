@@ -1314,6 +1314,10 @@ class crud extends \codename\core\bootstrapInstance {
             $fielddata['field_type'] = 'select';
             $fielddata['field_displayfield'] = '{$element[\'field_name\']}';
             $fielddata['field_valuefield'] = 'field_value';
+
+            // NOTE: Datatype for this kind of pseudo-boolean field must be null or so
+            // because the boolean validator really needs a bool.
+            $fielddata['field_datatype'] = null;
             $fielddata['field_elements'] = array(
                     array(
                         'field_value' => "true",
