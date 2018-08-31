@@ -423,7 +423,13 @@ class crud extends \codename\core\bootstrapInstance {
         }
         $this->getResponse()->setData('labels', $fieldLabels);
 
-        $this->getMyModel()->addField(implode(',', $visibleFields));
+        //
+        // NOTE: CHANGED on 2018-08-31
+        // If we explicitly add fields here
+        // the model may rush into a severe result normalization situation.
+        //
+        // $this->getMyModel()->addField(implode(',', $visibleFields));
+        //
 
         $this->applyFilters();
 
