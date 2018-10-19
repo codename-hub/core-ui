@@ -72,7 +72,7 @@ class field implements \JsonSerializable {
           // Replace field_value with its callable result
           $data['field_value'] = $data['field_value']();
         }
-        if(isset($data['field_elements']) && !is_string($data['field_elements']) && is_callable($data['field_value'])) {
+        if(isset($data['field_elements']) && !is_string($data['field_elements']) && is_callable($data['field_elements'])) {
           // Replace field_value with its callable result
           $data['field_elements'] = $data['field_elements']();
         }
