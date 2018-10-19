@@ -1326,11 +1326,11 @@ class crud extends \codename\core\bootstrapInstance {
             $fielddata['field_datatype'] = null;
             $fielddata['field_elements'] = array(
                     array(
-                        'field_value' => "true",
+                        'field_value' => true,
                         'field_name' => 'Ja'
                     ),
                     array(
-                        'field_value' => "false",
+                        'field_value' => false,
                         'field_name' => 'Nein'
                     )
             );
