@@ -366,20 +366,35 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         $formattedFields = [];
+
+        //
+        // Format foreign key values as defined by the model
+        //
         if(!is_null($this->getMyModel()->config->get('foreign'))) {
           $foreignKeys = $this->getMyModel()->config->get('foreign');
-          /*
-          $formattedFields = array_map(function($key, $foreign) {
-            return [ $key => $key.'_FORMATTED' ];
-          }, array_keys($foreignKeys), $foreignKeys);
-          */
-          $formattedFields = array_reduce(array_keys($foreignKeys), function ($carry, $key) use ($foreignKeys){
-              $carry[$key] = $key.'_FORMATTED'; // $foreignKeys[$key];
+
+          $formattedFields = array_reduce(array_keys($foreignKeys), function ($carry, $key) {
+              $carry[$key] = $key.'_FORMATTED';
               return $carry;
-          }, $foreignKeys);
+          }, $formattedFields);
         }
+
+        //
+        // also include "modifier" fields as _FORMATTED ones.
+        //
+        $formattedFields = array_merge($formattedFields, array_reduce(array_keys($this->modifiers), function ($carry, $key) {
+            $carry[$key] = $key.'_FORMATTED';
+            return $carry;
+        }, []));
+
+        //
+        // Fields that are available as raw data AND as a _FORMATTED one
+        //
         $this->getResponse()->setData('formattedFields', $formattedFields);
 
+        //
+        // Enable custom selection of displayed fields (columns)
+        //
         $this->getResponse()->setData('enable_displayfieldselection', ($this->config->exists('displayFieldSelection') ? $this->config->get('displayFieldSelection') : false));
 
         if($this->config->exists('availableFields')) {
@@ -417,9 +432,17 @@ class crud extends \codename\core\bootstrapInstance {
           $visibleFields[] = $this->getMyModel()->getPrimarykey();
         }
 
+        //
+        // Provide some labels for frontend display
+        //
         $fieldLabels = [];
         foreach(array_merge($availableFields, $formattedFields) as $field) {
           $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+        }
+        foreach($availableFields as $field) {
+          if($fieldLabels[$field] ?? false) {
+            $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+          }
         }
         $this->getResponse()->setData('labels', $fieldLabels);
 
