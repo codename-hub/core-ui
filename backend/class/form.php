@@ -477,6 +477,16 @@ class form implements \JsonSerializable {
     }
 
     /**
+     * sets the form action value in the config
+     * @param  string $value [description]
+     * @return form          [description]
+     */
+    public function setAction(string $value) : form {
+      $this->config['form_action'] = $value;
+      return $this;
+    }
+
+    /**
      * Adds a $fieldset to the instance
      * @param fieldset $fieldset
      * @return form
