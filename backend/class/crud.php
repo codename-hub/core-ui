@@ -1811,7 +1811,9 @@ class crud extends \codename\core\bootstrapInstance {
             $vals = array();
             foreach($row[$field] as $val) {
               $element = $this->getModel($obj['model'])->loadByUnique($obj['key'], $val);
-              @eval('$vals[] = "' . $obj['display'] . '";');
+              if(count($element) > 0) {
+                @eval('$vals[] = "' . $obj['display'] . '";');
+              }
             }
             $ret = implode(', ', $vals);
           } else {
