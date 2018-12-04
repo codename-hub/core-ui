@@ -124,10 +124,11 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Creates the instance and sets the $model of this instance. Also creates the form instance
-     * @param  \codename\core\model   $model       [description]
-     * @param  array|null             $requestData [description]
+     * @param  \codename\core\model   $model
+     * @param  array|null             $requestData
+     * @param  string                 $crudConfig  [optional explicit crud config]
      */
-    public function __CONSTRUCT(\codename\core\model $model, array $requestData = null) {
+    public function __CONSTRUCT(\codename\core\model $model, ?array $requestData = null, string $crudConfig = '') {
         $this->eventCrudFormInit = new event('EVENT_CRUD_FORM_INIT');
         $this->eventCrudBeforeValidation = new event('EVENT_CRUD_BEFORE_VALIDATION');
         $this->eventCrudAfterValidation = new event('EVENT_CRUD_AFTER_VALIDATION');
@@ -138,7 +139,7 @@ class crud extends \codename\core\bootstrapInstance {
         if($requestData != null) {
           $this->setFormNormalizationData($requestData);
         }
-        $this->setConfig();
+        $this->setConfig($crudConfig);
         $this->setChildCruds();
         $this->updateChildCrudConfigs();
         $this->form = new \codename\core\ui\form(array(
