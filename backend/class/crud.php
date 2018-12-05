@@ -375,8 +375,9 @@ class crud extends \codename\core\bootstrapInstance {
           $foreignKeys = $this->getMyModel()->config->get('foreign');
 
           $formattedFields = array_reduce(array_keys($foreignKeys), function ($carry, $key) {
-              $carry[$key] = $key.'_FORMATTED';
-              return $carry;
+            // foreign keys use a formatted output field AND a data key
+            $carry[$key] = $key.'_FORMATTED';
+            return $carry;
           }, $formattedFields);
         }
 
@@ -384,8 +385,9 @@ class crud extends \codename\core\bootstrapInstance {
         // also include "modifier" fields as _FORMATTED ones.
         //
         $formattedFields = array_merge($formattedFields, array_reduce(array_keys($this->modifiers), function ($carry, $key) {
-            $carry[$key] = $key.'_FORMATTED';
-            return $carry;
+          // use modifier key as final field
+          $carry[$key] = $key;
+          return $carry;
         }, []));
 
         //
@@ -405,10 +407,16 @@ class crud extends \codename\core\bootstrapInstance {
           $availableFields = $this->getMyModel()->config->get('field');
         }
 
+        // add formatted fields to availableFields
+        $availableFields = array_merge($availableFields, array_keys($formattedFields));
+
         // remove all disabled fields
         if($this->config->exists('disabled')) {
           $availableFields = array_diff($availableFields, $this->config->get('disabled'));
         }
+
+        // merge and kill duplicates
+        $availableFields = array_values(array_unique($availableFields));
 
         $displayFields = array();
 
@@ -425,8 +433,12 @@ class crud extends \codename\core\bootstrapInstance {
           }
         }
 
-        if(sizeof($displayFields) > 0) {
+        if(count($displayFields) > 0) {
           $visibleFields = $displayFields;
+        } else {
+          // add all modifier fields by default
+          // if no field selection provided
+          $visibleFields = array_merge($visibleFields, array_keys($this->modifiers));
         }
 
         if(!in_array($this->getMyModel()->getPrimarykey(), $visibleFields)) {
@@ -521,7 +533,11 @@ class crud extends \codename\core\bootstrapInstance {
           }
         }
 
-        $visibleFields = array_unique(array_merge($this->columnOrder, $visibleFields, array_keys($this->modifiers)));
+        if(count($this->columnOrder) > 0) {
+          $visibleFields = array_values(array_unique(array_merge(array_intersect($this->columnOrder, $visibleFields), $visibleFields)));
+        } else {
+          $visibleFields = array_values(array_unique($visibleFields));
+        }
 
         // Send data to the response
         $this->getResponse()->setData('rows', $this->makeFields($this->getMyModel()->search()->getResult(), $visibleFields));
