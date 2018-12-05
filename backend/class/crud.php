@@ -1832,7 +1832,11 @@ class crud extends \codename\core\bootstrapInstance {
             }
             if($evalResult === false) {
               $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
-              @eval('$ret = "' . $obj['display'] . '";');
+              if(count($element) > 0) {
+                @eval('$ret = "' . $obj['display'] . '";');
+              } else {
+                $ret = null;
+              }
             }
           }
           return array($row[$field], $ret);
