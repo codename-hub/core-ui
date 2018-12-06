@@ -533,10 +533,16 @@ class crud extends \codename\core\bootstrapInstance {
           }
         }
 
+        //
+        // NOTE/EXPERIMENTAL:
+        // if $visibleFields contains one or more elements that are arrays
+        // (e.g. object-path-style fields)
+        // this may not work properly in some cases?
+        //
         if(count($this->columnOrder) > 0) {
-          $visibleFields = array_values(array_unique(array_merge(array_intersect($this->columnOrder, $visibleFields), $visibleFields)));
+          $visibleFields = array_values(array_unique(array_merge(array_intersect($this->columnOrder, $visibleFields), $visibleFields), SORT_REGULAR));
         } else {
-          $visibleFields = array_values(array_unique($visibleFields));
+          $visibleFields = array_values(array_unique($visibleFields, SORT_REGULAR));
         }
 
         // Send data to the response
