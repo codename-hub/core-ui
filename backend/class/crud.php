@@ -1735,6 +1735,13 @@ class crud extends \codename\core\bootstrapInstance {
 
               foreach($searchForFields as $field) {
                   $o = $this->getFieldoutput($row, $field);
+                  //
+                  // field is an array: object path
+                  //
+                  if(is_array($field)) {
+                    $object = \codename\core\io\helper\deepaccess::set($object, $field, $o[0]);
+                    continue;
+                  }
                   // @NOTE: we're differentiating between a pre-formatted and a raw value here:
                   // if array index 1 is set, this is the formatted value.
                   if(array_key_exists(1, $o)) {
@@ -1779,10 +1786,14 @@ class crud extends \codename\core\bootstrapInstance {
      * <br />#1: The $field has been given a modifier using ->addModifier($field, $callable)
      * <br />#2: The $field has been configured to display data from another model (a.k.a foreign key / reference)
      * @param array $row
-     * @param string $field
+     * @param string|array $field
      * @return string
      */
-    protected function getFieldoutput(array $row, string $field) {
+    protected function getFieldoutput(array $row, $field) {
+
+        if(is_array($field)) {
+          return [\codename\core\io\helper\deepaccess::get($row, $field)];
+        }
 
         if(array_key_exists($field, $this->modifiers)) {
             if(array_key_exists($field, $row)) {
