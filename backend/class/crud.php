@@ -1537,6 +1537,8 @@ class crud extends \codename\core\bootstrapInstance {
             // TODO: allow custom crud config somehow?
             // $crud->setConfig('some-crud-config');
 
+            $fielddata['field_rowkey'] = $crud->getMyModel()->getPrimarykey();
+
             $fielddata['visibleFields'] = $crud->getConfig()->get('visibleFields');
 
             $fielddata['labels'] = [];
