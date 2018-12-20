@@ -253,7 +253,7 @@ class crud extends \codename\core\context implements \codename\core\context\cont
      */
     public function getModelapp() : string {
         if(is_null($this->modelApp)) {
-            return $this->getRequest()->getData('app');
+            return \codename\core\app::getApp();
         }
         return $this->modelApp;
     }
