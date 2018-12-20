@@ -1,5 +1,6 @@
 <?php
 namespace codename\core\ui;
+use codename\core\app;
 use \codename\core\event;
 use \codename\core\ui;
 
@@ -262,7 +263,51 @@ class crud extends \codename\core\bootstrapInstance {
       if($identifier == '') {
         $identifier = $this->getMyModel()->schema . '_' . $this->getMyModel()->table;
       }
-      return new \codename\core\config\json('config/crud/' . $identifier . '.json', true);
+
+      // prepare config
+      $config = null;
+
+      //
+      // Try to retrieve cached config
+      //
+      if($this->useConfigCache) {
+        $cacheGroup = app::getVendor().'_'.app::getApp().'_CRUD_CONFIG';
+        $cacheKey = $identifier;
+        if($cachedConfig = \codename\core\app::getCache()->get($cacheGroup, $cacheKey)) {
+          $config = new \codename\core\config($cachedConfig);
+        }
+      }
+
+      //
+      // If config not already set by cache, get it
+      //
+      if(!$config) {
+        $config = new \codename\core\config\json('config/crud/' . $identifier . '.json', true);
+
+        // Cache, if enabled.
+        if($this->useConfigCache) {
+          \codename\core\app::getCache()->set($cacheGroup, $cacheKey, $config->get());
+        }
+      }
+
+      return $config;
+    }
+
+    /**
+     * Cache configurations
+     * @var bool
+     */
+    protected $useConfigCache = true;
+
+
+    /**
+     * Enable/disable caching of the crud config
+     * @param  bool $state [description]
+     * @return crud        [description]
+     */
+    public function setConfigCache(bool $state) : crud {
+      $this->useConfigCache = $state;
+      return $this;
     }
 
     /**
@@ -1119,6 +1164,42 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [loadFormConfig description]
+     * @param  string $identifier [description]
+     * @return \codename\core\config
+     */
+    protected function loadFormConfig(string $identifier) : \codename\core\config {
+
+      // prepare config
+      $config = null;
+
+      //
+      // Try to retrieve cached config
+      //
+      if($this->useConfigCache) {
+        $cacheGroup = app::getVendor().'_'.app::getApp().'_CRUD_FORM';
+        $cacheKey = $identifier;
+        if($cachedConfig = \codename\core\app::getCache()->get($cacheGroup, $cacheKey)) {
+          $config = new \codename\core\config($cachedConfig);
+        }
+      }
+
+      //
+      // If config not already set by cache, get it
+      //
+      if(!$config) {
+        $config = new \codename\core\config\json('config/crud/form_' . $identifier . '.json');
+
+        // Cache, if enabled.
+        if($this->useConfigCache) {
+          \codename\core\app::getCache()->set($cacheGroup, $cacheKey, $config->get());
+        }
+      }
+
+      return $config;
+    }
+
+    /**
      * Loads data from a form configuration file
      * @param string $identifier
      * @return crud
@@ -1127,7 +1208,7 @@ class crud extends \codename\core\bootstrapInstance {
     public function useForm(string $identifier) : crud {
         $this->getForm()->setId($identifier);
 
-        $formConfig = new \codename\core\config\json('config/crud/form_' . $identifier . '.json');
+        $formConfig = $this->loadFormConfig($identifier);
 
         //
         // update child crud configs
