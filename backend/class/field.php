@@ -109,7 +109,7 @@ class field implements \JsonSerializable {
         }
 
         if($outputConfig) {
-          
+
           // bare config
           return $data;
 
@@ -222,7 +222,7 @@ class field implements \JsonSerializable {
         }
 
         if(!array_key_exists('field_placeholder', $field)) {
-            $field['field_placeholder'] = '';
+            $field['field_placeholder'] = $field['field_title'] ?? '';
         }
 
         if(!array_key_exists('field_datatype', $field)) {
