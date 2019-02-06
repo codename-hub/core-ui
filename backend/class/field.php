@@ -111,7 +111,9 @@ class field implements \JsonSerializable {
 
         // normalize field value at output time
         // which may be the serialization as JSON
-        $data['field_value'] = self::getNormalizedFieldValue($data['field_name'], $data['field_value'], $data['field_datatype']);
+        // $data['field_value'] = self::getNormalizedFieldValue($data['field_name'], $data['field_value'], $data['field_datatype']);
+
+        $data = self::normalizeFieldConfig($data);
 
         if($outputConfig) {
 
@@ -259,6 +261,29 @@ class field implements \JsonSerializable {
     }
 
     /**
+     * [normalizeFieldConfig description]
+     * @param  array  $fielddata [description]
+     * @return array
+     */
+    protected static function normalizeFieldConfig(array $fielddata) : array {
+      if($fielddata['field_type'] == 'form') {
+        if(($fielddata['form'] ?? false) && ($fielddata['form'] instanceof \codename\core\ui\form)) {
+          if(is_array($fielddata['field_value'])) {
+            foreach($fielddata['form']->getFields() as $fieldInstance) {
+              $fieldName = $fieldInstance->getProperty('field_name');
+              $fieldDatatype = $fieldInstance->getProperty('field_datatype');
+              $fieldValue = $fieldInstance->getProperty('field_value');
+              $fielddata['field_value'][$fieldName] = self::getNormalizedFieldValue($fieldName, $fieldValue, $fieldDatatype);
+            }
+          }
+        }
+      } else {
+        $fielddata['field_value'] = self::getNormalizedFieldValue($fielddata['field_name'], $fielddata['field_value'], $fielddata['field_datatype']);
+      }
+      return $fielddata;
+    }
+
+    /**
      * [getNormalizedFieldValue description]
      * @param  string $fieldName [description]
      * @param  [type] $value     [description]
@@ -302,7 +327,7 @@ class field implements \JsonSerializable {
         case 'number_natural':
           $value = $value === null ? null : intval($value);
       }
-      
+
       // DEBUG:
       // \codename\core\app::getResponse()->setData('meh debug_'.$fieldName, [
       //   'value' => $value,
