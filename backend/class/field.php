@@ -325,6 +325,10 @@ class field implements \JsonSerializable {
             }
           }
         case 'number_natural':
+          // string int prefilter: "null" and "" => null
+          if(is_string($value)) {
+            $value = empty($value) ? null : $value;
+          }
           $value = $value === null ? null : intval($value);
       }
 
