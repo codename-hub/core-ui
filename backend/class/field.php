@@ -1,6 +1,7 @@
 <?php
 namespace codename\core\ui;
 use \codename\core\app;
+use codename\core\exception;
 
 /**
  * Instances of this class are utilized by the \codename\core\ui\form class for displaying and validating input data
@@ -107,6 +108,10 @@ class field implements \JsonSerializable {
 
           }
         }
+
+        // normalize field value at output time
+        // which may be the serialization as JSON
+        $data['field_value'] = self::getNormalizedFieldValue($data['field_name'], $data['field_value'], $data['field_datatype']);
 
         if($outputConfig) {
 
@@ -225,8 +230,19 @@ class field implements \JsonSerializable {
             $field['field_placeholder'] = $field['field_title'] ?? '';
         }
 
+        if(!array_key_exists('field_value', $field)) {
+          $field['field_value'] = null;
+        }
+
         if(!array_key_exists('field_datatype', $field)) {
-            $field['field_datatype'] = ($field['field_type'] == 'submit' ? null : 'text');
+          $field['field_datatype'] = ($field['field_type'] == 'submit' ? null : 'text');
+        }
+
+        //
+        // if field_datatype is set (not null), perform field_value normalization
+        //
+        if($field['field_datatype']) {
+          $field['field_value'] = self::getNormalizedFieldValue($field['field_name'], $field['field_value'], $field['field_datatype']);
         }
 
         if(!array_key_exists('field_validator', $field)) {
@@ -236,14 +252,64 @@ class field implements \JsonSerializable {
         if(!array_key_exists('field_description', $field)) {
             $field['field_description'] = '';
         }
-
-        if(!array_key_exists('field_value', $field)) {
-            $field['field_value'] = null;
-        }
         if(!array_key_exists('field_title', $field)) {
             $field['field_title'] = '';
         }
         return $field;
+    }
+
+    /**
+     * [getNormalizedFieldValue description]
+     * @param  string $fieldName [description]
+     * @param  [type] $value     [description]
+     * @param  [type] $datatype  [description]
+     * @return [type]            [description]
+     */
+    public static function getNormalizedFieldValue(string $fieldName, $value, $datatype) {
+      switch($datatype) {
+        case 'boolean':
+          // pure boolean
+          if(is_bool($value)) {
+            // dont change. field_value has a valid datatype
+            break;
+          }
+          // int: 0 or 1
+          if(is_int($value)) {
+            if($value !== 1 && $value !== 0) {
+              throw new exception('EXCEPTION_FIELD_NORMALIZEFIELD_BOOLEAN_INVALID', exception::$ERRORLEVEL_ERROR, [
+                'field' => $fieldName,
+                'value' => $value
+              ]);
+            }
+            $value = $value === 1 ? true : false;
+            break;
+          }
+          // string boolean
+          if(is_string($value)) {
+            // fallback, empty string
+            if(strlen($value) === 0) {
+              $value = null;
+              break;
+            }
+            if($value === 'true') {
+              $value = true;
+              break;
+            } elseif ($value === 'false') {
+              $value = false;
+              break;
+            }
+          }
+        case 'number_natural':
+          $value = $value === null ? null : intval($value);
+      }
+      
+      // DEBUG:
+      // \codename\core\app::getResponse()->setData('meh debug_'.$fieldName, [
+      //   'value' => $value,
+      //   'datatype' => $datatype
+      // ]);
+      //
+      return $value;
     }
 
     /**
