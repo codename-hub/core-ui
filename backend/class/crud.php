@@ -786,7 +786,7 @@ class crud extends \codename\core\bootstrapInstance {
                     'field_valuefield' => 'value'
                 );
 
-                if($this->readOnly) {
+                if($this->readOnly || ($this->config->exists('readonly') && is_array($this->config->get('readonly')) && in_array($field, $this->config->get('readonly')))) {
                   $fielddata['field_readonly'] = true;
                 }
 
@@ -807,7 +807,12 @@ class crud extends \codename\core\bootstrapInstance {
                 continue;
             }
 
-            $this->getForm()->addField($this->makeField($field))->setType('compact');
+            $options = [];
+            if($this->config->exists('readonly') && is_array($this->config->get('readonly')) && in_array($field, $this->config->get('readonly'))) {
+              $options['field_readonly'] = true;
+            }
+
+            $this->getForm()->addField($this->makeField($field, $options))->setType('compact');
         }
 
         if($addSubmitButton) {
@@ -1474,11 +1479,11 @@ class crud extends \codename\core\bootstrapInstance {
 
         // Set primary key field hidden
         if($field == $this->getMyModel()->getPrimarykey()) {
-          if(($options['field_readonly'] ?? false) == true) {
-            $fielddata['field_type'] = 'infopanel';
-          } else {
+          // if(($options['field_readonly'] ?? false) == true) {
+          //   $fielddata['field_type'] = 'infopanel';
+          // } else {
             $fielddata['field_type'] = 'hidden';
-          }
+          // }
         }
 
         // Decode object datatypes
