@@ -57,6 +57,11 @@ class app extends \codename\core\app {
       if(!self::$requireJsAdded) {
         app::getResponse()->requireResource('js', '/assets/requirejs/require.js', 0);
         app::getResponse()->requireResource('js', '/assets/require.config.js', 1);
+        // requirecss must be issued earlier, if used
+        // app::getResponse()->requireResource('js', '/assets/require-css/css.js', 2);
+        // app::getResponse()->requireResource('script',
+        //   "require(['require-css']);", 1
+        // );
         /* app::getResponse()->requireResource('script',
           "requirejs.config({
               baseUrl: 'library',
