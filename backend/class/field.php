@@ -358,7 +358,10 @@ class field implements \JsonSerializable {
      * @deprecated
      */
     public function setProperty(string $property, $value) {
-        return $this->config->set($property, $value);
+        $cfg = $this->config->get();
+        $cfg[$property] = $value;
+        $this->config = new \codename\core\config($cfg);
+        return $this;
     }
 
     /**
