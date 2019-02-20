@@ -1346,7 +1346,15 @@ class crud extends \codename\core\bootstrapInstance {
         // perform the query using the given configuration
         // and remove it afterwards.
         //
-        $count = (int) $this->getMyModel()->addCalculatedField('__count', 'count(*)')->search()->getResult()[0]['__count'];
+        $start = microtime(true);
+
+        // $count = (int) $this->getMyModel()->addCalculatedField('__count', 'count('.$this->getMyModel()->getPrimarykey().')')->search()->getResult()[0]['__count'];
+        $count = (int) $this->getMyModel()->getCount();
+
+
+        $end = microtime(true);
+        $this->getResponse()->setData('_count_time', ($end-$start));
+
         $this->getMyModel()->removeCalculatedField('__count');
 
         // default value, if none of the below works:
