@@ -318,6 +318,8 @@ class crud extends \codename\core\bootstrapInstance {
     public function setConfig(string $identifier = '') : \codename\core\ui\crud {
       $this->config = $this->loadConfig($identifier);
 
+      $this->customizedFields = $this->config->get('customized_fields') ?? [];
+
       if($identifier !== '') {
         $this->updateChildCrudConfigs();
       }
@@ -1422,6 +1424,14 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * list of fields that are configured
+     * to just provide a basic configuration
+     * and skip unnecessary stuff (e.g. FKEY value fetching)
+     * @var string[]
+     */
+    protected $customizedFields = [];
+
+    /**
      * Creates the field instance for the given field and adds information to it.
      * @param  string $field   [description]
      * @param  array  $options [description]
@@ -1510,32 +1520,37 @@ class crud extends \codename\core\bootstrapInstance {
 
             $elements = $this->getModel($foreign['model'], $foreign['app'] ?? app::getApp());
 
-            if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
-                foreach ($foreign['order'] as $order) {
-                    if(!app::getValidator('structure_config_modelorder')->isValid($order)) {
-                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $order);
-                    }
-                    $elements->addOrder($order['field'], $order['direction']);
-                }
-            }
-
-            if(array_key_exists('filter', $foreign) && is_array($foreign['filter'])) {
-                foreach ($foreign['filter'] as $filter) {
-                    if(!app::getValidator('structure_config_modelfilter')->isValid($filter)) {
-                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
-                    }
-                    if($filter['field'] == $elements->getIdentifier() . '_flag') {
-                      if($filter['operator'] == '=') {
-                        $elements->withFlag($elements->config->get('flag>'.$filter['value']));
-                      } else if($filter['operator'] == '!=') {
-                        $elements->withoutFlag($elements->config->get('flag>'.$filter['value']));
-                      } else {
-                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_FILTER_FLAG_INVALIDOPERATOR, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
+            //
+            // skip basic model setup, if we're using the remote api interface anyways.
+            //
+            if(!($elements instanceof \codename\rest\model\exposesRemoteApiInterface) || !isset($foreign['remote_source'])) {
+              if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
+                  foreach ($foreign['order'] as $order) {
+                      if(!app::getValidator('structure_config_modelorder')->isValid($order)) {
+                          throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $order);
                       }
-                    } else {
-                      $elements->addFilter($filter['field'], $filter['value'], $filter['operator']);
-                    }
-                }
+                      $elements->addOrder($order['field'], $order['direction']);
+                  }
+              }
+
+              if(array_key_exists('filter', $foreign) && is_array($foreign['filter'])) {
+                  foreach ($foreign['filter'] as $filter) {
+                      if(!app::getValidator('structure_config_modelfilter')->isValid($filter)) {
+                          throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
+                      }
+                      if($filter['field'] == $elements->getIdentifier() . '_flag') {
+                        if($filter['operator'] == '=') {
+                          $elements->withFlag($elements->config->get('flag>'.$filter['value']));
+                        } else if($filter['operator'] == '!=') {
+                          $elements->withoutFlag($elements->config->get('flag>'.$filter['value']));
+                        } else {
+                          throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_FILTER_FLAG_INVALIDOPERATOR, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
+                        }
+                      } else {
+                        $elements->addFilter($filter['field'], $filter['value'], $filter['operator']);
+                      }
+                  }
+              }
             }
 
             $fielddata['field_type'] = 'select';
@@ -1580,7 +1595,9 @@ class crud extends \codename\core\bootstrapInstance {
               $fielddata['field_displayfield'] = $foreign['key']; // $defaultDisplayField[$foreign['model']] ?? $foreign['key'];
 
             } else {
-              $fielddata['field_elements'] = $elements->search()->getResult();
+              if(!in_array($field, $this->customizedFields)) {
+                $fielddata['field_elements'] = $elements->search()->getResult();
+              }
             }
 
             if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
