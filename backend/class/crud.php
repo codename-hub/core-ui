@@ -1357,7 +1357,7 @@ class crud extends \codename\core\bootstrapInstance {
         $end = microtime(true);
         $this->getResponse()->setData('_count_time', ($end-$start));
 
-        $this->getMyModel()->removeCalculatedField('__count');
+        // $this->getMyModel()->removeCalculatedField('__count');
 
         // default value, if none of the below works:
         $page = 1;
