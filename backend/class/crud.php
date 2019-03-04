@@ -1583,6 +1583,15 @@ class crud extends \codename\core\bootstrapInstance {
               }
 
               $fielddata['field_remote_source_filter_key'] = $filterKeys;
+
+              //
+              // Explicit Filter Key
+              // for retrieving an already set, unique and strictly defined value
+              //
+              if($remoteSource['explicit_filter_key'] ?? false) {
+                $fielddata['field_remote_source_explicit_filter_key'] = $remoteSource['explicit_filter_key'];
+              }
+              
               /*
               if(array_key_exists($foreign['model'], $remoteApiFilterKeys)) {
                 $field['field_remote_source_filter_key'] = $remoteSource['filter_key'];
