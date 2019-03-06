@@ -194,6 +194,36 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     }
 
     /**
+     * [action_import description]
+     * @return [type] [description]
+     */
+    public function action_import() {
+      $this->getResponse()->setData('context', 'crud');
+      if($this->getCrudinstance()->getConfig()->exists('import>_security>group')) {
+        $group = $this->getCrudinstance()->getConfig()->get('import>_security>group');
+        if(\codename\core\app::getAuth()->memberOf($group)) {
+          // get import file
+          $request = $this->getRequest();
+          if($request instanceof \codename\core\request\filesInterface) {
+            $importFileUpload = $request->getFiles()['crud_import_file'] ?? null;
+            if($importFileUpload && $importFileUpload['tmp_name']) {
+              $json = json_decode(file_get_contents($importFileUpload['tmp_name']), true);
+              $this->getCrudinstance()->import($json);
+            } else {
+              throw new exception('CRUD_IMPORT_INVALID_IMPORT_FILE_UPLOAD', exception::$ERRORLEVEL_ERROR);
+            }
+          } else {
+            throw new exception('CRUD_IMPORT_INVALID_REQUEST', exception::$ERRORLEVEL_ERROR);
+          }
+        } else {
+          throw new exception('CRUD_IMPORT_NOT_ALLOWED_BY_AUTH', exception::$ERRORLEVEL_ERROR);
+        }
+      } else {
+        throw new exception('CRUD_IMPORT_NOT_ALLOWED_BY_CONFIG', exception::$ERRORLEVEL_ERROR);
+      }
+    }
+
+    /**
      * Enables export of the current crud_list
      */
     public function action_export() {

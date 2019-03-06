@@ -533,6 +533,15 @@ class crud extends \codename\core\bootstrapInstance {
           $this->getResponse()->setData('enable_export', false);
         }
 
+        if($this->getConfig()->exists('import>_security>group')) {
+          if($enableImport = app::getAuth()->memberOf($this->getConfig()->get('import>_security>group'))) {
+            // $this->getResponse()->setData('export_types', $this->getConfig()->get('export>allowedTypes'));
+          }
+          $this->getResponse()->setData('enable_import', $enableImport);
+        } else {
+          $this->getResponse()->setData('enable_import', false);
+        }
+
         $fieldActions = $this->config->get("action>field") ?? array();
         $filters = $this->config->get('visibleFilters', array());
 
@@ -680,6 +689,35 @@ class crud extends \codename\core\bootstrapInstance {
      * @var bool
      */
     protected $rawMode = false;
+
+    /**
+     * imports a previously exported dataset
+     *
+     * @param  array   $data        [description]
+     * @param  bool $ignorePkeys    [description]
+     * @return void
+     */
+    public function import(array $data, bool $ignorePkeys = true) {
+      foreach($data as $dataset) {
+        $this->getMyModel()->reset();
+        if(count($errors = $this->getMyModel()->validate($dataset)->getErrors()) > 0) {
+          // erroneous dataset found
+          throw new exception('CRUD_IMPORT_INVALID_DATASET', exception::$ERRORLEVEL_ERROR, $errors);
+        }
+      }
+
+      foreach($data as &$dataset) {
+        if(($dataset[$this->getMyModel()->getPrimarykey()] ?? false) && $ignorePkeys) {
+          unset($dataset[$this->getMyModel()->getPrimarykey()]);
+        }
+        // TODO: recurse?
+        $this->getMyModel()->entryMake($dataset)->entrySave();
+      }
+
+      $this->getResponse()->setData('import_data', $data);
+
+      return;
+    }
 
     /**
      * Adds a top action
