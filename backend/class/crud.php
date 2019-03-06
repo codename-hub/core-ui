@@ -524,11 +524,14 @@ class crud extends \codename\core\bootstrapInstance {
             $this->getMyModel()->addOrder($order['field'], $order['direction']);
         }
 
-        // if($this->getConfig()->exists('export>_security>group')) {
-        //   $this->getResponse()->setData('enable_export', app::getAuth()->memberOf($this->getConfig()->get('export>_security>group')));
-        // } else {
-        //   $this->getResponse()->setData('enable_export', false);
-        // }
+        if($this->getConfig()->exists('export>_security>group')) {
+          if($enableExport = app::getAuth()->memberOf($this->getConfig()->get('export>_security>group'))) {
+            $this->getResponse()->setData('export_types', $this->getConfig()->get('export>allowedTypes'));
+          }
+          $this->getResponse()->setData('enable_export', $enableExport);
+        } else {
+          $this->getResponse()->setData('enable_export', false);
+        }
 
         $fieldActions = $this->config->get("action>field") ?? array();
         $filters = $this->config->get('visibleFilters', array());
@@ -593,7 +596,12 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         // Send data to the response
-        $this->getResponse()->setData('rows', $this->makeFields($this->getMyModel()->search()->getResult(), $visibleFields));
+        if($this->rawMode) {
+          $this->getResponse()->setData('rows', $this->getMyModel()->search()->getResult());
+        } else {
+          $this->getResponse()->setData('rows', $this->makeFields($this->getMyModel()->search()->getResult(), $visibleFields));
+        }
+
         $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
         $this->getResponse()->setData('bulkActions', $this->prepareActionsOutput($this->config->get("action>bulk") ?? []));
         $this->getResponse()->setData('elementActions', $this->prepareActionsOutput($this->config->get("action>element") ?? []));
@@ -654,14 +662,24 @@ class crud extends \codename\core\bootstrapInstance {
     protected $allowPagination = true;
 
     /**
-     *
+     * [export description]
+     * @param  bool $raw [enables raw export]
+     * @return void
      */
-    public function export() {
+    public function export(bool $raw = false) {
       // disable limit and offset temporarily
       $this->allowPagination = false;
+      $this->rawMode = $raw;
       $this->listview();
+      $this->rawMode = false;
       $this->allowPagination = true;
     }
+
+    /**
+     * defines raw, unformatted mode
+     * @var bool
+     */
+    protected $rawMode = false;
 
     /**
      * Adds a top action
@@ -1591,7 +1609,7 @@ class crud extends \codename\core\bootstrapInstance {
               if($remoteSource['explicit_filter_key'] ?? false) {
                 $fielddata['field_remote_source_explicit_filter_key'] = $remoteSource['explicit_filter_key'];
               }
-              
+
               /*
               if(array_key_exists($foreign['model'], $remoteApiFilterKeys)) {
                 $field['field_remote_source_filter_key'] = $remoteSource['filter_key'];

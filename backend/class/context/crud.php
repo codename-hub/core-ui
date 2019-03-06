@@ -2,6 +2,7 @@
 namespace codename\core\ui\context;
 
 use codename\core\app;
+use codename\core\exception;
 
 /**
  * CRUD Context base class
@@ -201,35 +202,79 @@ class crud extends \codename\core\context implements \codename\core\context\cont
       if($this->getCrudinstance()->getConfig()->exists('export>_security>group')) {
         $group = $this->getCrudinstance()->getConfig()->get('export>_security>group');
         if(\codename\core\app::getAuth()->memberOf($group)) {
-            $this->getCrudinstance()->export();
+
+            // handle raw mode
+            $rawMode = false;
+            if($this->getRequest()->getData('export_mode') === 'raw') {
+              if(!$this->getCrudinstance()->getConfig()->get('export>allowRaw')) {
+                throw new exception('EXPORT_MODE_RAW_NOT_ALLOWED', exception::$ERRORLEVEL_ERROR);
+              }
+
+              // perform raw modifications
+              $rawMode = true;
+            }
+
+            $this->getCrudinstance()->export($rawMode);
 
             // should be customizable: (e.g. excel, standard, ...) exports.
-            $export = new \codename\core\export\csv\excel();
+            $exportType = $this->getRequest()->getData('export_type');
 
-            foreach($this->getResponse()->getData('visibleFields') as $field) {
-              $export->addField(new \codename\core\value\text($field));
+            // check export types
+            if(!in_array($exportType, $this->getCrudinstance()->getConfig()->get('export>allowedTypes'))) {
+              throw new exception('EXPORT_TYPE_NOT_ALLOWED', exception::$ERRORLEVEL_ERROR, $exportType);
             }
 
-            foreach($this->getResponse()->getData('rows') as $row) {
-              $export->addRow(new \codename\core\datacontainer($row));
+            $exportClass = \codename\core\app::getInheritedClass('export_'.$exportType);
+            $export = new $exportClass();
+
+            if($export instanceof \codename\core\export\exportInterface) {
+
+              if(!$rawMode) {
+                foreach($this->getResponse()->getData('visibleFields') as $field) {
+                  $export->addField(new \codename\core\value\text($field));
+                }
+              } else {
+                if($this->getResponse()->getData('rows')[0] ?? false) {
+                  foreach($this->getResponse()->getData('rows')[0] as $key => $irrelevantValue) {
+                    $export->addField(new \codename\core\value\text($key));
+                  }
+                } else {
+                  // error?
+                }
+              }
+
+              foreach($this->getResponse()->getData('rows') as $row) {
+                $export->addRow(new \codename\core\datacontainer($row));
+              }
+
+              // stupid.
+              switch($exportType) {
+                case 'json':
+                  $fileExtension = 'json';
+                  break;
+                case 'csv_excel':
+                  $fileExtension = 'csv';
+                  break;
+              }
+
+              $filename = 'Export_' . $this->getCrudinstance()->getMyModel()->getIdentifier() . '_' . time() . '.' . $fileExtension;
+              $exportedFile = '/tmp/' . $filename;
+
+              $export->setFilename($exportedFile)->export();
+
+              \codename\core\helper\file::downloadToClient($exportedFile, $filename);
+
+              //
+              // TODO: delete tmp file - this requires downloadToClient NOT to stop things executing.
+              //
+            } else {
+              throw new exception('EXPORT_CLASS_INVALID', exception::$ERRORLEVEL_FATAL, $exportClass);
             }
-
-            $filename = 'Export_' . $this->getCrudinstance()->getMyModel()->table . '_' . time() . '.csv';
-            $csvFile = '/tmp/' . $filename;
-
-            $export->setFilename($csvFile)->export();
-
-            $bucket = \codename\core\app::getBucket('backoffice');
-            $file = 'export/' . $filename;
-            $bucket->filePush($csvFile, '/'.$file);
-
-            $bucket->downloadToClient(
-              new \codename\core\value\text\filerelative($file),
-              new \codename\core\value\text\filename($filename)
-            );
-
-            $bucket->fileDelete($file);
+        } else {
+          throw new exception('EXPORT_DISALLOWED_BY_AUTH', exception::$ERRORLEVEL_ERROR);
         }
+      } else {
+        throw new exception('EXPORT_DISALLOWED_BY_CONFIG', exception::$ERRORLEVEL_ERROR);
       }
       return;
     }
