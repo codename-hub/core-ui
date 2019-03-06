@@ -244,6 +244,14 @@ class crud extends \codename\core\context implements \codename\core\context\cont
               $rawMode = true;
             }
 
+            // selected export ids
+            if($selectedIds = $this->getRequest()->getData('export_selected_id')) {
+              $this->getCrudinstance()->getMyModel()->addDefaultFilter(
+                $this->getCrudinstance()->getMyModel()->getPrimaryKey(),
+                $selectedIds
+              );
+            }
+
             $this->getCrudinstance()->export($rawMode);
 
             // should be customizable: (e.g. excel, standard, ...) exports.
