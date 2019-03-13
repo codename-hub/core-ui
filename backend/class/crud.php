@@ -644,6 +644,20 @@ class crud extends \codename\core\bootstrapInstance {
           $form = $this->makeForm(null, false);
           $this->getResponse()->setData('formconfig', $form->output(true));
         }
+
+        //
+        // Alternative pagination method: seek
+        // provide first and last id fetched
+        //
+        if($this->getConfig()->get('seek') === true) {
+          $rows = $this->getResponse()->getData('rows');
+          $first = reset($rows);
+          $last = end($rows);
+          $this->getResponse()->addData([
+            'crud_pagination_first_id' => $first[$this->getMyModel()->getPrimarykey()],
+            'crud_pagination_last_id' => $last[$this->getMyModel()->getPrimarykey()]
+          ]);
+        }
         return;
     }
 
@@ -1419,15 +1433,11 @@ class crud extends \codename\core\bootstrapInstance {
         // and remove it afterwards.
         //
         $start = microtime(true);
-
-        // $count = (int) $this->getMyModel()->addCalculatedField('__count', 'count('.$this->getMyModel()->getPrimarykey().')')->search()->getResult()[0]['__count'];
         $count = (int) $this->getMyModel()->getCount();
-
-
         $end = microtime(true);
-        $this->getResponse()->setData('_count_time', ($end-$start));
 
-        // $this->getMyModel()->removeCalculatedField('__count');
+        // DEBUG!
+        $this->getResponse()->setData('_count_time', ($end-$start));
 
         // default value, if none of the below works:
         $page = 1;
@@ -1452,15 +1462,56 @@ class crud extends \codename\core\bootstrapInstance {
           $page = $pages;
         }
 
-        if($pages > 1) {
-          $this->getMyModel()->setLimit($limit)->setOffset(($page-1) * $limit);
+        if($this->getConfig()->get('seek') === true) {
+          //
+          // Alternative pagination method: Seeking!
+          //
+          $firstId = $this->getRequest()->getData('crud_pagination_first_id');
+          $lastId = $this->getRequest()->getData('crud_pagination_last_id');
+          $seekMode = $this->getRequest()->getData('crud_pagination_seek') ?? 0;
+
+          $ordering = 'ASC'; // is this really our default?
+          if($this->config->get("order")) {
+            foreach ($this->config->get("order") as $order) {
+              if($order['field'] === $this->getMyModel()->getPrimarykey()) {
+                $ordering = $order['direction'];
+              }
+            }
+          }
+
+          // stable position
+          if($firstId && $seekMode == 0) {
+            $operator = $ordering === 'ASC' ? '>=' : '<=';
+            // $this->getResponse()->setData('seek_debug', "{$this->getMyModel()->getPrimarykey()} $operator $firstId");
+            $this->getMyModel()->addFilter($this->getMyModel()->getPrimarykey(), $firstId, $operator);
+          }
+
+          // we're moving backwards
+          if($firstId && $seekMode < 0) {
+            $operator = $ordering === 'ASC' ? '<' : '>';
+            // $this->getResponse()->setData('seek_debug', "{$this->getMyModel()->getPrimarykey()} $operator $firstId");
+            $this->getMyModel()->addFilter($this->getMyModel()->getPrimarykey(), $firstId, $operator);
+          }
+
+          // we're moving forward
+          if($lastId && $seekMode > 0) {
+            $operator = $ordering === 'ASC' ? '>' : '<';
+            // $this->getResponse()->setData('seek_debug', "{$this->getMyModel()->getPrimarykey()} $operator $lastId");
+            $this->getMyModel()->addFilter($this->getMyModel()->getPrimarykey(), $lastId, $operator);
+          }
+
+          $this->getMyModel()->setLimit($limit);
+
+        } else {
+          if($pages > 1) {
+            $this->getMyModel()->setLimit($limit)->setOffset(($page-1) * $limit);
+          }
         }
-
-
 
         // Response
         $this->getResponse()->addData(
             array(
+                'crud_pagination_seek_enabled'  => $this->getConfig()->get('seek') === true,
                 'crud_pagination_count' => $count,
                 'crud_pagination_page' => $page,
                 'crud_pagination_pages' => $pages,
