@@ -161,6 +161,20 @@ class crud extends \codename\core\bootstrapInstance {
     protected $childCruds = [];
 
     /**
+     * russian function
+     * limits field output to visibleFields & optionally: "internalFields" in crud config
+     * @return void
+     */
+    public function limitFieldOutput() {
+      $visibleFields = $this->getConfig()->get('visibleFields');
+      $internalFields = $this->getConfig()->get('internalFields') ?? [];
+      $this->model->hideAllFields()->addField(implode(',', array_merge($visibleFields, $internalFields)));
+      foreach($this->childCruds as $crud) {
+        $crud->limitFieldOutput();
+      }
+    }
+
+    /**
      * reads config from the 'children' key
      * and creates instances for those children (cruds)
      */
