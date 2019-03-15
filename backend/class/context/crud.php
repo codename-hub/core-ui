@@ -70,6 +70,10 @@ class crud extends \codename\core\context implements \codename\core\context\cont
           'view'    => $this->getRequest()->getData('context').'_'.$this->getRequest()->getData('view')
         ];
 
+        if($this->getRequest()->getData('action')) {
+          $dict['action'] = $this->getRequest()->getData('context').'_'.$this->getRequest()->getData('view').'___'.$this->getRequest()->getData('action');
+        }
+
         foreach($dict as &$d) {
           if($d !== null) {
             $d = app::getTranslate()->translate('CRUD.'.$d);
