@@ -1040,6 +1040,8 @@ class crud extends \codename\core\bootstrapInstance {
         // OLD: app::getHook()->fire(\codename\core\hook::EVENT_CRUD_CREATE_SUCCESS, $data);
         $this->eventCrudSuccess->invoke($this, $data);
 
+        $this->getResponse()->setData($this->getMyModel()->getPrimarykey(), $this->getMyModel()->lastInsertId());
+
         $this->getResponse()->setData('view', 'crud_success');
     }
 
