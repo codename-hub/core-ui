@@ -1068,7 +1068,11 @@ class crud extends \codename\core\bootstrapInstance {
         foreach($data as $entry) {
 
           // get full entry with modified delta
-          $currentEntry = $this->getMyModel()->load($entry[$this->getMyModel()->getPrimarykey()]);
+          if($entry[$this->getMyModel()->getPrimarykey()] ?? false) {
+            $currentEntry = $this->getMyModel()->load($entry[$this->getMyModel()->getPrimarykey()]);
+          } else {
+            $currentEntry = [];
+          }
           $currentEntry = array_replace_recursive($currentEntry, $entry);
 
           // TODO: validate using bulk form?
