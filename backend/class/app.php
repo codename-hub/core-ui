@@ -130,4 +130,19 @@ class app extends \codename\core\app {
     self::$urlGenerator = $generator;
   }
 
+  /**
+   * returns the current server/FE endpoint
+   * including Protocol and Port (on need)
+   *
+   * @return string [description]
+   */
+  public static function getCurrentServerEndpoint() : string {
+    // url base prefix preparation
+    $port = $_SERVER['X-Forwarded-Port'] ?? $_SERVER['SERVER_PORT'] ?? null;
+    $proto = (($_SERVER['HTTPS'] ?? null) === 'on') ? 'https' : 'http';
+    $portSuffix = (($proto === 'https' && $port != 443) || ($proto === 'http' && $port != 80)) ? (':'.$port) : '';
+    $urlBase = $proto.'://'.$_SERVER['SERVER_NAME'].$portSuffix;
+    return $urlBase;
+  }
+
 }
