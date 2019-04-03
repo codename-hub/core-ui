@@ -316,7 +316,13 @@ class field implements \JsonSerializable {
               $value = null;
               break;
             }
-            if($value === 'true') {
+            if($value === '1') {
+              $value = true;
+              break;
+            } else if($value === '0') {
+              $value = false;
+              break;
+            } else if($value === 'true') {
               $value = true;
               break;
             } elseif ($value === 'false') {
