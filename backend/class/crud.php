@@ -1758,6 +1758,8 @@ class crud extends \codename\core\bootstrapInstance {
             // provide a sub-form config !
             // $crud = new \codename\core\ui\crud($this->getModel($foreign['model'], $foreign['app'] ?? '', $foreign['vendor'] ?? ''));
             $crud = $this->childCruds[$field];
+            $crud->onCreateFormfield = $this->onCreateFormfield;
+            $crud->onFormfieldCreated = $this->onFormfieldCreated;
 
             if($this->readOnly) {
               $crud->readOnly = $this->readOnly;
