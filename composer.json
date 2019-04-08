@@ -1,7 +1,7 @@
 {
     "name": "codename/core-ui",
     "description": "This is going to be the core UI framework.",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
     "time": "2017-10-19",
@@ -13,7 +13,7 @@
     ],
     "require": {
       "codename/core" : "*",
-      "twig/twig" : "2.6.*",
+      "twig/twig" : "2.*",
       "twig/extensions" : "^1.5",
       "dompdf/dompdf" : "^0.8"
     },
