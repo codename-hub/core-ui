@@ -897,6 +897,9 @@ class crud extends \codename\core\bootstrapInstance {
             if($this->config->exists('readonly') && is_array($this->config->get('readonly')) && in_array($field, $this->config->get('readonly'))) {
               $options['field_readonly'] = true;
             }
+            if($this->config->exists('required') && is_array($this->config->get('required')) && in_array($field, $this->config->get('required'))) {
+              $options['field_required'] = true;
+            }
 
             $this->getForm()->addField($this->makeField($field, $options))->setType('compact');
         }
@@ -1581,7 +1584,7 @@ class crud extends \codename\core\bootstrapInstance {
                 'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field ),
                 'field_description' => app::getTranslate()->translate('DATAFIELD.' . $field . '_DESCRIPTION' ),
                 'field_type' => 'input',
-                'field_required' => false,
+                'field_required' => $options['field_required'] ?? false,
                 'field_placeholder' => app::getTranslate()->translate('DATAFIELD.' . $field ),
                 'field_multiple' => false,
                 'field_readonly' => $options['field_readonly'] ?? false
@@ -1613,9 +1616,10 @@ class crud extends \codename\core\bootstrapInstance {
             );
         }
 
-        if($this->config->exists("required>$field")) {
+        if($this->config->exists("required")) {
+          if (in_array($field, $this->config->get('required'))) {
             $fielddata['field_required'] = true;
-            $this->getMyModel()->requireField($field);
+          }
         }
 
         if(!is_null($this->data)) {
@@ -1635,7 +1639,9 @@ class crud extends \codename\core\bootstrapInstance {
         if(strpos($fielddata['field_type'], 'bject_') != false) {
             $fielddata['field_value'] = app::object2array(json_decode($fielddata['field_value']));
         }
-        $fielddata['field_required'] = ($this->getMyModel()->config->exists("required") && in_array($field, $this->getMymodel()->config->get("required")));
+        if ($this->getMyModel()->config->exists("required") && in_array($field, $this->getMymodel()->config->get("required"))) {
+          $fielddata['field_required'] = true;
+        }
 
         // Modify field to be a reference dropdown
         if(array_key_exists('foreign', $modelconfig) && array_key_exists($field, $modelconfig['foreign'])) {
