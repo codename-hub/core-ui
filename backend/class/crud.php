@@ -1545,6 +1545,8 @@ class crud extends \codename\core\bootstrapInstance {
                 return 'yesno';
             case 'text_date':
                 return 'date';
+            case 'text_date_birthdate':
+                return 'date';
             case 'text_timestamp':
                 return 'timestamp';
             default:
