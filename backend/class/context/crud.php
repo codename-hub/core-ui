@@ -406,7 +406,7 @@ class crud extends \codename\core\context implements \codename\core\context\cont
      */
     public function getCrudinstance() : \codename\core\ui\crud {
         if(is_null($this->crud)) {
-            throw new \codename\core\exception(self::EXCEPTION_GETCRUDINSTANCE_CRUDPROPERTYISNULL, \codename\core\exception::$ERRORLEVEL_WARNING, $model->getPrimarykey());
+            throw new \codename\core\exception(self::EXCEPTION_GETCRUDINSTANCE_CRUDPROPERTYISNULL, \codename\core\exception::$ERRORLEVEL_WARNING, ($this->model->getPrimarykey() ?? null));
         }
         return $this->crud;
     }
