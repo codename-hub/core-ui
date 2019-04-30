@@ -2059,11 +2059,11 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         if(array_key_exists($field, $this->modifiers)) {
-            if(array_key_exists($field, $row)) {
-              return array($row[$field], $this->modifiers[$field]($row));
-            } else {
-              return array($this->modifiers[$field]($row));
-            }
+            // if(array_key_exists($field, $row)) {
+            //   return array($row[$field], $this->modifiers[$field]($row));
+            // } else {
+            // }
+            return array($this->modifiers[$field]($row));
         }
 
         if(!isset($row[$field])) {
