@@ -388,6 +388,22 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [protected description]
+     * @var callable[]
+     */
+    protected $resultsetModifiers = [];
+
+    /**
+     * add a modifier for modifying the whole resultset
+     * @param  callable               $modifier [description]
+     * @return \codename\core\ui\crud           [description]
+     */
+    public function addResultsetModifier(callable $modifier) : \codename\core\ui\crud {
+      $this->resultsetModifiers[] = $modifier;
+      return $this;
+    }
+
+    /**
      * default column ordering
      * @var string[]
      */
@@ -618,11 +634,19 @@ class crud extends \codename\core\bootstrapInstance {
           $visibleFields = array_values(array_unique($visibleFields, SORT_REGULAR));
         }
 
+        $resultData = $this->resultData ?? $this->getMyModel()->search()->getResult();
+
+        if(count($this->resultsetModifiers) > 0) {
+          foreach($this->resultsetModifiers as $modifier) {
+            $resultData = $modifier($resultData);
+          }
+        }
+
         // Send data to the response
         if($this->rawMode) {
-          $this->getResponse()->setData('rows', $this->getMyModel()->search()->getResult());
+          $this->getResponse()->setData('rows', $resultData);
         } else {
-          $this->getResponse()->setData('rows', $this->makeFields($this->getMyModel()->search()->getResult(), $visibleFields));
+          $this->getResponse()->setData('rows', $this->makeFields($resultData, $visibleFields));
         }
 
         $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
@@ -659,6 +683,20 @@ class crud extends \codename\core\bootstrapInstance {
           ]);
         }
         return;
+    }
+
+    /**
+     * [protected description]
+     * @var array|null
+     */
+    protected $resultData = null;
+
+    /**
+     * [setResultData description]
+     * @param array $data [description]
+     */
+    public function setResultData(array $data) {
+      $this->resultData = $data;
     }
 
     /**
