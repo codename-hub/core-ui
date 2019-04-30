@@ -1979,7 +1979,12 @@ class crud extends \codename\core\bootstrapInstance {
 
         $myRows = array();
         foreach($rows as $row) {
-            $object = array();
+
+            if($this->provideRawData) {
+              $object = $row;
+            } else {
+              $object = array();
+            }
 
             if(count($this->modifiers) > 0 || !is_null($this->getMyModel()->config->get('foreign'))) {
 
@@ -2041,6 +2046,22 @@ class crud extends \codename\core\bootstrapInstance {
             $myRows[] = $object;
         }
         return $myRows;
+    }
+
+    /**
+     * whether the crud_list
+     * should provide raw result parts
+     * from the model query
+     * @var bool
+     */
+    protected $provideRawData = false;
+
+    /**
+     * [setProvideRawData description]
+     * @param bool $state [description]
+     */
+    public function setProvideRawData(bool $state) {
+      $this->provideRawData = $state;
     }
 
     /**
