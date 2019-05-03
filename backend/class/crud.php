@@ -575,9 +575,17 @@ class crud extends \codename\core\bootstrapInstance {
         $fieldActions = $this->config->get("action>field") ?? array();
         $filters = $this->config->get('visibleFilters', array());
 
-        foreach($filters as $tFName => &$fData) {
+        //
+        // build a form from filters
+        //
+        $filterForm = new \codename\core\ui\form([
+          'form_id' => 'filterform',
+          'form_method' => 'post',
+          'form_action' => ''
+        ]);
 
-          $specifier = explode('.', $tFName);
+        foreach($filters as $filterSpecifier => $filterConfig) {
+          $specifier = explode('.', $filterSpecifier);
           $useModel = $this->getMyModel();
 
           $fName = $specifier[count($specifier)-1];
@@ -587,40 +595,70 @@ class crud extends \codename\core\bootstrapInstance {
             $useModel = $this->getModel($specifier[0]);
           }
 
-          // handle date_range filter.
-          // @TODO: create a more general UI-specific function that returns datatype-specific fields/filter-UI elements
-          if(in_array($useModel->config->get('datatype>'.$fName), array('text_timestamp', 'text_date'))) {
-            $fData['filtertype'] = 'date_range';
-          }
+          $field = null;
 
           // field is a foreign key
-          if($fData['wildcard'] == false && $useModel->config->exists('foreign>'.$fName)) {
-            // modify filter, add filteroptions
-            $fConfig = $useModel->config->get('foreign>'.$fName);
-            $fModel = $this->getModel($fConfig['model']);
-            if(isset($fConfig['filter'])) {
-              foreach($fConfig['filter'] as $modelFilter) {
-                $fModel->addFilter($modelFilter['field'],$modelFilter['value'],$modelFilter['operator']);
-              }
-            }
-            $fResult = $fModel->search()->getResult();
-            $fData['filteroptions'] = array();
-            foreach($fResult as $element) {
-              $ret = '';
-              eval('$ret = "' . $fConfig['display'] . '";');
-              $fData['filteroptions'][$element[$fConfig['key']]] = $ret;
-            }
+          if(!($fData['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
+            $field = $this->makeFieldForeign($useModel, $fName); // options?
+          } else {
+            // wildcard
+            $field = new \codename\core\ui\field([
+              'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
+              'field_name'  => $filterSpecifier,
+              'field_type'  => 'input'
+            ]);
           }
 
-          // field is flag field
-          if($fName == $useModel->getIdentifier() . '_flag') {
-            $flagConfig = $useModel->config->get('flag');
-            $fData['filteroptions'] = array();
-            foreach($flagConfig as $flagName => $flagValue) {
-              $fData['filteroptions'][$flagValue] = app::getTranslate()->translate('DATAFIELD.' . $fName . '_' . $flagName);
-            }
-          }
+          $filterForm->addField($field);
         }
+
+
+        // foreach($filters as $tFName => &$fData) {
+        //
+        //   $specifier = explode('.', $tFName);
+        //   $useModel = $this->getMyModel();
+        //
+        //   $fName = $specifier[count($specifier)-1];
+        //
+        //   if(count($specifier) == 2) {
+        //     // we have a model/table reference
+        //     $useModel = $this->getModel($specifier[0]);
+        //   }
+        //
+        //   // handle date_range filter.
+        //   // @TODO: create a more general UI-specific function that returns datatype-specific fields/filter-UI elements
+        //   if(in_array($useModel->config->get('datatype>'.$fName), array('text_timestamp', 'text_date'))) {
+        //     $fData['filtertype'] = 'date_range';
+        //   }
+        //
+        //   // field is a foreign key
+        //   if($fData['wildcard'] == false && $useModel->config->exists('foreign>'.$fName)) {
+        //     // modify filter, add filteroptions
+        //     $fConfig = $useModel->config->get('foreign>'.$fName);
+        //     $fModel = $this->getModel($fConfig['model']);
+        //     if(isset($fConfig['filter'])) {
+        //       foreach($fConfig['filter'] as $modelFilter) {
+        //         $fModel->addFilter($modelFilter['field'],$modelFilter['value'],$modelFilter['operator']);
+        //       }
+        //     }
+        //     $fResult = $fModel->search()->getResult();
+        //     $fData['filteroptions'] = array();
+        //     foreach($fResult as $element) {
+        //       $ret = '';
+        //       eval('$ret = "' . $fConfig['display'] . '";');
+        //       $fData['filteroptions'][$element[$fConfig['key']]] = $ret;
+        //     }
+        //   }
+        //
+        //   // field is flag field
+        //   if($fName == $useModel->getIdentifier() . '_flag') {
+        //     $flagConfig = $useModel->config->get('flag');
+        //     $fData['filteroptions'] = array();
+        //     foreach($flagConfig as $flagName => $flagValue) {
+        //       $fData['filteroptions'][$flagValue] = app::getTranslate()->translate('DATAFIELD.' . $fName . '_' . $flagName);
+        //     }
+        //   }
+        // }
 
         //
         // NOTE/EXPERIMENTAL:
@@ -649,6 +687,8 @@ class crud extends \codename\core\bootstrapInstance {
           $this->getResponse()->setData('rows', $this->makeFields($resultData, $visibleFields));
         }
 
+        $this->getResponse()->setData('filterform', $filterForm->output(true));
+
         $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
         $this->getResponse()->setData('bulkActions', $this->prepareActionsOutput($this->config->get("action>bulk") ?? []));
         $this->getResponse()->setData('elementActions', $this->prepareActionsOutput($this->config->get("action>element") ?? []));
@@ -656,10 +696,10 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getResponse()->setData('visibleFields', $visibleFields);
         $this->getResponse()->setData('availableFields', $availableFields);
 
-        $this->getResponse()->setData('filters', $filters);
+        // $this->getResponse()->setData('filters', $filters);
         $this->getResponse()->setData('crud_filter_identifier', self::CRUD_FILTER_IDENTIFIER);
         $this->getResponse()->setData('filters_used', $this->getRequest()->getData(self::CRUD_FILTER_IDENTIFIER));
-        $this->getResponse()->setData('filters_unused', $filters);
+        // $this->getResponse()->setData('filters_unused', $filters);
         $this->getResponse()->setData('enable_search_bar', $this->config->exists("visibleFilters>_search"));
         $this->getResponse()->setData('modelinstance', $this->getMyModel());
 
@@ -1600,6 +1640,183 @@ class crud extends \codename\core\bootstrapInstance {
      * @var string[]
      */
     protected $customizedFields = [];
+
+
+    /**
+     * function for making fields, independent of the current crud model
+     * @param  \codename\core\model  $model   [description]
+     * @param  string $field   [description]
+     * @param  array  $options [description]
+     * @return field           [description]
+     */
+    protected function makeFieldForeign(\codename\core\model $model, string $field, array $options = []) : field {
+      // load model config for simplicity
+      $modelconfig = $model->config->get();
+
+      // Error if field not in model
+      if(!in_array($field, $model->getFields())) {
+          throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_FIELDNOTFOUNDINMODEL, \codename\core\exception::$ERRORLEVEL_ERROR, $field);
+      }
+
+      // Create basic formfield array
+      $fielddata = array(
+              'field_id' => $field,
+              'field_name' => $field,
+              'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field ),
+              'field_description' => app::getTranslate()->translate('DATAFIELD.' . $field . '_DESCRIPTION' ),
+              'field_type' => 'input',
+              'field_required' => $options['field_required'] ?? false,
+              'field_placeholder' => app::getTranslate()->translate('DATAFIELD.' . $field ),
+              'field_multiple' => false,
+              'field_readonly' => $options['field_readonly'] ?? false
+      );
+
+      // Get the displaytype of this field
+      if (array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype'])) {
+          $fielddata['field_type'] = $this->getDisplaytype($modelconfig['datatype'][$field]);
+          $fielddata['field_datatype'] = $modelconfig['datatype'][$field];
+      }
+
+      if($fielddata['field_type'] == 'yesno') {
+          $fielddata['field_type'] = 'select';
+          $fielddata['field_displayfield'] = '{$element[\'field_name\']}';
+          $fielddata['field_valuefield'] = 'field_value';
+
+          // NOTE: Datatype for this kind of pseudo-boolean field must be null or so
+          // because the boolean validator really needs a bool.
+          $fielddata['field_datatype'] = null;
+          $fielddata['field_elements'] = array(
+                  array(
+                      'field_value' => true,
+                      'field_name' => 'Ja'
+                  ),
+                  array(
+                      'field_value' => false,
+                      'field_name' => 'Nein'
+                  )
+          );
+      }
+
+      // Modify field to be a reference dropdown
+      if(array_key_exists('foreign', $modelconfig) && array_key_exists($field, $modelconfig['foreign'])) {
+          if(!app::getValidator('structure_config_modelreference')->isValid($modelconfig['foreign'][$field])) {
+              throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDREFERENCEOBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $modelconfig['foreign'][$field]);
+          }
+
+          $foreign = $modelconfig['foreign'][$field];
+
+          $elements = $this->getModel($foreign['model'], $foreign['app'] ?? app::getApp());
+
+          //
+          // skip basic model setup, if we're using the remote api interface anyways.
+          //
+          if(!($elements instanceof \codename\rest\model\exposesRemoteApiInterface) || !isset($foreign['remote_source'])) {
+            if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
+                foreach ($foreign['order'] as $order) {
+                    if(!app::getValidator('structure_config_modelorder')->isValid($order)) {
+                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $order);
+                    }
+                    $elements->addOrder($order['field'], $order['direction']);
+                }
+            }
+
+            if(array_key_exists('filter', $foreign) && is_array($foreign['filter'])) {
+                foreach ($foreign['filter'] as $filter) {
+                    if(!app::getValidator('structure_config_modelfilter')->isValid($filter)) {
+                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
+                    }
+                    if($filter['field'] == $elements->getIdentifier() . '_flag') {
+                      if($filter['operator'] == '=') {
+                        $elements->withFlag($elements->config->get('flag>'.$filter['value']));
+                      } else if($filter['operator'] == '!=') {
+                        $elements->withoutFlag($elements->config->get('flag>'.$filter['value']));
+                      } else {
+                        throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_FILTER_FLAG_INVALIDOPERATOR, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
+                      }
+                    } else {
+                      $elements->addFilter($filter['field'], $filter['value'], $filter['operator']);
+                    }
+                }
+            }
+          }
+
+          $fielddata['field_type'] = 'select';
+          $fielddata['field_displayfield'] = $foreign['display'];
+          $fielddata['field_valuefield'] = $foreign['key'];
+
+          if($elements instanceof \codename\rest\model\exposesRemoteApiInterface && isset($foreign['remote_source'])) {
+            // $fielddata['field_elements'] = $elements->search()->getResult();
+            $apiEndpoint = $elements->getExposedApiEndpoint();
+            $fielddata['field_remote_source'] = $apiEndpoint;
+
+            $remoteSource = $foreign['remote_source'] ?? [];
+
+            //
+            // if(array_key_exists($foreign['model'], $defaultRemoteApiFilters)) {
+            //   $field['field_remote_source_parameter'] = [
+            //     'filter' => array_merge($defaultRemoteApiFilters[$foreign['model']], [] /*($foreign['filter'] ?? [])*/ )
+            //   ];
+            // }
+
+            $filterKeys = [];
+            foreach($remoteSource['filter_key'] as $filterKey => $filterData) {
+              if(is_array($filterData)) {
+                foreach($filterData as $filterDataKey => $filterDataData) {
+                  $filterKeys[$filterKey][$filterDataData] = true;
+                }
+              } else {
+                $filterKeys[$filterData] = true;
+              }
+            }
+
+            $fielddata['field_remote_source_filter_key'] = $filterKeys;
+
+            //
+            // Explicit Filter Key
+            // for retrieving an already set, unique and strictly defined value
+            //
+            if($remoteSource['explicit_filter_key'] ?? false) {
+              $fielddata['field_remote_source_explicit_filter_key'] = $remoteSource['explicit_filter_key'];
+            }
+
+            /*
+            if(array_key_exists($foreign['model'], $remoteApiFilterKeys)) {
+              $field['field_remote_source_filter_key'] = $remoteSource['filter_key'];
+            }
+            */
+            $fielddata['field_remote_source_parameter'] = $remoteSource['parameters'] ?? [];
+            $fielddata['field_remote_source_display_key'] = $remoteSource['display_key'] ?? null;
+            $fielddata['field_remote_source_links'] = $foreign['remote_source']['links'] ?? [];
+            $fielddata['field_valuefield'] = $foreign['key'];
+            $fielddata['field_displayfield'] = $foreign['key']; // $defaultDisplayField[$foreign['model']] ?? $foreign['key'];
+
+          } else {
+            if(!in_array($field, $this->customizedFields)) {
+              $fielddata['field_elements'] = $elements->search()->getResult();
+            }
+          }
+
+          if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
+              $fielddata['field_multiple'] = true;
+          }
+      }
+
+      $c = &$this->onCreateFormfield;
+      if($c !== null && is_callable($c)) {
+        $c($fielddata);
+      }
+
+      $field = new field($fielddata);
+      $field->setType('compact');
+
+      $c = &$this->onFormfieldCreated;
+      if($c !== null && is_callable($c)) {
+        $c($field);
+      }
+
+      // Add the field to the form
+      return $field;
+    }
 
     /**
      * Creates the field instance for the given field and adds information to it.
