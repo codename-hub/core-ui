@@ -578,38 +578,42 @@ class crud extends \codename\core\bootstrapInstance {
         //
         // build a form from filters
         //
-        $filterForm = new \codename\core\ui\form([
-          'form_id' => 'filterform',
-          'form_method' => 'post',
-          'form_action' => ''
-        ]);
+        $filterForm = null;
 
-        foreach($filters as $filterSpecifier => $filterConfig) {
-          $specifier = explode('.', $filterSpecifier);
-          $useModel = $this->getMyModel();
+        if(count($filters) > 0) {
+          $filterForm = new \codename\core\ui\form([
+            'form_id' => 'filterform',
+            'form_method' => 'post',
+            'form_action' => ''
+          ]);
 
-          $fName = $specifier[count($specifier)-1];
+          foreach($filters as $filterSpecifier => $filterConfig) {
+            $specifier = explode('.', $filterSpecifier);
+            $useModel = $this->getMyModel();
 
-          if(count($specifier) == 2) {
-            // we have a model/table reference
-            $useModel = $this->getModel($specifier[0]);
+            $fName = $specifier[count($specifier)-1];
+
+            if(count($specifier) == 2) {
+              // we have a model/table reference
+              $useModel = $this->getModel($specifier[0]);
+            }
+
+            $field = null;
+
+            // field is a foreign key
+            if(!($fData['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
+              $field = $this->makeFieldForeign($useModel, $fName); // options?
+            } else {
+              // wildcard
+              $field = new \codename\core\ui\field([
+                'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
+                'field_name'  => $filterSpecifier,
+                'field_type'  => 'input'
+              ]);
+            }
+
+            $filterForm->addField($field);
           }
-
-          $field = null;
-
-          // field is a foreign key
-          if(!($fData['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
-            $field = $this->makeFieldForeign($useModel, $fName); // options?
-          } else {
-            // wildcard
-            $field = new \codename\core\ui\field([
-              'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
-              'field_name'  => $filterSpecifier,
-              'field_type'  => 'input'
-            ]);
-          }
-
-          $filterForm->addField($field);
         }
 
 
@@ -687,7 +691,7 @@ class crud extends \codename\core\bootstrapInstance {
           $this->getResponse()->setData('rows', $this->makeFields($resultData, $visibleFields));
         }
 
-        $this->getResponse()->setData('filterform', $filterForm->output(true));
+        $this->getResponse()->setData('filterform', $filterForm ? $filterForm->output(true) : null);
 
         $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
         $this->getResponse()->setData('bulkActions', $this->prepareActionsOutput($this->config->get("action>bulk") ?? []));
