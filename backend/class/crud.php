@@ -989,7 +989,7 @@ class crud extends \codename\core\bootstrapInstance {
         if($addSubmitButton) {
           $this->getForm()->addField((new field(array(
             'field_name' => 'name',
-            'field_title' => 'submit',
+            'field_title' => app::getTranslate()->translate('BUTTON.BTN_SAVE'),
             'field_description' => 'description',
             'field_id' => 'submit',
             'field_type' => 'submit',
