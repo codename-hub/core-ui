@@ -1419,7 +1419,7 @@ class crud extends \codename\core\bootstrapInstance {
                 $newFieldset = new fieldset(array('fieldset_name' => $key));
                 foreach($formConfig->get("fieldset>{$key}>field") as $field) {
                     $options = array();
-                    $options['field_required'] = ($formConfig->exists("fieldset>required") && in_array($field, $formConfig->get("fieldset>required")));
+                    $options['field_required'] = ($formConfig->exists("fieldset>{$key}>required") && in_array($field, $formConfig->get("fieldset>{$key}>required")));
                     $options['field_readonly'] = ($formConfig->exists("fieldset>{$key}>readonly") && in_array($field, $formConfig->get("fieldset>{$key}>readonly")));
                     if($field == $this->getMyModel()->table . '_flag') {
                         $flags = $this->getMyModel()->config->get('flag');
