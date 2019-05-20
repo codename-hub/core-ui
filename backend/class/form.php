@@ -415,6 +415,25 @@ class form implements \JsonSerializable {
     }
 
     /**
+     * normalizes given data
+     * using the form fields in this form
+     *
+     * @param  array  $data [description]
+     * @return array
+     */
+    public function normalizeData(array $data) : ?array {
+      $newdata = [];
+      foreach($this->fields as $field) {
+        $key = $field->getProperty('field_name');
+        if(array_key_exists($key, $data)) {
+          $newdata[$key] = \codename\core\ui\field::getNormalizedFieldValue($key, $data[$key] ?? null, $field->getProperty('field_datatype'));
+        }
+      }
+      return count($newdata) > 0 ? $newdata : null;
+    }
+
+
+    /**
      * Setter for the type of output to generate
      * @param string $type
      * @return form
