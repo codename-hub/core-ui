@@ -704,7 +704,7 @@ class crud extends \codename\core\bootstrapInstance {
 
         // $this->getResponse()->setData('filters', $filters);
         $this->getResponse()->setData('crud_filter_identifier', self::CRUD_FILTER_IDENTIFIER);
-        $this->getResponse()->setData('filters_used', $filterForm->normalizeData($filterForm->getData()));
+        $this->getResponse()->setData('filters_used', $filterForm ? $filterForm->normalizeData($filterForm->getData()) : null);
         // $this->getResponse()->setData('filters_unused', $filters);
         $this->getResponse()->setData('enable_search_bar', $this->config->exists("visibleFilters>_search"));
         $this->getResponse()->setData('modelinstance', $this->getMyModel());
