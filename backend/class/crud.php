@@ -87,6 +87,12 @@ class crud extends \codename\core\bootstrapInstance {
     protected $fields = array();
 
     /**
+     * Contains all fields Configurations that are displayed in the CRUD generator
+     * @var array
+     */
+    protected $fieldsformConfig = array();
+
+    /**
      * Contains the ID of the CRUD form
      * @var string
      */
@@ -978,6 +984,12 @@ class crud extends \codename\core\bootstrapInstance {
             }
 
             $options = [];
+            if (($this->fieldsformConfig['readonly'] ?? false) && in_array($field, $this->fieldsformConfig['readonly'])) {
+              $options['field_readonly'] = true;
+            }
+            if (($this->fieldsformConfig['required'] ?? false) && in_array($field, $this->fieldsformConfig['required'])) {
+              $options['field_required'] = true;
+            }
             if($this->config->exists('readonly') && is_array($this->config->get('readonly')) && in_array($field, $this->config->get('readonly'))) {
               $options['field_readonly'] = true;
             }
@@ -1454,6 +1466,13 @@ class crud extends \codename\core\bootstrapInstance {
             }
         } elseif ($formConfig->exists("field")) {
             $this->fields = $formConfig->get("field");
+            $this->fieldsformConfig = [];
+            if ($formConfig->exists('required')) {
+              $this->fieldsformConfig['required'] = $formConfig->get('required');
+            }
+            if ($formConfig->exists('readonly')) {
+              $this->fieldsformConfig['readonly'] = $formConfig->get('readonly');
+            }
         }
 
         // DEBUG: \codename\core\app::getResponse()->setData('debug_crud_fields_set_'.($this->getForm()->config['form_tag'] ?? 'no-tag').'_'.$identifier, $this->fields);
