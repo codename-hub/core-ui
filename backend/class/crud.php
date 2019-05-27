@@ -1802,9 +1802,13 @@ class crud extends \codename\core\bootstrapInstance {
             }
           }
 
-          if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
-              $fielddata['field_multiple'] = true;
-          }
+          // if(array_key_exists('datatype', $modelconfig) && array_key_exists($field, $modelconfig['datatype']) && $modelconfig['datatype'][$field] == 'structure') {
+          //     $fielddata['field_multiple'] = true;
+          // }
+
+          $fielddata['field_datatype'] = 'structure';
+          $fielddata['field_multiple'] = true;
+
       }
 
       $c = &$this->onCreateFormfield;
@@ -2148,12 +2152,15 @@ class crud extends \codename\core\bootstrapInstance {
 
     /**
      * Will return the filterable string that is used for the given field's datatype
-     * @param  string  $value    [description]
+     * @param  mixed    $value    [description]
      * @param  string  $field    [description]
      * @param  bool    $wildcard [description]
-     * @return string            [description]
+     * @return mixed            [description]
      */
-    protected function getFilterstring(string $value, string $field, bool $wildcard = false) : string {
+    protected function getFilterstring($value, string $field, bool $wildcard = false) {
+        if(is_array($value)) {
+          return $value;
+        }
         switch($this->getMyModel()->getFieldtype(new \codename\core\value\text\modelfield($field))) {
             case 'number_natural' :
                 return $value;
