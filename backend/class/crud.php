@@ -603,14 +603,28 @@ class crud extends \codename\core\bootstrapInstance {
             $field = null;
 
             // field is a foreign key
-            if(!($fData['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
-              $field = $this->makeFieldForeign($useModel, $fName); // options?
+            if(!($filterConfig['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
+              $field = $this->makeFieldForeign($useModel, $fName, $filterConfig); // options?
+
+              // if(is_array($filterForm->getData($filterSpecifier))) {
+              //   // normalize pre-set value differently
+              //   $filterValue = $filterForm->getData($filterSpecifier);
+              //   $elementDatatype = $useModel->getConfig()->get('datatype>'.$fName);
+              //   $filterValue = array_map(function($element) use( $filterSpecifier, $elementDatatype) {
+              //     return \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $element, $elementDatatype);
+              //   }, $filterValue);
+              //   $field->setValue($filterValue);
+              // } else {
+              //   $field->setValue( \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $filterForm->getData($filterSpecifier), $field->getProperty('field_datatype')) );
+              // }
+
             } else {
-              // wildcard
+              // wildcard, no normalization needed
               $field = new \codename\core\ui\field([
                 'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
                 'field_name'  => $filterSpecifier,
-                'field_type'  => 'input'
+                'field_type'  => 'input',
+                // 'field_value' => $filterForm->getData($filterSpecifier)
               ]);
             }
 
@@ -1806,9 +1820,32 @@ class crud extends \codename\core\bootstrapInstance {
           //     $fielddata['field_multiple'] = true;
           // }
 
-          $fielddata['field_datatype'] = 'structure';
-          $fielddata['field_multiple'] = true;
+          //
+          // by default, we allow multiselect
+          //
+          $multiple = true;
+          if(array_key_exists('field_multiple', $options)) {
+            $multiple = $options['field_multiple'];
+          } else if(array_key_exists('multiple', $options)) {
+            $multiple = $options['multiple'];
+          }
 
+          if($multiple) {
+            $fielddata['field_datatype'] = 'structure';
+            $fielddata['field_multiple'] = $multiple;
+          }
+
+          if($elementDatatype = $modelconfig['datatype'][$field] ?? false) {
+            //
+            // if multiselect, provide element datatype for correct conversions
+            //
+            if($multiple) {
+              $fielddata['field_element_datatype'] = $elementDatatype;
+            } else {
+              $fielddata['field_datatype'] = $elementDatatype;
+            }
+          }
+      
       }
 
       $c = &$this->onCreateFormfield;
