@@ -2203,7 +2203,7 @@ class crud extends \codename\core\bootstrapInstance {
                 $this->getMyModel()->withDefaultFlag($this->getFilterstring($value, $key, false));
               }
             } else {
-              if(is_array($value) && $this->model->config->exists("datatype>".$key) && in_array($this->model->config->exists("datatype>".$key), array('text_timestamp', 'text_date'))) {
+              if(is_array($value) && $this->model->config->exists("datatype>".$key) && in_array($this->model->config->get("datatype>".$key), array('text_timestamp', 'text_date'))) {
                 $this->getMyModel()->addDefaultfilter($key, $this->getFilterstring($value[0], $key, false), '>=');
                 $this->getMyModel()->addDefaultfilter($key, $this->getFilterstring($value[1], $key, false), '<=');
               } else {
