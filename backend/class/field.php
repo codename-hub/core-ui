@@ -245,6 +245,10 @@ class field implements \JsonSerializable {
         //
         if($field['field_datatype']) {
           $field['field_value'] = self::getNormalizedFieldValue($field['field_name'], $field['field_value'], $field['field_datatype']);
+          // set type to relativetime by field_datatype is text_datetime_relative
+          if ($field['field_datatype'] === 'text_datetime_relative') {
+            $field['field_type'] = 'relativetime';
+          }
         }
 
         if(!array_key_exists('field_validator', $field)) {
