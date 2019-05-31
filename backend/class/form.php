@@ -427,6 +427,10 @@ class form implements \JsonSerializable {
         $key = $field->getProperty('field_name');
         if(array_key_exists($key, $data)) {
           if($data[$key] && $field->getProperty('field_datatype') === 'structure' && $elementDatatype = $field->getProperty('field_element_datatype')) {
+            // if not an array, make it an array.
+            if(!is_array($data[$key])) {
+              $data[$key] = [ $data[$key] ];
+            }
             $normalizedValue = array_map(function($element) use( $key, $elementDatatype) {
               return \codename\core\ui\field::getNormalizedFieldValue($key, $element, $elementDatatype);
             }, $data[$key]);
