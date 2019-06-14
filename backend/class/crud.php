@@ -508,8 +508,12 @@ class crud extends \codename\core\bootstrapInstance {
         if($this->getRequest()->isDefined('display_selectedfields') && $this->getResponse()->getData('enable_displayfieldselection') == true) {
           $selectedFields = $this->getRequest()->getData('display_selectedfields');
           if(is_array($selectedFields)) {
+            //
+            // NOTE/CHANGED 2019-06-14: we have to include some more fields
+            //
+            $avFields = array_unique(array_merge($visibleFields, $availableFields));
             foreach($selectedFields as $displayField) {
-              if(in_array($displayField, $availableFields)) {
+              if(in_array($displayField, $avFields)) {
                 $displayFields[] = $displayField;
               }
             }
