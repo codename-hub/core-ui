@@ -2471,7 +2471,16 @@ class crud extends \codename\core\bootstrapInstance {
             } catch (\Exception $e) {
               $evalResult = false;
             }
-            if($evalResult === false) {
+
+            //
+            // NOTE/WARNING:
+            // eval only returns FALSE, if there's an exception thrown internally
+            // as we changed the app class to no longer throw an exception on a Notice
+            // (e.g. if array index/key not set), we don't run into the situation
+            //
+            // so, we now check for $evalResult === null
+            //
+            if($evalResult === false || $evalResult === null) {
               $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
               if(count($element) > 0) {
                 @eval('$ret = "' . $obj['display'] . '";');
