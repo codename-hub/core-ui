@@ -1208,14 +1208,24 @@ class crud extends \codename\core\bootstrapInstance {
         $transaction = new \codename\core\transaction('crud_bulk_edit', [ $this->getMyModel() ]);
         $transaction->start();
 
+        $pkeyValues = [];
+
         foreach($data as $entry) {
           //
           // TODO: how to handle delta edits on nested models?
           //
           $this->getMyModel()->saveWithChildren($entry);
+
+          if($pkeyValue = $entry[$this->getMyModel()->getPrimarykey()] ?? false) {
+            $pkeyValues[] = $pkeyValue;
+          } else {
+            $pkeyValues[] = $this->getMyModel()->lastInsertId();
+          }
         }
 
         $transaction->end();
+
+        $this->getResponse()->setData($this->getMyModel()->getPrimarykey(), $pkeyValues);
 
       } else {
         throw new exception('CRUD_BULK_EDIT_DATA_UNDEFINED', exception::$ERRORLEVEL_ERROR);
@@ -1868,7 +1878,7 @@ class crud extends \codename\core\bootstrapInstance {
               $fielddata['field_datatype'] = $elementDatatype;
             }
           }
-      
+
       }
 
       $c = &$this->onCreateFormfield;
