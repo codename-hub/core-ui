@@ -138,7 +138,14 @@ class app extends \codename\core\app {
    */
   public static function getCurrentServerEndpoint() : string {
     // url base prefix preparation
-    $port = $_SERVER['X-Forwarded-Port'] ?? $_SERVER['SERVER_PORT'] ?? null;
+    //
+    // vendors and services like AWS (especially ELBs)
+    // also provide a non-standard header like X-Forwarded-Port
+    // which is the same as with the protocol, but for ports
+    //
+    // NOTE: we handle X-Forwarded-Proto separately during request object creation (request\http)
+    //
+    $port = $_SERVER['HTTP_X_FORWARDED_PORT'] ?? $_SERVER['SERVER_PORT'] ?? null;
     $proto = (($_SERVER['HTTPS'] ?? null) === 'on') ? 'https' : 'http';
     $portSuffix = (($proto === 'https' && $port != 443) || ($proto === 'http' && $port != 80)) ? (':'.$port) : '';
     $urlBase = $proto.'://'.$_SERVER['SERVER_NAME'].$portSuffix;
