@@ -310,6 +310,7 @@ class form implements \JsonSerializable {
     public function fieldSent(\codename\core\ui\field $field) : bool {
         switch ($field->getProperty('field_type')) {
             case 'file' :
+            case 'signature' : // temporary fix for signature fields
                 if(app::getRequest() instanceof \codename\core\request\filesInterface) {
                   return array_key_exists($field->getProperty('field_name'), app::getRequest()->getFiles());
                 } else {
