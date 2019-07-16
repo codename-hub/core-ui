@@ -2132,6 +2132,8 @@ class crud extends \codename\core\bootstrapInstance {
             $fielddata['field_datatype'] = 'structure';
 
             $crud = new \codename\core\ui\crud($this->getModel($collectionConfig['model'], $collectionConfig['app'] ?? '', $collectionConfig['vendor'] ?? ''));
+            $crud->onCreateFormfield = $this->onCreateFormfield;
+            $crud->onFormfieldCreated = $this->onFormfieldCreated;
             // TODO: allow custom crud config somehow?
             // $crud->setConfig('some-crud-config');
 
