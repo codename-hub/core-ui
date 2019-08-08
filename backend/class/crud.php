@@ -348,6 +348,14 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [setCustomizedFields description]
+     * @param array $fields [description]
+     */
+    public function setCustomizedFields(array $fields) {
+      $this->customizedFields = $fields;
+    }
+
+    /**
      * [updateChildCrudConfigs description]
      * @return [type] [description]
      */
