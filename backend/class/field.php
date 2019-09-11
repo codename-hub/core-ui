@@ -246,7 +246,11 @@ class field implements \JsonSerializable {
         if($field['field_datatype']) {
           $field['field_value'] = self::getNormalizedFieldValue($field['field_name'], $field['field_value'], $field['field_datatype']);
           // set type to relativetime by field_datatype is text_datetime_relative
-          if ($field['field_datatype'] === 'text_datetime_relative') {
+          // NOTE/WARNING: 2019-09-11: this is bad - do not change it to relativetime by default, as it overrides forced-hidden fields...
+          // this SHOULD be handled in crud and/or form (in this case possibly individually...)
+          // CHANGED: only change field_type to relativetime, if field is not already set as hidden... this may cause trouble, still
+          // if you want to use different field types.
+          if ($field['field_datatype'] === 'text_datetime_relative' && $field['field_type'] != 'hidden') {
             $field['field_type'] = 'relativetime';
           }
         }
