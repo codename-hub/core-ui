@@ -592,6 +592,8 @@ class crud extends \codename\core\bootstrapInstance {
 
         $fieldActions = $this->config->get("action>field") ?? array();
         $filters = $this->config->get('visibleFilters', array());
+        // merge-in provided filters
+        $filters = array_merge($filters, $this->providedFilters);
 
         //
         // build a form from filters
@@ -2251,6 +2253,28 @@ class crud extends \codename\core\bootstrapInstance {
         }
     }
 
+
+    /**
+     * provides a custom filter option
+     * @param  string   $name   [description]
+     * @param  array    $config [description]
+     * @param  callable $cb     [description]
+     * @return [type]           [description]
+     */
+    public function provideFilter(string $name, array $config, callable $cb) {
+      $this->providedFilters[$name] = [
+        'config' => $config,
+        'callback' => $cb
+      ];
+    }
+
+    /**
+     * customized, provided filters
+     * @var array
+     */
+    protected $providedFilters = [];
+
+
     /**
      * Will apply defaultFilter properties to the model instance of this CRUD generator
      * @return void
@@ -2281,6 +2305,12 @@ class crud extends \codename\core\bootstrapInstance {
             if($key === 'search' || (!is_array($value) && strlen($value) == 0)) {
                 continue;
             }
+
+            if($providedFilter = $this->providedFilters[$key] ?? false) {
+              $providedFilter['callback']($this, $value);
+              continue;
+            }
+
             if($key == $this->getMyModel()->getIdentifier() . '_flag') {
               if(is_array($value)) {
                 foreach($value as $flagval) {
