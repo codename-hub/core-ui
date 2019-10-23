@@ -1712,7 +1712,7 @@ class crud extends \codename\core\bootstrapInstance {
      * @param  array  $options [description]
      * @return field           [description]
      */
-    protected function makeFieldForeign(\codename\core\model $model, string $field, array $options = []) : field {
+    public function makeFieldForeign(\codename\core\model $model, string $field, array $options = []) : field {
       // load model config for simplicity
       $modelconfig = $model->config->get();
 
