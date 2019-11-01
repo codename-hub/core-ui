@@ -1680,6 +1680,8 @@ class crud extends \codename\core\bootstrapInstance {
         switch($datatype) {
             case 'structure_address':
                 return 'structure_address';
+            case 'structure_text_telephone':
+                return 'structure_text_telephone';
             case 'structure':
                 return 'structure';
             case 'boolean':
