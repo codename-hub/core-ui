@@ -568,9 +568,16 @@ class crud extends \codename\core\bootstrapInstance {
           $this->makePagination();
         }
 
-        foreach ($this->config->get("order") as $order) {
-            $this->getMyModel()->addOrder($order['field'], $order['direction']);
+        if($this->crudSeekOverridePkeyOrder) {
+          // Seek-mode order hack
+          // following ordering happends during runtime below
+          $this->getMyModel()->addOrder($this->getMyModel()->getPrimarykey(), $this->crudSeekOverridePkeyOrder);
         }
+
+        foreach ($this->config->get("order") as $order) {
+          $this->getMyModel()->addOrder($order['field'], $order['direction']);
+        }
+
 
         if($this->getConfig()->exists('export>_security>group')) {
           if($enableExport = app::getAuth()->memberOf($this->getConfig()->get('export>_security>group'))) {
@@ -714,6 +721,26 @@ class crud extends \codename\core\bootstrapInstance {
 
         $resultData = $this->resultData ?? $this->getMyModel()->search()->getResult();
 
+        //
+        // Seek mode runtime ordering
+        //
+        if($this->crudSeekOverridePkeyOrder) {
+          //
+          // Stable usort based on main models' PKEY
+          // this is done in reverse, as we previously changed core ordering in ::makePagination
+          //
+          self::stable_usort($resultData, function($a, $b){
+            //
+            // NOTE: we use the spaceship operator here, which outputs -1, 0 or 1 depending on value equality
+            // and we finally multiply it by -1 to re-gain the old/original PKEY ordering
+            //
+            return ($a[$this->getMyModel()->getPrimarykey()] <=> $b[$this->getMyModel()->getPrimarykey()])
+              *
+              ($this->crudSeekOverridePkeyOrder === 'ASC' ? -1 : 1);
+          });
+        }
+
+
         if(count($this->resultsetModifiers) > 0) {
           foreach($this->resultsetModifiers as $modifier) {
             $resultData = $modifier($resultData);
@@ -763,6 +790,25 @@ class crud extends \codename\core\bootstrapInstance {
           ]);
         }
         return;
+    }
+
+    /**
+     * stable usort function
+     */
+    protected static function stable_usort(array &$array, $value_compare_func)
+    {
+      $index = 0;
+      foreach ($array as &$item) {
+        $item = array($index++, $item);
+      }
+      $result = usort($array, function($a, $b) use($value_compare_func) {
+        $result = call_user_func($value_compare_func, $a[1], $b[1]);
+        return $result == 0 ? $a[0] - $b[0] : $result;
+      });
+      foreach ($array as &$item) {
+        $item = $item[1];
+      }
+      return $result;
     }
 
     /**
@@ -1582,12 +1628,16 @@ class crud extends \codename\core\bootstrapInstance {
         // perform the query using the given configuration
         // and remove it afterwards.
         //
-        $start = microtime(true);
-        $count = (int) $this->getMyModel()->getCount();
-        $end = microtime(true);
+        if($this->getConfig()->get('seek')) {
+          $count = null;
+        } else {
+          $start = microtime(true);
+          $count = (int) $this->getMyModel()->getCount();
+          $end = microtime(true);
 
-        // DEBUG!
-        $this->getResponse()->setData('_count_time', ($end-$start));
+          // DEBUG!
+          $this->getResponse()->setData('_count_time', ($end-$start));
+        }
 
         // default value, if none of the below works:
         $page = 1;
@@ -1605,11 +1655,18 @@ class crud extends \codename\core\bootstrapInstance {
           $limit = $this->config->get("pagination>limit", 10);
         }
 
-        $pages = ($limit==0||$count==0) ? 1 : ceil($count / $limit);
+        if($this->getConfig()->get('seek')) {
+          $pages = null;
+        } else {
+          $pages = ($limit==0||$count==0) ? 1 : ceil($count / $limit);
+        }
 
-        // pagination limit change with present page param, that is out of range:
-        if($page > $pages) {
-          $page = $pages;
+        // when not in seek mode (normal mode), limit last page to max. page available
+        if(!$this->getConfig()->get('seek')) {
+          // pagination limit change with present page param, that is out of range:
+          if($page > $pages) {
+            $page = $pages;
+          }
         }
 
         if($this->getConfig()->get('seek') === true) {
@@ -1641,6 +1698,7 @@ class crud extends \codename\core\bootstrapInstance {
             $operator = $ordering === 'ASC' ? '<' : '>';
             // $this->getResponse()->setData('seek_debug', "{$this->getMyModel()->getPrimarykey()} $operator $firstId");
             $this->getMyModel()->addFilter($this->getMyModel()->getPrimarykey(), $firstId, $operator);
+            $this->crudSeekOverridePkeyOrder = $ordering === 'ASC' ? 'DESC' : 'ASC'; // enable overriding the other ordering...
           }
 
           // we're moving forward
@@ -1670,6 +1728,12 @@ class crud extends \codename\core\bootstrapInstance {
         );
         return;
     }
+
+    /**
+     * [protected description]
+     * @var bool
+     */
+    protected $crudSeekOverridePkeyOrder = null;
 
     /**
      * Resolve a datatype to a foreced display type
