@@ -1,10 +1,9 @@
 <?php
 namespace codename\core\ui;
 use codename\core\app;
-use \codename\core\event;
-use \codename\core\ui;
-
+use codename\core\event;
 use codename\core\exception;
+use codename\core\ui;
 
 /**
  * The CRUD generator uses it's model to display the model's content.
@@ -2368,7 +2367,7 @@ class crud extends \codename\core\bootstrapInstance {
 
         foreach($filters as $key => $value) {
             // exclude search key here, as we're not returning after a wildcard search anymore
-            if($key === 'search' || (!is_array($value) && strlen($value) == 0)) {
+            if($key === 'search') {
                 continue;
             }
 
