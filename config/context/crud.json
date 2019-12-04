@@ -4,6 +4,9 @@
 		"crud_list":{
 			"icon":"icon-list"
 		},
+		"crud_config":{
+			"icon":"icon-list"
+		},
 		"crud_create":{
 			"icon":"icon-plus"
 		},

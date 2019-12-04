@@ -445,6 +445,214 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * Returns the config for listview()
+     * @return void
+     */
+    public function listconfig() {
+      $visibleFields = $this->config->get('visibleFields');
+
+      // Only append primarykey, if not added to visibleFields
+      if(!in_array($this->getMyModel()->getPrimarykey(), $visibleFields)) {
+        $visibleFields[] = $this->getMyModel()->getPrimarykey();
+      }
+
+      $formattedFields = [];
+
+      //
+      // Format foreign key values as defined by the model
+      //
+      if(!is_null($this->getMyModel()->config->get('foreign'))) {
+        $foreignKeys = $this->getMyModel()->config->get('foreign');
+
+        $formattedFields = array_reduce(array_keys($foreignKeys), function ($carry, $key) {
+          // foreign keys use a formatted output field AND a data key
+          $carry[$key] = $key.'_FORMATTED';
+          return $carry;
+        }, $formattedFields);
+      }
+
+      //
+      // also include "modifier" fields as _FORMATTED ones.
+      //
+      $formattedFields = array_merge($formattedFields, array_reduce(array_keys($this->modifiers), function ($carry, $key) {
+        // use modifier key as final field
+        $carry[$key] = $key;
+        return $carry;
+      }, []));
+
+      //
+      // Fields that are available as raw data AND as a _FORMATTED one
+      //
+      $this->getResponse()->setData('formattedFields', $formattedFields);
+
+      //
+      // Enable custom selection of displayed fields (columns)
+      //
+      $this->getResponse()->setData('enable_displayfieldselection', ($this->config->exists('displayFieldSelection') ? $this->config->get('displayFieldSelection') : false));
+
+      if($this->config->exists('availableFields')) {
+        $availableFields = $this->config->get('availableFields');
+      } else {
+        // enable ALL fields of the model to be displayed
+        $availableFields = $this->getMyModel()->config->get('field');
+      }
+
+      // add formatted fields to availableFields
+      $availableFields = array_merge($availableFields, array_keys($formattedFields));
+
+      // remove all disabled fields
+      if($this->config->exists('disabled')) {
+        $availableFields = array_diff($availableFields, $this->config->get('disabled'));
+      }
+
+      // merge and kill duplicates
+      $availableFields = array_values(array_unique($availableFields));
+
+      $displayFields = array();
+
+      // display fields are either the visibleFields (defined in config) or submitted
+      // in the latter case, we have to check for legitimacy first.
+      if($this->getRequest()->isDefined('display_selectedfields') && $this->getResponse()->getData('enable_displayfieldselection') == true) {
+        $selectedFields = $this->getRequest()->getData('display_selectedfields');
+        if(is_array($selectedFields)) {
+          //
+          // NOTE/CHANGED 2019-06-14: we have to include some more fields
+          //
+          $avFields = array_unique(array_merge($visibleFields, $availableFields));
+          foreach($selectedFields as $displayField) {
+            if(in_array($displayField, $avFields)) {
+              $displayFields[] = $displayField;
+            }
+          }
+        }
+      }
+
+      if(count($displayFields) > 0) {
+        $visibleFields = $displayFields;
+      } else {
+        // add all modifier fields by default
+        // if no field selection provided
+        $visibleFields = array_merge($visibleFields, array_keys($this->modifiers));
+      }
+
+      if(!in_array($this->getMyModel()->getPrimarykey(), $visibleFields)) {
+        $visibleFields[] = $this->getMyModel()->getPrimarykey();
+      }
+
+      //
+      // Provide some labels for frontend display
+      //
+      $fieldLabels = [];
+      foreach(array_merge($availableFields, $formattedFields) as $field) {
+        $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+      }
+      foreach($availableFields as $field) {
+        if($fieldLabels[$field] ?? false) {
+          $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
+        }
+      }
+      $this->getResponse()->setData('labels', $fieldLabels);
+      if($this->getConfig()->exists('export>_security>group')) {
+        if($enableExport = app::getAuth()->memberOf($this->getConfig()->get('export>_security>group'))) {
+          $this->getResponse()->setData('export_types', $this->getConfig()->get('export>allowedTypes'));
+        }
+        $this->getResponse()->setData('enable_export', $enableExport);
+      } else {
+        $this->getResponse()->setData('enable_export', false);
+      }
+
+      if($this->getConfig()->exists('import>_security>group')) {
+        if($enableImport = app::getAuth()->memberOf($this->getConfig()->get('import>_security>group'))) {
+          // $this->getResponse()->setData('export_types', $this->getConfig()->get('export>allowedTypes'));
+        }
+        $this->getResponse()->setData('enable_import', $enableImport);
+      } else {
+        $this->getResponse()->setData('enable_import', false);
+      }
+
+      $fieldActions = $this->config->get("action>field") ?? array();
+      $filters = $this->config->get('visibleFilters', array());
+      // merge-in provided filters
+      $filters = array_merge($filters, $this->providedFilters);
+
+      //
+      // build a form from filters
+      //
+      $filterForm = null;
+
+      if(count($filters) > 0) {
+        $filterForm = new \codename\core\ui\form([
+          'form_id' => 'filterform',
+          'form_method' => 'post',
+          'form_action' => ''
+        ]);
+
+        $filterForm->setFormRequest($this->getRequest()->getData(self::CRUD_FILTER_IDENTIFIER) ?? []);
+
+        foreach($filters as $filterSpecifier => $filterConfig) {
+          $specifier = explode('.', $filterSpecifier);
+          $useModel = $this->getMyModel();
+
+          $fName = $specifier[count($specifier)-1];
+
+          if(count($specifier) == 2) {
+            // we have a model/table reference
+            $useModel = $this->getModel($specifier[0]);
+          }
+
+          $field = null;
+
+          // field is a foreign key
+          if(!($filterConfig['wildcard'] ?? false) && in_array($fName, $useModel->config->get('field'))) {
+            $field = $this->makeFieldForeign($useModel, $fName, $filterConfig); // options?
+
+            // if(is_array($filterForm->getData($filterSpecifier))) {
+            //   // normalize pre-set value differently
+            //   $filterValue = $filterForm->getData($filterSpecifier);
+            //   $elementDatatype = $useModel->getConfig()->get('datatype>'.$fName);
+            //   $filterValue = array_map(function($element) use( $filterSpecifier, $elementDatatype) {
+            //     return \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $element, $elementDatatype);
+            //   }, $filterValue);
+            //   $field->setValue($filterValue);
+            // } else {
+            //   $field->setValue( \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $filterForm->getData($filterSpecifier), $field->getProperty('field_datatype')) );
+            // }
+
+          } else {
+            // wildcard, no normalization needed
+            $field = new \codename\core\ui\field([
+              'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
+              'field_name'  => $filterSpecifier,
+              'field_type'  => 'input',
+              // 'field_value' => $filterForm->getData($filterSpecifier)
+            ]);
+          }
+
+          $filterForm->addField($field);
+        }
+      }
+
+      if(count($this->columnOrder) > 0) {
+        $visibleFields = array_values(array_unique(array_merge(array_intersect($this->columnOrder, $visibleFields), $visibleFields), SORT_REGULAR));
+      } else {
+        $visibleFields = array_values(array_unique($visibleFields, SORT_REGULAR));
+      }
+      $this->getResponse()->setData('filterform', $filterForm ? $filterForm->output(true) : null);
+
+      $this->getResponse()->setData('topActions', $this->prepareActionsOutput($this->config->get("action>top") ?? []));
+      $this->getResponse()->setData('bulkActions', $this->prepareActionsOutput($this->config->get("action>bulk") ?? []));
+      $this->getResponse()->setData('elementActions', $this->prepareActionsOutput($this->config->get("action>element") ?? []));
+      $this->getResponse()->setData('fieldActions', $this->prepareActionsOutput($fieldActions) ?? []);
+      $this->getResponse()->setData('visibleFields', $visibleFields);
+      $this->getResponse()->setData('availableFields', $availableFields);
+      $this->getResponse()->setData('crud_filter_identifier', self::CRUD_FILTER_IDENTIFIER);
+      $this->getResponse()->setData('enable_search_bar', $this->config->exists("visibleFilters>_search"));
+      $this->getResponse()->setData('modelinstance', $this->getMyModel());
+
+      return;
+    }
+
+    /**
      * Returns a list of the entries in the model and paginate, filter and order it
      * @return void
      */

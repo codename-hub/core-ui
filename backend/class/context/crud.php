@@ -94,6 +94,17 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     }
 
     /**
+     * Using the CRUD generator to generate the CRUD config
+     * @return void
+     * @access public
+     */
+    public function view_crud_config () {
+      $this->getResponse()->setData('context', 'crud');
+      $this->getCrudinstance()->listconfig();
+      return;
+    }
+
+    /**
      * Using the CRUD generator to generate the list page
      * @return void
      * @access public
