@@ -18,7 +18,7 @@
           </style>
         {% endfor %}
         {% for head in response.getResources('head') %}
-          {{ head }}
+          {{ head | raw }}
         {% endfor %}
 
     </head>
