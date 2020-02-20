@@ -482,11 +482,17 @@ class form implements \JsonSerializable {
     /**
      * Adds the given $field to the form instance
      * @param field $field
+     * @param int   $position [position where to insert the field; -1 is last, -2 the second last]
      * @return form
      */
-    public function addField(field $field) : form {
+    public function addField(field $field, int $position = -1) : form {
+      if($position !== -1) {
+        array_splice($this->fields, $position, 0, [ $field ]);
+        return $this;
+      } else {
         array_push($this->fields, $field);
         return $this;
+      }
     }
 
     /**
