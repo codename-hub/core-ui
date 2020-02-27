@@ -543,7 +543,7 @@ class crud extends \codename\core\bootstrapInstance {
       // Provide some labels for frontend display
       //
       $fieldLabels = [];
-      foreach(array_merge($availableFields, $formattedFields) as $field) {
+      foreach(array_merge($availableFields, $visibleFields, $formattedFields) as $field) {
         $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
       }
       foreach($availableFields as $field) {
@@ -752,7 +752,7 @@ class crud extends \codename\core\bootstrapInstance {
         // Provide some labels for frontend display
         //
         $fieldLabels = [];
-        foreach(array_merge($availableFields, $formattedFields) as $field) {
+        foreach(array_merge($availableFields, $visibleFields, $formattedFields) as $field) {
           $fieldLabels[$field] = app::getTranslate()->translate('DATAFIELD.'.$field);
         }
         foreach($availableFields as $field) {
