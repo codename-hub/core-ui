@@ -1,7 +1,6 @@
 {
     "name": "codename/core-ui",
     "description": "This is going to be the core UI framework.",
-    "version": "0.1.1",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
     "time": "2017-10-19",
