@@ -3,7 +3,6 @@
     "description": "This is going to be the core UI framework.",
     "type": "library",
     "keywords": ["codename", "core", "ui"],
-    "time": "2017-10-19",
     "authors": [
         {
             "name": "Kevin Dargel",
