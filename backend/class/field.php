@@ -191,7 +191,7 @@ class field implements \JsonSerializable {
      * @return bool
      */
     public function isRequired() : bool {
-        return $this->config->get('field_required');
+        return $this->config->get('field_required') ?? false;
     }
 
     /**
