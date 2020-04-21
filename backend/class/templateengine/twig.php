@@ -141,6 +141,8 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     // Add request and response containers, globally
     $this->twigInstance->addGlobal('request', app::getRequest());
     $this->twigInstance->addGlobal('response', app::getResponse());
+    $this->twigInstance->addGlobal('frontend', \codename\core\ui\app::getInstance('frontend'));
+    $this->twigInstance->addGlobal('translate', app::getTranslate());
 
     // add testing for array
     $this->twigInstance->addTest(new \Twig\TwigTest('array', function ($value) {
@@ -215,9 +217,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    */
   public function render(string $referencePath, $data = null): string {
     $twigTemplate = $this->twigInstance->load($referencePath);
-    return $twigTemplate->render(array(
-      'data' => $data
-    ));
+    try {
+      return $twigTemplate->render(array(
+        'data' => $data
+      ));
+    } catch (\Twig\Error\RuntimeError $e) {
+      throw $e->getPrevious();
+    }
+
   }
 
   /**
