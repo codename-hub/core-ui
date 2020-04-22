@@ -63,8 +63,59 @@ class frontend {
      * @return string
      */
     protected function parseGroup(array $group) : string {
-        $templateengine = 'default';
 
+        //
+        // Evaulate context permissions
+        //
+        if($group['context']) {
+          $allowedContextGroup = app::getConfig()->get('context>' . $group['context'] . '>_security>group');
+          if($allowedContextGroup) {
+            if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedContextGroups))) {
+              return '';
+            }
+          }
+        }
+
+        //
+        // Evaulate view permissions
+        //
+        if($group['view']) {
+          $allowedViewGroup = app::getConfig()->get('context>' . $group['context'] . '>view>' .$group['view'] . '>_security>group');
+          if($allowedViewGroup) {
+            if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedViewGroup))) {
+              return '';
+            }
+          }
+        }
+
+        $filteredChildren = [];
+        foreach($group['children'] as $key => $child) {
+          //
+          // Evaulate context permissions
+          //
+          $allowedContextGroup = app::getConfig()->get('context>' . $child['context'] . '>_security>group');
+          if($allowedContextGroup) {
+            if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedContextGroups))) {
+              continue;
+            }
+          }
+
+          //
+          // Evaulate view permissions
+          //
+          $allowedViewGroup = app::getConfig()->get('context>' . $child['context'] . '>view>' .$child['view'] . '>_security>group');
+          if($allowedViewGroup) {
+            if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedViewGroup))) {
+              continue;
+            }
+          }
+
+          $filteredChildren[$key] = $child;
+        }
+
+        $group['children'] = $filteredChildren;
+
+        $templateengine = 'default';
         return app::getTemplateEngine($templateengine)->render('template/' . app::getRequest()->getData('template') . '/mainnavi/group', $group);
         // return app::parseFile(app::getInheritedPath('frontend/template/' . app::getRequest()->getData('template') . '/mainnavi/group.php'), $group);
     }
@@ -75,6 +126,26 @@ class frontend {
      * @return string
      */
     protected function parseLink(array $link) : string {
+      //
+      // Evaulate context permissions
+      //
+      $allowedContextGroup = app::getConfig()->get('context>' . $link['context'] . '>_security>group');
+      if($allowedContextGroup) {
+        if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedContextGroups))) {
+          return '';
+        }
+      }
+
+      //
+      // Evaulate view permissions
+      //
+      $allowedViewGroup = app::getConfig()->get('context>' . $link['context'] . '>view>' .$link['view'] . '>_security>group');
+      if($allowedViewGroup) {
+        if(!(app::getAuth()->isAuthenticated() && app::getAuth()->memberOf($allowedViewGroup))) {
+          return '';
+        }
+      }
+
       $templateengine = 'default';
       return app::getTemplateEngine($templateengine)->render('template/' . app::getRequest()->getData('template') . '/mainnavi/link', $link);
         // return app::parseFile(app::getInheritedPath('frontend/template/' . app::getRequest()->getData('template') . '/mainnavi/link.php'), $link);
