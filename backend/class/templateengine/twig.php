@@ -142,7 +142,13 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $this->twigInstance->addGlobal('request', app::getRequest());
     $this->twigInstance->addGlobal('response', app::getResponse());
     $this->twigInstance->addGlobal('frontend', \codename\core\ui\app::getInstance('frontend'));
-    $this->twigInstance->addGlobal('translate', app::getTranslate());
+
+    //
+    // workaround to perform on-demand init of translation client, only if defined in environment
+    //
+    if(app::getEnvironment()->get('translate')) {
+      $this->twigInstance->addGlobal('translate', app::getTranslate());
+    }
 
     // add testing for array
     $this->twigInstance->addTest(new \Twig\TwigTest('array', function ($value) {
