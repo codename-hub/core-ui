@@ -250,9 +250,11 @@ class field implements \JsonSerializable {
           // this SHOULD be handled in crud and/or form (in this case possibly individually...)
           // CHANGED: only change field_type to relativetime, if field is not already set as hidden... this may cause trouble, still
           // if you want to use different field types.
-          if ($field['field_datatype'] === 'text_datetime_relative' && $field['field_type'] != 'hidden') {
-            $field['field_type'] = 'relativetime';
-          }
+          // CHANGED 2020-05-26: Now it finally causes real trouble. Field Type cannot be changed, as this overrides it in the end (just before output)
+          // Moved type determination to crud
+          // if ($field['field_datatype'] === 'text_datetime_relative' && $field['field_type'] != 'hidden') {
+          //   $field['field_type'] = 'relativetime';
+          // }
         }
 
         if(!array_key_exists('field_validator', $field)) {

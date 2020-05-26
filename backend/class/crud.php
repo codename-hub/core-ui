@@ -1951,6 +1951,15 @@ class crud extends \codename\core\bootstrapInstance {
      * @return string
      */
     public function getDisplaytype(string $datatype) : string {
+        return self::getDisplaytypeStatic($datatype);
+    }
+
+    /**
+     * [getDisplaytypeStatic description]
+     * @param  string $datatype [description]
+     * @return string           [description]
+     */
+    public static function getDisplaytypeStatic(string $datatype) : string {
         switch($datatype) {
             case 'structure_address':
                 return 'structure_address';
@@ -1966,6 +1975,12 @@ class crud extends \codename\core\bootstrapInstance {
                 return 'date';
             case 'text_timestamp':
                 return 'timestamp';
+            //
+            // CHANGED 2020-05-26: relativetime field detection/determination
+            // moved to here from field class
+            //
+            case 'text_datetime_relative':
+                return 'relativetime';
             default:
                 return 'input';
             break;
