@@ -1,6 +1,7 @@
 <?php
 namespace codename\core\ui;
 use \codename\core\app;
+use codename\core\exception;
 
 /**
  * Forms can either hold instances of \codename\core\ui\field or \codename\core\ui\fieldset
@@ -585,6 +586,81 @@ class form implements \JsonSerializable {
         $this->fireCallback(\codename\core\ui\form::CALLBACK_FORM_VALID);
 
         return $this;
+    }
+
+    /**
+     * returns a field instance based on a search for the given field name
+     * or null, if not found
+     * @param  string                  $fieldName [description]
+     * @return \codename\core\ui\field|null
+     */
+    public function getField(string $fieldName) : ?\codename\core\ui\field {
+      foreach($this->getFields() as $field) {
+        if($field->getProperty('field_name') == $fieldName) {
+          return $field;
+        }
+      }
+      foreach($this->getFieldsets() as $fieldset) {
+        foreach($fieldset->getFields() as $field) {
+          if($field->getProperty('field_name') == $fieldName) {
+            return $field;
+          }
+        }
+      }
+      return null;
+    }
+
+    /**
+     * returns a field instance based on a path (as array)
+     * or null, if not found
+     * @param  array  $fieldPath [description]
+     * @return \codename\core\ui\field|null
+     */
+    public function getFieldRecursive(array $fieldPath) : ?\codename\core\ui\field {
+      $fieldName = array_shift($fieldPath);
+      foreach($this->getFields() as $field) {
+        if($field->getProperty('field_name') == $fieldName) {
+          if(count($fieldPath) === 0) {
+            // end reached
+            return $field;
+          } else {
+            // if we get a property named "form"
+            // dive deeper
+            if($form = $field->getProperty('form')) {
+              if($form instanceof \codename\core\ui\form) {
+                return $form->getFieldRecursive($fieldPath);
+              } else {
+                throw new exception('FORM_GETFIELDRECURSIVE_INVALID_FORM_INSTANCE', exception::$ERRORLEVEL_ERROR, $fieldName);
+              }
+            } else {
+              throw new exception('FORM_GETFIELDRECURSIVE_NO_FORM_INSTANCE', exception::$ERRORLEVEL_ERROR, $fieldName);
+            }
+          }
+        }
+      }
+      foreach($this->getFieldsets() as $fieldset) {
+        foreach($fieldset->getFields() as $field) {
+          if($field->getProperty('field_name') == $fieldName) {
+            if(count($fieldPath) === 0) {
+              // end reached
+              return $field;
+            } else {
+              // if we get a property named "form"
+              // dive deeper
+              if($form = $field->getProperty('form')) {
+                if($form instanceof \codename\core\ui\form) {
+                  return $form->getFieldRecursive($fieldPath);
+                } else {
+                  throw new exception('FORM_GETFIELDRECURSIVE_INVALID_FORM_INSTANCE', exception::$ERRORLEVEL_ERROR, $fieldName);
+                }
+              } else {
+                throw new exception('FORM_GETFIELDRECURSIVE_NO_FORM_INSTANCE', exception::$ERRORLEVEL_ERROR, $fieldName);
+              }
+            }
+          }
+        }
+      }
+      return null;
     }
 
     /**
