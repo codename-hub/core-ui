@@ -619,6 +619,16 @@ class crud extends \codename\core\bootstrapInstance {
             //   $field->setValue( \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $filterForm->getData($filterSpecifier), $field->getProperty('field_datatype')) );
             // }
 
+          } elseif($filterConfig['config']['field_config'] ?? false) {
+            $fieldData = array_merge(
+              [
+                'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
+                'field_name'  => $filterSpecifier,
+                'field_type'  => 'input',
+              ],
+              $filterConfig['config']['field_config']
+            );
+            $field = new \codename\core\ui\field($fieldData);
           } else {
             // wildcard, no normalization needed
             $field = new \codename\core\ui\field([
@@ -855,6 +865,16 @@ class crud extends \codename\core\bootstrapInstance {
               //   $field->setValue( \codename\core\ui\field::getNormalizedFieldValue($filterSpecifier, $filterForm->getData($filterSpecifier), $field->getProperty('field_datatype')) );
               // }
 
+            } elseif($filterConfig['config']['field_config'] ?? false) {
+              $fieldData = array_merge(
+                [
+                  'field_title' => app::getTranslate()->translate('DATAFIELD.' . $fName),
+                  'field_name'  => $filterSpecifier,
+                  'field_type'  => 'input',
+                ],
+                $filterConfig['config']['field_config']
+              );
+              $field = new \codename\core\ui\field($fieldData);
             } else {
               // wildcard, no normalization needed
               $field = new \codename\core\ui\field([
