@@ -231,8 +231,24 @@ class crud extends \codename\core\bootstrapInstance {
               // store it for later
               $this->childCruds[$child] = $crud;
 
-              // join the model upon the current
-              $this->getMyModel()->addModel($crud->getMyModel(), \codename\core\model\plugin\join::TYPE_LEFT, $childConfig['field'], $foreignConfig['key']);
+              //
+              // CHANGED/FEATURE force_virtual_join 2020-07-21
+              // This method uses the new feature of the core framework
+              // this allows virtualizing the table join
+              // to avoid RDBMS join limitations by abstracting the whole thing.
+              //
+              // You have to enable 'force_virtual_join' in the respective model child config
+              // Cruds enable this feature automatically, while you may opt-in into its usage
+              // when querying models regularly.
+              //
+              if($childConfig['force_virtual_join'] ?? false) {
+                $virtualJoinModel = $crud->getMyModel();
+                $virtualJoinModel->setForceVirtualJoin(true);
+                $this->getMyModel()->addModel($virtualJoinModel, \codename\core\model\plugin\join::TYPE_LEFT, $childConfig['field'], $foreignConfig['key']);
+              } else {
+                // join the model upon the current
+                $this->getMyModel()->addModel($crud->getMyModel(), \codename\core\model\plugin\join::TYPE_LEFT, $childConfig['field'], $foreignConfig['key']);
+              }
 
               //
               // Enable virtual field results
