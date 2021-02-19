@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>{{ title }}</title>
+        <title>{{ response.getData('title') }}</title>
 
         {% for js in response.getResources('js') %}
           <script src="{{ js }}" type="text/javascript"></script>
