@@ -1681,10 +1681,15 @@ class crud extends \codename\core\bootstrapInstance {
         }
       }
 
-      // @TODO create new hooks for CRUD_SHOW.
-
       // use modified makeForm function, that allows $addSubmitButton = false (second argument)
       $form = $this->makeForm($primaryKey, false);
+
+      // Fire the form init event
+      $hookval = $this->eventCrudFormInit->invokeWithResult($this, $form);
+
+      if(is_object($hookval) && $hookval instanceof \codename\core\ui\form) {
+          $form = $hookval;
+      }
 
       $this->getResponse()->setData('form', $form->output($this->outputFormConfig));
     }
