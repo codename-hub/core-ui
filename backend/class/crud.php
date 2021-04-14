@@ -1039,6 +1039,18 @@ class crud extends \codename\core\bootstrapInstance {
     }
 
     /**
+     * [stats description]
+     * @return void
+     */
+    public function stats() {
+      $this->applyFilters();
+
+      if($this->allowPagination) {
+        $this->makePagination();
+      }
+    }
+
+    /**
      * stable usort function
      */
     protected static function stable_usort(array &$array, $value_compare_func)
@@ -1879,7 +1891,7 @@ class crud extends \codename\core\bootstrapInstance {
         // perform the query using the given configuration
         // and remove it afterwards.
         //
-        if($this->getConfig()->get('seek')) {
+        if($this->getConfig()->get('seek') || $this->getRequest()->getData('crud_stats_async')) {
           $count = null;
         } else {
           $start = microtime(true);
@@ -1906,14 +1918,14 @@ class crud extends \codename\core\bootstrapInstance {
           $limit = $this->config->get("pagination>limit", 10);
         }
 
-        if($this->getConfig()->get('seek')) {
+        if($this->getConfig()->get('seek') || $this->getRequest()->getData('crud_stats_async')) {
           $pages = null;
         } else {
           $pages = ($limit==0||$count==0) ? 1 : ceil($count / $limit);
         }
 
         // when not in seek mode (normal mode), limit last page to max. page available
-        if(!$this->getConfig()->get('seek')) {
+        if(!$this->getConfig()->get('seek') && !$this->getRequest()->getData('crud_stats_async')) {
           // pagination limit change with present page param, that is out of range:
           if($page > $pages) {
             $page = $pages;
@@ -1962,7 +1974,7 @@ class crud extends \codename\core\bootstrapInstance {
           $this->getMyModel()->setLimit($limit);
 
         } else {
-          if($pages > 1) {
+          if($pages > 1 || $this->getRequest()->getData('crud_stats_async')) {
             $this->getMyModel()->setLimit($limit)->setOffset(($page-1) * $limit);
           }
         }

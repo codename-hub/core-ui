@@ -105,6 +105,17 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     }
 
     /**
+     * Crud Stats
+     * also to be used for async counts
+     * @return void
+     */
+    public function view_crud_stats () {
+      $this->getResponse()->setData('context', 'crud');
+      $this->getCrudinstance()->stats();
+      return;
+    }
+
+    /**
      * Using the CRUD generator to generate the list page
      * @return void
      * @access public
