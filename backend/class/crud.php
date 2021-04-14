@@ -2834,7 +2834,7 @@ class crud extends \codename\core\bootstrapInstance {
           } else if(is_array($row[$field])) {
             $vals = array();
             foreach($row[$field] as $val) {
-              $element = $this->getModel($obj['model'])->loadByUnique($obj['key'], $val);
+              $element = $this->getModelCached($obj['model'])->loadByUnique($obj['key'], $val);
               if(count($element) > 0) {
                 @eval('$vals[] = "' . $obj['display'] . '";');
               }
@@ -2848,12 +2848,25 @@ class crud extends \codename\core\bootstrapInstance {
             // first: try to NOT perform an additional query
             $element = $row;
             $evalResult = false;
+            $ret = null; // default fallback value
+
+            // NOTE: we silence E_NOTICEs in core app
+            // therefore, temporary override the error handler
+            // and throw an internal exception to catch.
+            // In This case, we know the eval failed and we have to re-try.
+            // This will/should fail, when a specific key is missing
+            set_error_handler(function ($err_severity, $err_msg, $err_file, $err_line, array $err_context) {
+              throw new \codename\core\NoticeException ($err_msg, 0, $err_severity, $err_file, $err_line);
+            }, E_NOTICE);
+
             try {
               $evalResult = @eval('$ret = "' . $obj['display'] . '";');
-            } catch (\Exception $e) {
+            } catch (\codename\core\NoticeException $e) {
               $evalResult = false;
             }
 
+            // restore error handler, should be the core-app one.
+            restore_error_handler();
             //
             // NOTE/WARNING:
             // eval only returns FALSE, if there's an exception thrown internally
@@ -2862,8 +2875,10 @@ class crud extends \codename\core\bootstrapInstance {
             //
             // so, we now check for $evalResult === null
             //
-            if($evalResult === false || $evalResult === null) {
-              $element = $this->getModel($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
+            // CHANGED 2021-04-14: see note above, we override the error handler temporarily
+            //
+            if($evalResult === false) {
+              $element = $this->getModelCached($obj['model'], $obj['app'] ?? '', $obj['vendor'] ?? '')->loadByUnique($obj['key'], $row[$field]);
               if(count($element) > 0) {
                 @eval('$ret = "' . $obj['display'] . '";');
               } else {
@@ -2879,6 +2894,27 @@ class crud extends \codename\core\bootstrapInstance {
         if($row[$field]==NULL) {
           return array(null);
         }
+    }
+
+    /**
+     * [protected description]
+     * @var \codename\core\model[]
+     */
+    protected $cachedModels = [];
+
+    /**
+     * [getModelCached description]
+     * @param  string               $model  [description]
+     * @param  string               $app    [description]
+     * @param  string               $vendor [description]
+     * @return \codename\core\model         [description]
+     */
+    protected function getModelCached(string $model, string $app = '', string $vendor = ''): \codename\core\model {
+      $identifier = implode(',', [ $model, $app, $vendor ]);
+      if(!$this->cachedModels[$identifier] ?? false) {
+        $this->cachedModels[$identifier] = $this->getModel($model, $app, $vendor);
+      }
+      return $this->cachedModels[$identifier];
     }
 
     /**
