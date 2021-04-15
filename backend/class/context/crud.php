@@ -116,13 +116,26 @@ class crud extends \codename\core\context implements \codename\core\context\cont
     }
 
     /**
+     * If there are overridden crud_list functions
+     * this may be used for doing this special override
+     * @return void
+     */
+    public function action_crud_stats() {
+      return;
+    }
+
+    /**
      * Using the CRUD generator to generate the list page
      * @return void
      * @access public
      */
     public function view_crud_list () {
         $this->getResponse()->setData('context', 'crud');
-        $this->getCrudinstance()->listview();
+        if($this->getRequest()->getData('action') == 'crud_stats') {
+          $this->getCrudinstance()->stats();
+        } else {
+          $this->getCrudinstance()->listview();
+        }
         return;
     }
 
