@@ -16,6 +16,7 @@
             title="<?=$data['field_title']?>"
             data-datatype="<?=$data['field_validator']?>"
             data-placeholder="<?=$data['field_placeholder']?>"
+            placeholder="<?=$data['field_placeholder']?>"
             data-description="<?=$data['field_description']?>"
             data-prompt-position="topLeft"
             <?php if ($data['field_readonly']) { echo 'readonly'; } ?>
