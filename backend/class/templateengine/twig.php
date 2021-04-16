@@ -146,8 +146,16 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     //
     // workaround to perform on-demand init of translation client, only if defined in environment
     //
-    if(app::getEnvironment()->get('translate')) {
-      $this->twigInstance->addGlobal('translate', app::getTranslate());
+    if(app::getEnvironment()->get(app::getEnv().'>translate>default')) {
+      //
+      // NOTE: might fail in unconfigured env, as "inherit" config exists
+      // (bare core app without anything added)
+      //
+      try {
+        $this->twigInstance->addGlobal('translate', app::getTranslate('default'));
+      } catch (\Exception $e) {
+        // swallow exception.
+      }
     }
 
     // add testing for array
