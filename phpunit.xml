@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<phpunit xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" bootstrap="tests/autoload.php" xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd">
+  <coverage processUncoveredFiles="true">
+    <include>
+      <directory suffix=".php">backend/class/</directory>
+    </include>
+    <report>
+      <html outputDirectory=".phpunit/coverage-html" />
+    </report>
+  </coverage>
+  <testsuites>
+    <testsuite name="all">
+      <directory suffix=".php">tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
