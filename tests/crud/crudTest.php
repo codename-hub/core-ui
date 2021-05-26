@@ -2,6 +2,7 @@
 namespace codename\core\ui\tests\crud;
 
 use codename\core\tests\base;
+use codename\core\tests\overrideableApp;
 
 class crudTest extends base {
 
@@ -35,6 +36,8 @@ class crudTest extends base {
    */
   protected function setUp(): void
   {
+    overrideableApp::resetRequest();
+    overrideableApp::resetResponse();
     $app = static::createApp();
 
     // Additional overrides to get a more complete app lifecycle
@@ -208,6 +211,51 @@ class crudTest extends base {
 
     $res = $model->search()->getResult();
     $this->assertCount(1, $res);
+  }
+
+  /**
+   * [testCrudEditFormSendSuccess description]
+   */
+  public function testCrudEditFormSendSuccess(): void {
+    $model = $this->getModel('testmodel');
+
+    // insert an entry and pass on PKEY for further 'editing'
+    $model->save([
+      'testmodel_text' => 'XYZ'
+    ]);
+    $id = $model->lastInsertId();
+
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->edit($id);
+
+    // renderer?
+    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
+
+    $form = $crudInstance->getForm();
+
+    // make sure we're loading the right entry
+    // and the value is prefilled
+    $this->assertEquals('XYZ', $form->getField('testmodel_text')->getConfig()->get('field_value'));
+
+    $formSentField = null;
+    foreach($form->getFields() as $field) {
+      // detect form sent field
+      if(strpos($field->getProperty('field_name'), 'formSent') === 0) {
+        $formSentField = $field;
+      }
+    }
+
+    // emulate a request 'submitting' the form
+    \codename\core\app::getRequest()->setData($formSentField->getProperty('field_name'), 1);
+    \codename\core\app::getRequest()->setData('testmodel_text', 'changed');
+
+    // create a new crud instance to simulate creation
+    $saveCrudInstance = new \codename\core\ui\crud($model);
+    $saveCrudInstance->edit($id);
+
+    $res = $model->search()->getResult();
+    $this->assertCount(1, $res);
+    $this->assertEquals('changed', $res[0]['testmodel_text']);
   }
 
 }
