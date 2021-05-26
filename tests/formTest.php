@@ -444,4 +444,152 @@ class formTest extends base
 
   }
 
+  /**
+   * [testFormFieldWithoutForm description]
+   */
+  public function testFormFieldWithoutForm(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('FORM_GETFIELDRECURSIVE_NO_FORM_INSTANCE');
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+    ]));
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+  }
+
+  /**
+   * [testFormFieldWithoutFormInstance description]
+   */
+  public function testFormFieldWithoutFormInstance(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('FORM_GETFIELDRECURSIVE_INVALID_FORM_INSTANCE');
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+      'form'            => 'example',
+    ]));
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+  }
+
+  /**
+   * [testFormFieldWithFormInstance description]
+   */
+  public function testFormFieldWithFormInstance(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+      'form'            => (new \codename\core\ui\form([
+        'form_id'     => 'exampleform',
+        'form_action' => 'get',
+        'form_method' => '',
+      ])),
+    ]));
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+    $this->assertNull($field);
+  }
+
+  /**
+   * [testFormFieldsetWithoutForm description]
+   */
+  public function testFormFieldsetWithoutForm(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('FORM_GETFIELDRECURSIVE_NO_FORM_INSTANCE');
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+    ]));
+    $form->addFieldset($fieldset);
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+  }
+
+  /**
+   * [testFormFieldsetWithoutFormInstance description]
+   */
+  public function testFormFieldsetWithoutFormInstance(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('FORM_GETFIELDRECURSIVE_INVALID_FORM_INSTANCE');
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+      'form'            => 'example',
+    ]));
+    $form->addFieldset($fieldset);
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+  }
+
+  /**
+   * [testFormFieldsetWithFormInstance description]
+   */
+  public function testFormFieldsetWithFormInstance(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'example',
+      'field_type'      => 'text',
+      'field_value'     => 'example',
+      'form'            => (new \codename\core\ui\form([
+        'form_id'     => 'exampleform',
+        'form_action' => 'get',
+        'form_method' => '',
+      ])),
+    ]));
+    $form->addFieldset($fieldset);
+
+    $field = $form->getFieldRecursive([ 'example', 'example' ]);
+    $this->assertNull($field);
+  }
+
 }
