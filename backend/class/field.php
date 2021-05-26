@@ -50,7 +50,7 @@ class field implements \JsonSerializable {
         // Normalize the field properties
         $field = $this->normalizeField($field);
 
-        if(count($errors = app::getValidator('structure_config_field')->validate($field)) > 0) {
+        if(count($errors = app::getValidator('structure_config_field')->reset()->validate($field)) > 0) {
             throw new \codename\core\exception(self::EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID, \codename\core\exception::$ERRORLEVEL_FATAL, $errors);
         }
 
@@ -243,7 +243,7 @@ class field implements \JsonSerializable {
         //
         // if field_datatype is set (not null), perform field_value normalization
         //
-        if($field['field_datatype']) {
+        if($field['field_datatype'] && ($field['field_name'] ?? false)) {
           $field['field_value'] = self::getNormalizedFieldValue($field['field_name'], $field['field_value'], $field['field_datatype']);
           // set type to relativetime by field_datatype is text_datetime_relative
           // NOTE/WARNING: 2019-09-11: this is bad - do not change it to relativetime by default, as it overrides forced-hidden fields...
@@ -338,12 +338,17 @@ class field implements \JsonSerializable {
             } elseif ($value === 'false') {
               $value = false;
               break;
+            } else {
+              throw new exception('EXCEPTION_FIELD_NORMALIZEFIELD_BOOLEAN_INVALID', exception::$ERRORLEVEL_ERROR, [
+                'field' => $fieldName,
+                'value' => $value
+              ]);
             }
           }
         case 'number_natural':
           // string int prefilter: "null" and "" => null
           if(is_string($value)) {
-            $value = $value === '' ? null : $value;
+            $value = $value === '' ? null : intval($value);
           }
           $value = $value === null ? null : intval($value);
       }

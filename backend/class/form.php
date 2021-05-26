@@ -113,7 +113,7 @@ class form implements \JsonSerializable {
      * @return form
      */
     public function __CONSTRUCT(array $data) {
-        if (count($errors = app::getValidator('structure_config_form')->validate($data)) > 0) {
+        if (count($errors = app::getValidator('structure_config_form')->reset()->validate($data)) > 0) {
             throw new \codename\core\exception(self::EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID, \codename\core\exception::$ERRORLEVEL_FATAL, $errors);
         }
 
