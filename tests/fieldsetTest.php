@@ -60,7 +60,7 @@ class fieldsetTest extends base
       'field_value' => 'example2',
     ]), 0);
 
-    $config = $fieldset->jsonSerialize();
+    $config = $fieldset->output(true);
 
     $this->assertEquals('example', $config['fieldset_id']);
     $this->assertEquals('FIELDSET_EXAMPLE', $config['fieldset_name']);
@@ -121,7 +121,7 @@ class fieldsetTest extends base
       'fieldset_name_override'  => 'example_override',
     ]);
 
-    $config = $fieldset->jsonSerialize();
+    $config = $fieldset->output(true);
 
     $this->assertEquals('example', $config['fieldset_id']);
     $this->assertEquals('example_override', $config['fieldset_name']);
