@@ -148,15 +148,33 @@ class crudTest extends base {
   // }
 
   /**
-   * [testCrudInit description]
+   * Tests basic crud init
+   * @coversNothing
    */
   public function testCrudInit(): void {
+
+    $this->expectNotToPerformAssertions();
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
 
-
-
+    // just test, if it doesn't crash
     $crudInstance->create();
+  }
+
+  /**
+   * [testCrudInit description]
+   */
+  public function testCrudCreate(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->create();
+
+    // renderer?
+    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
+
+    $form = $crudInstance->getForm();
+    $this->assertEquals('hidden', $form->getField('testmodel_id')->getProperty('field_type'));
+    $this->assertEquals('input', $form->getField('testmodel_text')->getProperty('field_type'));
   }
 
 }
