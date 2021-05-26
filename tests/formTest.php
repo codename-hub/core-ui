@@ -50,16 +50,14 @@ class formTest extends base
       'form_method' => '',
     ]);
 
-    $result = $form->jsonSerialize();
-    $this->assertCount(4, $result);
     $this->assertEquals([
       'form_id'     => 'exampleform',
       'form_action' => 'post',
       'form_method' => '',
-    ], $result['config'] ?? []);
-    $this->assertEmpty($result['fields'] ?? []);
-    $this->assertEmpty($result['fieldsets'] ?? []);
-    $this->assertEmpty($result['errorstack']->getErrors() ?? []);
+    ], $form->config);
+    $this->assertCount(0, $form->getFields());
+    $this->assertCount(0, $form->getFieldsets());
+    $this->assertEmpty($form->getErrorstack()->getErrors());
 
   }
 
@@ -111,16 +109,14 @@ class formTest extends base
     $form->setId('invalidexampleform');
     $form->setAction('post');
 
-    $result = $form->jsonSerialize();
-    $this->assertCount(4, $result);
     $this->assertEquals([
       'form_id'     => 'core_form_invalidexampleform',
       'form_action' => 'post',
       'form_method' => '',
-    ], $result['config'] ?? []);
-    $this->assertCount(2, $result['fields'] ?? []);
-    $this->assertCount(0, $result['fieldsets'] ?? []);
-    $this->assertEmpty($result['errorstack']->getErrors() ?? []);
+    ], $form->config);
+    $this->assertCount(2, $form->getFields());
+    $this->assertCount(0, $form->getFieldsets());
+    $this->assertEmpty($form->getErrorstack()->getErrors());
 
     $this->assertFalse($form->isSent());
 
@@ -141,6 +137,83 @@ class formTest extends base
         '__DETAILS'     => null,
       ]
     ], $errors);
+
+  }
+
+  /**
+   * [testValidFormWithFields description]
+   */
+  public function testValidFormWithFields(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'validfieldexample',
+      'field_type'      => 'text',
+      'field_value'     => 'validfieldexample',
+      'field_required'  => true,
+    ]));
+    $form->addField(new \codename\core\ui\field([
+      'field_name'  => 'validfieldexample2',
+      'field_type'  => 'text',
+      'field_value' => 'validfieldexample2',
+    ]), 0);
+
+    $fields = $form->getFields();
+    $this->assertCount(2, $fields ?? []);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+
+    $this->assertEquals([
+      'field_name'        => 'validfieldexample2',
+      'field_type'        => 'text',
+      'field_id'          => 'validfieldexample2',
+      'field_fieldtype'   => 'input',
+      'field_class'       => 'input',
+      'field_required'    => false,
+      'field_readonly'    => false,
+      'field_ajax'        => false,
+      'field_noninput'    => false,
+      'field_placeholder' => '',
+      'field_value'       => 'validfieldexample2',
+      'field_datatype'    => 'text',
+      'field_validator'   => '',
+      'field_description' => '',
+      'field_title'       => '',
+    ], $fields[0]->getConfig()->get());
+
+    $form->setId('validfieldexampleform');
+    $form->setAction('post');
+
+    $this->assertEquals([
+      'form_id'     => 'core_form_validfieldexampleform',
+      'form_action' => 'post',
+      'form_method' => '',
+    ], $form->config);
+    $this->assertCount(2, $form->getFields());
+    $this->assertCount(0, $form->getFieldsets());
+    $this->assertEmpty($form->getErrorstack()->getErrors());
+
+    $this->assertFalse($form->isSent());
+
+    overrideableApp::getRequest()->setData('formSentcore_form_validfieldexampleform', true);
+    overrideableApp::getRequest()->setData('validfieldexample', 'validfieldexample');
+
+    $this->assertTrue($form->isSent());
+    $this->assertTrue($form->isValid());
+
+    $errors = $form->getErrorstack()->getErrors();
+    $this->assertCount(0, $errors);
+    $this->assertEmpty($errors);
+
+    $data = $form->getData();
+    $data = $form->normalizeData($data);
+    $this->assertEquals([
+      'validfieldexample' => 'validfieldexample'
+    ], $data);
 
   }
 
@@ -181,16 +254,14 @@ class formTest extends base
     $form->setId('validexampleform');
     $form->setAction('post');
 
-    $result = $form->jsonSerialize();
-    $this->assertCount(4, $result);
     $this->assertEquals([
       'form_id'     => 'core_form_validexampleform',
       'form_action' => 'post',
       'form_method' => '',
-    ], $result['config'] ?? []);
-    $this->assertCount(0, $result['fields'] ?? []);
-    $this->assertCount(1, $result['fieldsets'] ?? []);
-    $this->assertEmpty($result['errorstack']->getErrors() ?? []);
+    ], $form->config);
+    $this->assertCount(0, $form->getFields());
+    $this->assertCount(1, $form->getFieldsets());
+    $this->assertEmpty($form->getErrorstack()->getErrors());
 
     $this->assertFalse($form->isSent());
 
@@ -208,6 +279,168 @@ class formTest extends base
     // NOTE: returned null, if not fields is set
     $data = $form->normalizeData($data);
     $this->assertEmpty($data);
+
+  }
+
+  /**
+   * [testFormSearchFieldByGetField description]
+   */
+  public function testFormSearchFieldByGetField(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'validfieldexample',
+      'field_type'      => 'text',
+      'field_value'     => 'validfieldexample',
+      'field_required'  => true,
+    ]));
+    $form->addField(new \codename\core\ui\field([
+      'field_name'  => 'validfieldexample2',
+      'field_type'  => 'text',
+      'field_value' => 'validfieldexample2',
+    ]), 0);
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'validexample',
+      'field_type'      => 'text',
+      'field_value'     => null,
+      'field_required'  => true,
+    ]));
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'validexample2',
+      'field_type'  => 'text',
+      'field_value' => 'validexample2',
+    ]), 0);
+    $form->addFieldset($fieldset);
+
+    $field = $form->getField('validfieldexample2');
+    $this->assertEquals([
+      'field_name'        => 'validfieldexample2',
+      'field_type'        => 'text',
+      'field_id'          => 'validfieldexample2',
+      'field_fieldtype'   => 'input',
+      'field_class'       => 'input',
+      'field_required'    => false,
+      'field_readonly'    => false,
+      'field_ajax'        => false,
+      'field_noninput'    => false,
+      'field_placeholder' => '',
+      'field_value'       => 'validfieldexample2',
+      'field_datatype'    => 'text',
+      'field_validator'   => '',
+      'field_description' => '',
+      'field_title'       => '',
+    ], $field->getConfig()->get());
+
+    $field = $form->getField('validexample2');
+    $this->assertEquals([
+      'field_name'        => 'validexample2',
+      'field_type'        => 'text',
+      'field_id'          => 'validexample2',
+      'field_fieldtype'   => 'input',
+      'field_class'       => 'input',
+      'field_required'    => false,
+      'field_readonly'    => false,
+      'field_ajax'        => false,
+      'field_noninput'    => false,
+      'field_placeholder' => '',
+      'field_value'       => 'validexample2',
+      'field_datatype'    => 'text',
+      'field_validator'   => '',
+      'field_description' => '',
+      'field_title'       => '',
+    ], $field->getConfig()->get());
+
+    $field = $form->getField('fieldnotfound');
+    $this->assertNull($field);
+
+  }
+
+  /**
+   * [testFormSearchFieldByGetFieldRecursive description]
+   */
+  public function testFormSearchFieldByGetFieldRecursive(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'validfieldexample',
+      'field_type'      => 'text',
+      'field_value'     => 'validfieldexample',
+      'field_required'  => true,
+    ]));
+    $form->addField(new \codename\core\ui\field([
+      'field_name'  => 'validfieldexample2',
+      'field_type'  => 'text',
+      'field_value' => 'validfieldexample2',
+    ]), 0);
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'validexample',
+      'field_type'      => 'text',
+      'field_value'     => null,
+      'field_required'  => true,
+    ]));
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'validexample2',
+      'field_type'  => 'text',
+      'field_value' => 'validexample2',
+    ]), 0);
+    $form->addFieldset($fieldset);
+
+    $field = $form->getFieldRecursive([ 'validfieldexample2' ]);
+    $this->assertEquals([
+      'field_name'        => 'validfieldexample2',
+      'field_type'        => 'text',
+      'field_id'          => 'validfieldexample2',
+      'field_fieldtype'   => 'input',
+      'field_class'       => 'input',
+      'field_required'    => false,
+      'field_readonly'    => false,
+      'field_ajax'        => false,
+      'field_noninput'    => false,
+      'field_placeholder' => '',
+      'field_value'       => 'validfieldexample2',
+      'field_datatype'    => 'text',
+      'field_validator'   => '',
+      'field_description' => '',
+      'field_title'       => '',
+    ], $field->getConfig()->get());
+
+    $field = $form->getFieldRecursive([ 'validexample2' ]);
+    $this->assertEquals([
+      'field_name'        => 'validexample2',
+      'field_type'        => 'text',
+      'field_id'          => 'validexample2',
+      'field_fieldtype'   => 'input',
+      'field_class'       => 'input',
+      'field_required'    => false,
+      'field_readonly'    => false,
+      'field_ajax'        => false,
+      'field_noninput'    => false,
+      'field_placeholder' => '',
+      'field_value'       => 'validexample2',
+      'field_datatype'    => 'text',
+      'field_validator'   => '',
+      'field_description' => '',
+      'field_title'       => '',
+    ], $field->getConfig()->get());
+
+    $field = $form->getFieldRecursive([ 'fieldnotfound' ]);
+    $this->assertNull($field);
 
   }
 

@@ -167,7 +167,7 @@ class fieldTest extends base
       'field_value' => 'example',
     ]);
 
-    $result = $field->jsonSerialize();
+    $result = $field->output(true);
     $this->assertEquals([
       'field_name'        => 'example',
       'field_type'        => 'text',
