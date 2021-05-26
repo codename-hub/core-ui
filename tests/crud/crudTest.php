@@ -162,9 +162,9 @@ class crudTest extends base {
   }
 
   /**
-   * [testCrudInit description]
+   * [testCrudCreateForm description]
    */
-  public function testCrudCreate(): void {
+  public function testCrudCreateForm(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
     $crudInstance->create();
@@ -175,6 +175,39 @@ class crudTest extends base {
     $form = $crudInstance->getForm();
     $this->assertEquals('hidden', $form->getField('testmodel_id')->getProperty('field_type'));
     $this->assertEquals('input', $form->getField('testmodel_text')->getProperty('field_type'));
+  }
+
+  /**
+   * [testCrudCreateFormSendSuccess description]
+   */
+  public function testCrudCreateFormSendSuccess(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->create();
+
+    // renderer?
+    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
+
+    $form = $crudInstance->getForm();
+
+    $formSentField = null;
+    foreach($form->getFields() as $field) {
+      // detect form sent field
+      if(strpos($field->getProperty('field_name'), 'formSent') === 0) {
+        $formSentField = $field;
+      }
+    }
+
+    // emulate a request 'submitting' the form
+    \codename\core\app::getRequest()->setData($formSentField->getProperty('field_name'), 1);
+    \codename\core\app::getRequest()->setData('testmodel_text', 'abc');
+
+    // create a new crud instance to simulate creation
+    $saveCrudInstance = new \codename\core\ui\crud($model);
+    $saveCrudInstance->create();
+
+    $res = $model->search()->getResult();
+    $this->assertCount(1, $res);
   }
 
 }
