@@ -20,7 +20,29 @@ class fieldTest extends base
       'app' => 'core-ui',
       'namespace' => '\\codename\\core\\ui'
     ]);
+
     $app->getAppstack();
+
+    static::setEnvironmentConfig([
+      'test' => [
+        'cache' => [
+          'default' => [
+            'driver' => 'memory'
+          ]
+        ],
+        'translate' => [
+          'default' => [
+            'driver'  => 'json',
+            'inherit' => true,
+          ]
+        ],
+        'templateengine' => [
+          'default' => [
+            'driver' => 'dummy',
+          ]
+        ],
+      ]
+    ]);
   }
 
   /**
@@ -185,6 +207,23 @@ class fieldTest extends base
       'field_description' => '',
       'field_title'       => '',
     ], $result);
+
+  }
+
+  /**
+   * [testOutputData description]
+   */
+  public function testOutput(): void {
+    $field = new \codename\core\ui\field([
+      'field_name'  => 'example',
+      'field_type'  => 'text',
+      'field_value' => 'example',
+    ]);
+
+    $field->setType('default');
+
+    $output = $field->output();
+    $this->assertEquals('frontend/field/default/text', $output);
 
   }
 

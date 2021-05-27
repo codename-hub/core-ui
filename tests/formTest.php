@@ -36,8 +36,44 @@ class formTest extends base
             'inherit' => true,
           ]
         ],
+        'templateengine' => [
+          'default' => [
+            'driver' => 'dummy',
+          ]
+        ],
       ]
     ]);
+  }
+
+  /**
+   * [testInvalidConstruct description]
+   */
+  public function testInvalidConstruct(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID');
+
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'post',
+    ]);
+
+  }
+
+  /**
+   * [testEmptyForm description]
+   */
+  public function testEmptyForm(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_OUTPUT_FORMISEMPTY');
+
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'post',
+      'form_method' => '',
+    ]);
+
+    $form->output(true);
+
   }
 
   /**
@@ -59,6 +95,12 @@ class formTest extends base
     $this->assertCount(0, $form->getFieldsets());
     $this->assertEmpty($form->getErrorstack()->getErrors());
 
+    $this->assertEmpty($form->getTemplateEngine());
+
+    $templateEngine = overrideableApp::getTemplateEngine();
+    $form->setTemplateEngine($templateEngine);
+    $this->assertNotEmpty($form->getTemplateEngine());
+
   }
 
   /**
@@ -78,15 +120,22 @@ class formTest extends base
       'field_required'  => true,
     ]));
     $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'noninputexample',
+      'field_type'      => 'text',
+      'field_value'     => null,
+      'field_noninput'  => true,
+    ]));
+    $form->addField(new \codename\core\ui\field([
       'field_name'  => 'invalidexample2',
       'field_type'  => 'text',
       'field_value' => 'invalidexample2',
     ]), 0);
 
     $fields = $form->getFields();
-    $this->assertCount(2, $fields ?? []);
+    $this->assertCount(3, $fields ?? []);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[2]);
 
     $this->assertEquals([
       'field_name'        => 'invalidexample2',
@@ -114,11 +163,14 @@ class formTest extends base
       'form_action' => 'post',
       'form_method' => '',
     ], $form->config);
-    $this->assertCount(2, $form->getFields());
+    $this->assertCount(3, $form->getFields());
     $this->assertCount(0, $form->getFieldsets());
     $this->assertEmpty($form->getErrorstack()->getErrors());
 
     $this->assertFalse($form->isSent());
+
+    $result = $form->output(true);
+    $this->assertNotEmpty($result);
 
     overrideableApp::getRequest()->setData('formSentcore_form_invalidexampleform', true);
 
@@ -279,6 +331,51 @@ class formTest extends base
     // NOTE: returned null, if not fields is set
     $data = $form->normalizeData($data);
     $this->assertEmpty($data);
+
+  }
+
+  /**
+   * [testFormOutput description]
+   */
+  public function testFormOutput(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'fieldexample',
+      'field_type'      => 'text',
+      'field_value'     => 'fieldexample',
+    ]));
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'fieldexample2',
+      'field_type'      => 'text',
+      'field_value'     => 'fieldexample2',
+    ]));
+
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example',
+    ]);
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'      => 'fieldsetexample',
+      'field_type'      => 'text',
+      'field_value'     => 'fieldsetexample',
+    ]));
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'fieldsetexample2',
+      'field_type'  => 'text',
+      'field_value' => 'fieldsetexample2',
+    ]), 0);
+    $form->addFieldset($fieldset);
+
+    $fieldset->setType('default');
+
+    $output = $form->output();
+    $this->assertEquals('frontend/form/default/form', $output);
 
   }
 

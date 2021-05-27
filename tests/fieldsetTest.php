@@ -36,6 +36,11 @@ class fieldsetTest extends base
             'inherit' => true,
           ]
         ],
+        'templateengine' => [
+          'default' => [
+            'driver' => 'dummy',
+          ]
+        ],
       ]
     ]);
   }
@@ -127,6 +132,28 @@ class fieldsetTest extends base
     $this->assertEquals('example_override', $config['fieldset_name']);
 
     $this->assertCount(0, $config['fields'] ?? []);
+  }
+
+  /**
+   * [testOutput description]
+   */
+  public function testOutput(): void {
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example_override',
+    ]);
+
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'example',
+      'field_type'  => 'text',
+      'field_value' => 'example',
+    ]));
+
+    $fieldset->setType('default');
+
+    $output = $fieldset->output();
+    $this->assertEquals('frontend/fieldset/default', $output);
   }
 
 }
