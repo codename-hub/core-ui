@@ -44,5 +44,20 @@ class appTest extends base
     $app = \codename\core\ui\app::run();
   }
 
+  /**
+   * [testUrlGenerator description]
+   */
+  public function testUrlGenerator(): void {
+    $urlGenerator = \codename\core\ui\app::getUrlGenerator();
+    $this->assertEquals((new \codename\core\generator\urlGenerator()), $urlGenerator);
+
+    $restUrlGenerator = new \codename\core\generator\restUrlGenerator();
+    \codename\core\ui\app::setUrlGenerator($restUrlGenerator);
+
+    $getUrlGenerator = \codename\core\ui\app::getUrlGenerator();
+    $this->assertEquals($restUrlGenerator, $getUrlGenerator);
+
+  }
+
 
 }
