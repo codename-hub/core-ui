@@ -158,9 +158,9 @@ class fieldTest extends base
   }
 
   /**
-   * [testJsonSerialize description]
+   * [testOutputData description]
    */
-  public function testJsonSerialize(): void {
+  public function testOutputData(): void {
     $field = new \codename\core\ui\field([
       'field_name'  => 'example',
       'field_type'  => 'text',
@@ -185,6 +185,38 @@ class fieldTest extends base
       'field_description' => '',
       'field_title'       => '',
     ], $result);
+
+  }
+
+  /**
+   * [testOutputDataWithForm description]
+   */
+  public function testOutputDataWithForm(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'exampleform',
+      'form_action' => 'get',
+      'form_method' => '',
+    ]);
+
+    $form->addField(new \codename\core\ui\field([
+      'field_name'      => 'formfieldexample',
+      'field_type'      => 'text',
+      'field_value'     => 'formfieldexample',
+    ]));
+
+    $field = new \codename\core\ui\field([
+      'field_name'  => 'example',
+      'field_type'  => 'form',
+      'field_value' => [
+        'formfieldexample'  => 'formfieldexample',
+      ],
+      'form'            => $form,
+    ]);
+
+    $result = $field->output(true);
+    $this->assertEquals([
+      'formfieldexample'  => 'formfieldexample',
+    ], $result['field_value']);
 
   }
 
