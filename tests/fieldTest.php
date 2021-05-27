@@ -215,9 +215,51 @@ class fieldTest extends base
    */
   public function testOutput(): void {
     $field = new \codename\core\ui\field([
-      'field_name'  => 'example',
-      'field_type'  => 'text',
-      'field_value' => 'example',
+      'field_name'          => 'example',
+      'field_type'          => 'text',
+      'field_value'         => function() {
+        return 'example';
+      },
+      'field_idfield'       => 'id',
+      'field_displayfield'  => 'id',
+      'field_valuefield'    => 'name',
+      'field_elements'      => function() {
+        return [
+          [
+            'id'    => 1,
+            'name'  => 'name',
+          ]
+        ];
+      },
+    ]);
+
+    $field->setType('default');
+
+    $output = $field->output();
+    $this->assertEquals('frontend/field/default/text', $output);
+
+  }
+
+  /**
+   * [testOutputCase2 description]
+   */
+  public function testOutputCase2(): void {
+    $field = new \codename\core\ui\field([
+      'field_name'          => 'example',
+      'field_type'          => 'text',
+      'field_value'         => function() {
+        return 'example';
+      },
+      'field_displayfield'  => 'id',
+      'field_valuefield'    => 'name',
+      'field_elements'      => function() {
+        return [
+          [
+            'id'    => 1,
+            'name'  => 'name',
+          ]
+        ];
+      },
     ]);
 
     $field->setType('default');
