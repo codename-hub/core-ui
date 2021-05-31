@@ -1,8 +1,8 @@
 <?php
 namespace codename\core\ui\tests;
 
-use \codename\core\tests\base;
-use \codename\core\tests\overrideableApp;
+use \codename\core\test\base;
+use \codename\core\test\overrideableApp;
 
 class fieldsetTest extends base
 {
