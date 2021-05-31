@@ -17,6 +17,10 @@
       "twig/extensions" : "^1.5",
       "dompdf/dompdf" : "^0.8"
     },
+    "require-dev" : {
+      "phpunit/phpunit" : "^9.0",
+      "codename/core-test" : "*"
+    },
     "autoload": {
       "psr-4": {
           "codename\\core\\ui\\": "backend/class/"
