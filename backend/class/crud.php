@@ -1469,6 +1469,7 @@ class crud extends \codename\core\bootstrapInstance {
         $this->getMyModel()->saveWithChildren($data);
 
         // OLD: app::getHook()->fire(\codename\core\hook::EVENT_CRUD_CREATE_SUCCESS, $data);
+        // eventCrudBeforeSave MUST NOT modify data, due to crud mechanics. Data might be modified in eventCrudBeforeValidation or so
         $this->eventCrudSuccess->invoke($this, $data);
 
         $this->getResponse()->setData($this->getMyModel()->getPrimarykey(), $this->getMyModel()->lastInsertId());
@@ -1656,12 +1657,10 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         // OLD: $newData = app::getHook()->fire(\codename\core\hook::EVENT_CRUD_EDIT_BEFORE_SAVE, $data);
-        $newData = $this->eventCrudBeforeSave->invokeWithResult($this, $data);
-        if(is_array($newData)) {
-            $data = $newData;
-            $this->getMyModel()->entryUpdate($data);
-        }
+        // eventCrudBeforeSave MUST NOT modify data, due to crud mechanics. Data might be modified in eventCrudBeforeValidation or so
+        $this->eventCrudBeforeSave->invoke($this, $data);
 
+        $this->getMyModel()->entryUpdate($data);
         $this->getMyModel()->entrySave();
 
         // OLD:: app::getHook()->fire(\codename\core\hook::EVENT_CRUD_EDIT_SUCCESS, $data);
