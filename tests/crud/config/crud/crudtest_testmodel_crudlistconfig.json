@@ -1,10 +1,12 @@
 {
-  "tag": "exampleTag",
   "pagination": {
     "limit": 5
   },
   "customized_fields" : [
     "testmodel_testmodeljoin_id"
+  ],
+  "availableFields" : [
+    "testmodel_text"
   ],
   "visibleFields" : [
     "testmodel_text",
@@ -18,6 +20,11 @@
   "children" : [
     "testmodel_testmodeljoin"
   ],
+  "children_config" : {
+    "testmodel_testmodeljoin" : {
+      "crud" : "crudtest_testmodeljoin_crudlistconfig"
+    }
+  },
   "disabled" : [
     "testmodel_unique_single",
     "testmodel_unique_multi1",

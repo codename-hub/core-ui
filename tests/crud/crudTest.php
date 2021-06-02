@@ -29,6 +29,10 @@ class crudTest extends base {
     $this->getModel('testmodel')
       ->addFilter('testmodel_id', 0, '>')
       ->delete();
+
+    $this->getModel('testmodeljoin')
+      ->addFilter('testmodeljoin_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -98,57 +102,24 @@ class crudTest extends base {
       ]
     ]);
 
-    static::createModel('crudtest', 'testmodel', [
-      'field' => [
-        'testmodel_id',
-        'testmodel_created',
-        'testmodel_modified',
-        'testmodel_text',
-        'testmodel_unique_single',
-        'testmodel_unique_multi1',
-        'testmodel_unique_multi2',
-      ],
-      'primary' => [
-        'testmodel_id'
-      ],
-      'unique' => [
-        'testmodel_unique_single',
-        [ 'testmodel_unique_multi1', 'testmodel_unique_multi2' ],
-      ],
-      'options' => [
-        'testmodel_unique_single' => [
-          'length' => 16
-        ],
-        'testmodel_unique_multi1' => [
-          'length' => 16
-        ],
-        'testmodel_unique_multi2' => [
-          'length' => 16
-        ],
-      ],
-      'datatype' => [
-        'testmodel_id'       => 'number_natural',
-        'testmodel_created'  => 'text_timestamp',
-        'testmodel_modified' => 'text_timestamp',
-        'testmodel_text'     => 'text',
-        'testmodel_unique_single' => 'text',
-        'testmodel_unique_multi1' => 'text',
-        'testmodel_unique_multi2' => 'text',
-      ],
-      'connection' => 'default'
-    ]
-    // ,function($schema, $model, $config) {
-    //   return new \codename\core\io\tests\target\model\testmodel([]);
-    // }
+    static::createModel(
+      'crudtest', 'testmodel',
+      \codename\core\ui\tests\crud\model\testmodel::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodel([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodeljoin',
+      \codename\core\ui\tests\crud\model\testmodeljoin::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodeljoin([]);
+      }
     );
 
     static::architect('crudtest', 'codename', 'test');
   }
-
-  // public function testCrudInit(): void {
-  //   $model = $this->getModel('testmodel');
-  //   $crudInstance = new \codename\core\ui\crud($model);
-  // }
 
   /**
    * Tests basic crud init
@@ -165,97 +136,160 @@ class crudTest extends base {
   }
 
   /**
-   * [testCrudCreateForm description]
+   * [testCrudStasts description]
    */
-  public function testCrudCreateForm(): void {
+  public function testCrudStasts(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
-    $crudInstance->create();
 
-    // renderer?
-    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
+    $stats = $crudInstance->stats();
+    $this->assertEmpty($stats);
 
-    $form = $crudInstance->getForm();
-    $this->assertEquals('hidden', $form->getField('testmodel_id')->getProperty('field_type'));
-    $this->assertEquals('input', $form->getField('testmodel_text')->getProperty('field_type'));
-  }
-
-  /**
-   * [testCrudCreateFormSendSuccess description]
-   */
-  public function testCrudCreateFormSendSuccess(): void {
-    $model = $this->getModel('testmodel');
-    $crudInstance = new \codename\core\ui\crud($model);
-    $crudInstance->create();
-
-    // renderer?
-    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
-
-    $form = $crudInstance->getForm();
-
-    $formSentField = null;
-    foreach($form->getFields() as $field) {
-      // detect form sent field
-      if(strpos($field->getProperty('field_name'), 'formSent') === 0) {
-        $formSentField = $field;
-      }
-    }
-
-    // emulate a request 'submitting' the form
-    \codename\core\app::getRequest()->setData($formSentField->getProperty('field_name'), 1);
-    \codename\core\app::getRequest()->setData('testmodel_text', 'abc');
-
-    // create a new crud instance to simulate creation
-    $saveCrudInstance = new \codename\core\ui\crud($model);
-    $saveCrudInstance->create();
-
-    $res = $model->search()->getResult();
-    $this->assertCount(1, $res);
-  }
-
-  /**
-   * [testCrudEditFormSendSuccess description]
-   */
-  public function testCrudEditFormSendSuccess(): void {
-    $model = $this->getModel('testmodel');
-
-    // insert an entry and pass on PKEY for further 'editing'
-    $model->save([
-      'testmodel_text' => 'XYZ'
+    $responseData = overrideableApp::getResponse()->getData();
+    $this->assertEquals([
+      'crud_pagination_seek_enabled'  => false,
+      'crud_pagination_count'         => 0,
+      'crud_pagination_page'          => 1,
+      'crud_pagination_pages'         => 1,
+      'crud_pagination_limit'         => 5,
+    ], [
+      'crud_pagination_seek_enabled'  => $responseData['crud_pagination_seek_enabled'],
+      'crud_pagination_count'         => $responseData['crud_pagination_count'],
+      'crud_pagination_page'          => $responseData['crud_pagination_page'],
+      'crud_pagination_pages'         => $responseData['crud_pagination_pages'],
+      'crud_pagination_limit'         => $responseData['crud_pagination_limit'],
     ]);
-    $id = $model->lastInsertId();
+  }
 
+  /**
+   * [testCrudSetRequestDataAndNormalizationData description]
+   */
+  public function testCrudSetRequestDataAndNormalizationData(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, [
+      'testmodel_text'          => 'moep',
+      'testmodel_testmodeljoin' => [
+        'testmodeljoin_text'    => 'se',
+      ],
+      'wrong_field'             => 'hello'
+    ]);
+    $crudInstance->useFormNormalizationData();
+
+    $result = $crudInstance->getData();
+    $this->assertEquals([
+      'testmodel_text'          => 'moep',
+      'testmodel_testmodeljoin' => [
+        'testmodeljoin_text'    => 'se',
+      ],
+    ], $result);
+  }
+
+  /**
+   * [testCrudAddActionTopValid description]
+   */
+  public function testCrudAddActionTopValid(): void {
+    $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
-    $crudInstance->edit($id);
+    $return = $crudInstance->addTopaction([
+      'name'        => 'exampleTopName',
+      'view'        => 'exampleTopView',
+      'context'     => 'exampleTopContext',
+      'icon'        => 'exampleTopIcon',
+      'btnClass'    => 'exampleTopBtnClass',
+    ]);
 
-    // renderer?
-    $this->assertEquals('frontend/form/compact/form', \codename\core\app::getResponse()->getData('form'));
+    $this->assertEmpty($result);
+    $this->assertEquals([
+      'name'        => 'exampleTopName',
+      'view'        => 'exampleTopView',
+      'context'     => 'exampleTopContext',
+      'icon'        => 'exampleTopIcon',
+      'btnClass'    => 'exampleTopBtnClass',
+    ], $crudInstance->getConfig()->get('action>top>exampleTopName'));
+  }
 
-    $form = $crudInstance->getForm();
+  /**
+   * [testCrudAddActionBulkValid description]
+   */
+  public function testCrudAddActionBulkValid(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $return = $crudInstance->addBulkaction([
+      'name'        => 'exampleBulkName',
+      'view'        => 'exampleBulkView',
+      'context'     => 'exampleBulkContext',
+      'icon'        => 'exampleBulkIcon',
+      'btnClass'    => 'exampleBulkBtnClass',
+    ]);
 
-    // make sure we're loading the right entry
-    // and the value is prefilled
-    $this->assertEquals('XYZ', $form->getField('testmodel_text')->getConfig()->get('field_value'));
+    $this->assertEmpty($result);
+    $this->assertEquals([
+      'name'        => 'exampleBulkName',
+      'view'        => 'exampleBulkView',
+      'context'     => 'exampleBulkContext',
+      'icon'        => 'exampleBulkIcon',
+      'btnClass'    => 'exampleBulkBtnClass',
+    ], $crudInstance->getConfig()->get('action>bulk>exampleBulkName'));
+  }
 
-    $formSentField = null;
-    foreach($form->getFields() as $field) {
-      // detect form sent field
-      if(strpos($field->getProperty('field_name'), 'formSent') === 0) {
-        $formSentField = $field;
-      }
-    }
+  /**
+   * [testCrudAddActionElementValid description]
+   */
+  public function testCrudAddActionElementValid(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $return = $crudInstance->addElementaction([
+      'name'        => 'exampleElementName',
+      'view'        => 'exampleElementView',
+      'context'     => 'exampleElementContext',
+      'icon'        => 'exampleElementIcon',
+      'btnClass'    => 'exampleElementBtnClass',
+    ]);
 
-    // emulate a request 'submitting' the form
-    \codename\core\app::getRequest()->setData($formSentField->getProperty('field_name'), 1);
-    \codename\core\app::getRequest()->setData('testmodel_text', 'changed');
+    $this->assertEmpty($result);
+    $this->assertEquals([
+      'name'        => 'exampleElementName',
+      'view'        => 'exampleElementView',
+      'context'     => 'exampleElementContext',
+      'icon'        => 'exampleElementIcon',
+      'btnClass'    => 'exampleElementBtnClass',
+    ], $crudInstance->getConfig()->get('action>element>exampleElementName'));
+  }
 
-    // create a new crud instance to simulate creation
-    $saveCrudInstance = new \codename\core\ui\crud($model);
-    $saveCrudInstance->edit($id);
+  /**
+   * [testCrudAddActionTopInvalid description]
+   */
+  public function testCrudAddActionTopInvalid(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_ADDACTION_INVALIDACTIONOBJECT');
 
-    $res = $model->search()->getResult();
-    $this->assertCount(1, $res);
-    $this->assertEquals('changed', $res[0]['testmodel_text']);
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $return = $crudInstance->addTopaction([]);
+  }
+
+  /**
+   * [testCrudAddActionBulkInvalid description]
+   */
+  public function testCrudAddActionBulkInvalid(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_ADDACTION_INVALIDACTIONOBJECT');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $return = $crudInstance->addBulkaction([]);
+  }
+
+  /**
+   * [testCrudAddActionElementInvalid description]
+   */
+  public function testCrudAddActionElementInvalid(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_ADDACTION_INVALIDACTIONOBJECT');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $return = $crudInstance->addElementaction([]);
   }
 
 }
