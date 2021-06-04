@@ -3,6 +3,7 @@
   "pagination": {
     "limit": 5
   },
+  "displayFieldSelection" : true,
   "customized_fields" : [
     "testmodel_testmodeljoin_id"
   ],

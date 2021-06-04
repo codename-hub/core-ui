@@ -2,6 +2,20 @@
   "pagination": {
     "limit": 5
   },
+  "import" : {
+    "_security" : {
+      "group" : "group_true"
+    }
+  },
+  "export" : {
+    "_security" : {
+      "group" : "group_true"
+    },
+    "allowedTypes" : [
+      "json"
+    ],
+    "allowRaw" : true
+  },
   "customized_fields" : [
     "testmodel_testmodeljoin_id"
   ],

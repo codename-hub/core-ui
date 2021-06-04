@@ -1,4 +1,5 @@
 {
+  "displayFieldSelection" : true,
   "visibleFields" : [
     "testmodeljoin_text"
   ]

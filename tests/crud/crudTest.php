@@ -184,6 +184,18 @@ class crudTest extends base {
   }
 
   /**
+   * [testCrudGetData description]
+   */
+  public function testCrudGetDataNull(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+
+    $result = $crudInstance->getData('example');
+    $this->assertNull($result);
+
+  }
+
+  /**
    * [testCrudSetRequestDataAndNormalizationData description]
    */
   public function testCrudSetRequestDataAndNormalizationData(): void {
@@ -204,6 +216,88 @@ class crudTest extends base {
         'testmodeljoin_text'    => 'se',
       ],
     ], $result);
+  }
+
+  /**
+   * [testCrudImport description]
+   */
+  public function testCrudImport(): void {
+    $data = [
+      [ 'testmodel_id' => 1, 'testmodel_text' => 'example1' ],
+      [ 'testmodel_id' => 2, 'testmodel_text' => 'example2' ],
+      [ 'testmodel_id' => 3, 'testmodel_text' => 'example3' ],
+    ];
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $resultView = $crudInstance->import($data);
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $dataClean = [];
+    foreach($data as $v) {
+      unset($v['testmodel_id']);
+      $dataClean[] = $v;
+    }
+
+    $this->assertCount(3, $responseData['import_data']);
+    $this->assertEquals($dataClean, $responseData['import_data']);
+
+    $res = $model->search()->getResult();
+    $this->assertCount(3, $res);
+
+  }
+
+  /**
+   * [testCrudImportInvalid description]
+   */
+  public function testCrudImportInvalid(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('CRUD_IMPORT_INVALID_DATASET');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->import([
+      [ 'testmodel_testmodeljoin_id' => 'example' ],
+    ]);
+
+  }
+
+  /**
+   * [testCrudExport description]
+   */
+  public function testCrudExport(): void {
+    // set demo data
+    $model = $this->getModel('testmodel')->addModel($this->getModel('testmodeljoin'));
+    $model->saveWithChildren([
+      'testmodel_text'          => 'example',
+    ]);
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $resultView = $crudInstance->export(true);
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertCount(1, $responseData['rows']);
+    $this->assertNotEmpty($responseData['rows'][0]['testmodel_id']);
+    $this->assertNotEmpty($responseData['rows'][0]['testmodel_created']);
+    $this->assertEmpty($responseData['rows'][0]['testmodel_modified']);
+    $this->assertEmpty($responseData['rows'][0]['testmodel_testmodeljoin_id']);
+    $this->assertEquals('example', $responseData['rows'][0]['testmodel_text']);
+    $this->assertEmpty($responseData['rows'][0]['testmodel_unique_single']);
+    $this->assertEmpty($responseData['rows'][0]['testmodel_unique_multi1']);
+    $this->assertEmpty($responseData['rows'][0]['testmodel_unique_multi2']);
+    $this->assertNotEmpty($responseData['rows'][0]['testmodel_testmodeljoin']);
+    $this->assertEquals([
+      'testmodeljoin_id'        => null,
+      'testmodeljoin_created'   => null,
+      'testmodeljoin_modified'  => null,
+      'testmodeljoin_text'      => null,
+    ], $responseData['rows'][0]['testmodel_testmodeljoin']);
+
   }
 
   /**
