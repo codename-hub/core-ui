@@ -136,9 +136,9 @@ class crudTest extends base {
   }
 
   /**
-   * [testCrudStasts description]
+   * [testCrudStats description]
    */
-  public function testCrudStasts(): void {
+  public function testCrudStats(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
 
@@ -159,6 +159,28 @@ class crudTest extends base {
       'crud_pagination_pages'         => $responseData['crud_pagination_pages'],
       'crud_pagination_limit'         => $responseData['crud_pagination_limit'],
     ]);
+  }
+
+  /**
+   * [testCrudDisplaytypeStatic description]
+   */
+  public function testCrudDisplaytypeStatic(): void {
+    $types = [
+      'structure_address'         => 'structure_address',
+      'structure_text_telephone'  => 'structure_text_telephone',
+      'structure'                 => 'structure',
+      'boolean'                   => 'yesno',
+      'text_date'                 => 'date',
+      'text_date_birthdate'       => 'date',
+      'text_timestamp'            => 'timestamp',
+      'text_datetime_relative'    => 'relativetime',
+      'input'                     => 'input',
+      'example'                   => 'input',
+    ];
+    foreach($types as $daType => $diType) {
+      $result = \codename\core\ui\crud::getDisplaytypeStatic($daType);
+      $this->assertEquals($diType, $result);
+    }
   }
 
   /**

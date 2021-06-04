@@ -14,7 +14,15 @@
   ],
   "visibleFilters": {
     "testmodel_text" : {
-      "wildcard" : true
+      "wildcard" : true,
+      "config" : {
+        "field_config" : {
+          "field_title" : "field_config_example_title"
+        }
+      }
+    },
+    "testmodeljoin.testmodeljoin_id" : {
+      "wildcard" : false
     }
 	},
   "children" : [
@@ -30,8 +38,12 @@
     "testmodel_unique_multi1",
     "testmodel_unique_multi2"
   ],
-  "order" : {
-  },
+  "order" : [
+    {
+      "field" : "testmodel_id",
+      "direction" : "ASC"
+    }
+  ],
   "action" : {
     "crud_edit" : "example"
   }
