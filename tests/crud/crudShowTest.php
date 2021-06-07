@@ -154,7 +154,7 @@ class crudShowTest extends base {
     $this->assertEquals('exampleTag', $form->config['form_tag']);
 
     $fields = $form->getFields();
-    $this->assertCount(4, $fields);
+    $this->assertCount(6, $fields);
 
     foreach($fields as $field) {
       if(

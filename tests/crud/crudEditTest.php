@@ -154,7 +154,7 @@ class crudEditTest extends base {
     $this->assertEquals('input', $form->getField('testmodel_text')->getProperty('field_type'));
 
     $fields = $form->getFields();
-    $this->assertCount(4, $fields);
+    $this->assertCount(6, $fields);
 
     // obsolete?
     $this->assertEquals('example', \codename\core\app::getResponse()->getData('editActions'));

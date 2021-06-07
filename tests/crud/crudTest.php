@@ -141,6 +141,7 @@ class crudTest extends base {
   public function testCrudStats(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
+    \codename\core\app::getRequest()->setData($crudInstance::CRUD_FILTER_IDENTIFIER, false);
 
     $stats = $crudInstance->stats();
     $this->assertEmpty($stats);

@@ -27,9 +27,17 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_testmodeljoin_id',
       'testmodel_testmodeljoin',
       'testmodel_text',
+      'testmodel_number_natural',
+      'testmodel_flag',
       'testmodel_unique_single',
       'testmodel_unique_multi1',
       'testmodel_unique_multi2',
+    ],
+    'flag' => [
+      'example1' => 1,
+      'example2' => 2,
+      'example4' => 4,
+      'example8' => 8,
     ],
     'primary' => [
       'testmodel_id'
@@ -70,6 +78,8 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_testmodeljoin_id'  => 'number_natural',
       'testmodel_testmodeljoin'     => 'virtual',
       'testmodel_text'              => 'text',
+      'testmodel_number_natural'    => 'number_natural',
+      'testmodel_flag'              => 'number_natural',
       'testmodel_unique_single'     => 'text',
       'testmodel_unique_multi1'     => 'text',
       'testmodel_unique_multi2'     => 'text',

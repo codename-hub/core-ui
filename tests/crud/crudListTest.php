@@ -634,9 +634,9 @@ class crudListTest extends base {
   }
 
   /**
-   * [testCrudListViewPagination description]
+   * [testCrudListViewPaginationWithFilter description]
    */
-  public function testCrudListViewPagination(): void {
+  public function testCrudListViewPaginationWithFilter(): void {
     \codename\core\app::getRequest()->setData('crud_pagination_page_prev', 2);
     \codename\core\app::getRequest()->setData('crud_pagination_limit', 2);
 
@@ -644,22 +644,32 @@ class crudListTest extends base {
     $model = $this->getModel('testmodel');
     $model->saveWithChildren([
       'testmodel_text'          => 'example1',
+      'testmodel_flag'          => 1,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'example2',
+      'testmodel_flag'          => 1,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'example3',
+      'testmodel_flag'          => 1,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'example4',
+      'testmodel_flag'          => 1,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'example5',
+      'testmodel_flag'          => 1,
     ]);
 
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
+
+    \codename\core\app::getRequest()->setData($crudInstance::CRUD_FILTER_IDENTIFIER, [
+      'testmodel_flag'          => 1,
+    ]);
+
     $resultView = $crudInstance->listview();
     $this->assertEmpty($resultView);
 
@@ -688,6 +698,86 @@ class crudListTest extends base {
       'crud_pagination_pages'         => $responseData['crud_pagination_pages'],
       'crud_pagination_limit'         => $responseData['crud_pagination_limit'],
     ]);
+  }
+
+  /**
+   * [testCrudListViewFilter description]
+   */
+  public function testCrudListViewFilter(): void {
+    \codename\core\app::getRequest()->setData('crud_pagination_page_prev', 2);
+    \codename\core\app::getRequest()->setData('crud_pagination_limit', 2);
+
+    // set demo data
+    $model = $this->getModel('testmodel');
+    $model->saveWithChildren([
+      'testmodel_text'            => 'example1',
+      'testmodel_number_natural'  => 1,
+      'testmodel_flag'            => 3,
+    ]);
+    $model->saveWithChildren([
+      'testmodel_text'            => 'example2',
+      'testmodel_number_natural'  => 1,
+      'testmodel_flag'            => 3,
+    ]);
+    $model->saveWithChildren([
+      'testmodel_text'            => 'example3',
+      'testmodel_number_natural'  => 1,
+      'testmodel_flag'            => 3,
+    ]);
+    $model->saveWithChildren([
+      'testmodel_text'            => 'example4',
+      'testmodel_number_natural'  => 1,
+      'testmodel_flag'            => 3,
+    ]);
+    $model->saveWithChildren([
+      'testmodel_text'            => 'example5',
+      'testmodel_number_natural'  => 1,
+      'testmodel_flag'            => 3,
+    ]);
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->setConfig('crudtest_testmodel_filter');
+
+    // added filters
+    $now = new \DateTime('now');
+    \codename\core\app::getRequest()->setData($crudInstance::CRUD_FILTER_IDENTIFIER, [
+      'provide_filter_example'    => true,
+      'testmodel_flag'            => [ 1, 2 ],
+      'testmodel_text'            => [
+        'example2',
+        'example3',
+        'example4',
+        'example5',
+      ],
+      'testmodel_number_natural'  => 1,
+      'search'                    => 'example%',
+      'testmodel_created'         => [
+        $now->format('Y-m-d 00:00:00'),
+        $now->format('Y-m-d 23:59:59'),
+      ],
+    ]);
+
+    $crudInstance->provideFilter('provide_filter_example', [
+      'datatype' => 'text',
+    ], function(\codename\core\ui\crud $crudInstance, $filterValue) {
+      $crudInstance->getMyModel()->addFilter('testmodel_text', 'example1', '!=');
+    });
+
+    $resultView = $crudInstance->listview();
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertEquals([
+      'testmodel_text',
+      'testmodel_testmodeljoin_id',
+      'testmodel_id',
+    ], $responseData['visibleFields']);
+
+    $this->assertCount(2, $responseData['rows']);
+    $this->assertEquals('example4', $responseData['rows'][0]['testmodel_text']);
+    $this->assertEquals('example5', $responseData['rows'][1]['testmodel_text']);
   }
 
 }
