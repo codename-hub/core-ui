@@ -347,6 +347,13 @@ class crudListTest extends base {
       return $results;
     });
 
+    $crudInstance->addRowModifier(function($row) {
+      return [
+        'example1' => 'omfg!',
+        'example2' => true,
+      ];
+    });
+
     $resultView = $crudInstance->listview();
     $this->assertEmpty($resultView);
 
@@ -370,6 +377,8 @@ class crudListTest extends base {
         'example'                               => 'example',
       ],
     ], $responseData['rows']);
+
+    $this->assertEquals('example1="omfg!" example2', $responseData['rows'][0]['__modifier']);
 
     $this->assertEquals([
       'crud_pagination_seek_enabled'  => false,

@@ -302,6 +302,59 @@ class crudTest extends base {
   }
 
   /**
+   * [testCrudUseFormWithFields description]
+   */
+  public function testCrudUseFormWithFields(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->useForm('testmodel');
+    $crudInstance->useForm('testmodel'); // check for cache
+    $crudInstance->outputFormConfig = true;
+    $form = $crudInstance->makeForm(null, false);
+
+    $this->assertInstanceOf(\codename\core\ui\form::class, $form);
+
+    $fields = $form->getFields();
+    $this->assertCount(4, $fields);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[2]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[3]);
+  }
+
+  /**
+   * [testCrudUseFormWithFieldsets description]
+   */
+  public function testCrudUseFormWithFieldsets(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->useForm('testmodel_fieldsets');
+    $crudInstance->outputFormConfig = true;
+    $form = $crudInstance->makeForm(null, false);
+
+    $this->assertInstanceOf(\codename\core\ui\form::class, $form);
+
+    $fieldsets = $form->getFieldsets();
+    $this->assertCount(2, $fieldsets);
+    $this->assertInstanceOf(\codename\core\ui\fieldset::class, $fieldsets[0]);
+    $this->assertInstanceOf(\codename\core\ui\fieldset::class, $fieldsets[1]);
+
+    $fields = $fieldsets[0]->getFields();
+    $this->assertCount(2, $fields);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+
+    $fields = $fieldsets[1]->getFields();
+    $this->assertCount(6, $fields);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[2]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[3]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[4]);
+    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[5]);
+  }
+
+  /**
    * [testCrudAddActionTopValid description]
    */
   public function testCrudAddActionTopValid(): void {
