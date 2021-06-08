@@ -41,6 +41,10 @@ class crudTest extends base {
     $this->getModel('testmodelcollection')
       ->addFilter('testmodelcollection_id', 0, '>')
       ->delete();
+
+    $this->getModel('testmodelwrongflag')
+      ->addFilter('testmodelwrongflag_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -139,6 +143,13 @@ class crudTest extends base {
       \codename\core\ui\tests\crud\model\testmodelcollection::$staticConfig,
       function($schema, $model, $config) {
         return new \codename\core\ui\tests\crud\model\testmodelcollection([]);
+      }
+    );
+    static::createModel(
+      'crudtest', 'testmodelwrongflag',
+      \codename\core\ui\tests\crud\model\testmodelwrongflag::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelwrongflag([]);
       }
     );
 
@@ -255,6 +266,27 @@ class crudTest extends base {
   }
 
   /**
+   * [testCrudUseDataAndGetData description]
+   */
+  public function testCrudUseDataAndGetData(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->useData([
+      'testmodel_text'          => 'moep',
+      'testmodel_testmodeljoin' => [
+        'testmodeljoin_text'    => 'se',
+      ]
+    ]);
+    $result = $crudInstance->getData();
+    $this->assertEquals([
+      'testmodel_text'          => 'moep',
+      'testmodel_testmodeljoin' => [
+        'testmodeljoin_text'    => 'se',
+      ],
+    ], $result);
+  }
+
+  /**
    * [testCrudImport description]
    */
   public function testCrudImport(): void {
@@ -337,6 +369,56 @@ class crudTest extends base {
   }
 
   /**
+   * [testCrudMakeFormWithWrongField description]
+   */
+  public function testCrudMakeFieldForeignFieldNotFound(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_FIELDNOTFOUNDINMODEL');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $crudInstance->makeFieldForeign($model, 'example');
+  }
+
+  /**
+   * [testCrudMakeFieldFieldNotFound description]
+   */
+  public function testCrudMakeFieldFieldNotFound(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_FIELDNOTFOUNDINMODEL');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $crudInstance->makeField('example');
+  }
+
+  /**
+   * [testCrudMakeFormWithWrongField description]
+   */
+  public function testCrudMakeFormWithWrongField(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFORM_FIELDNOTFOUNDINMODEL');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $form = $crudInstance->makeForm(null, false);
+  }
+
+  /**
+   * [testCrudMakeFormWithWrongField description]
+   */
+  public function testCrudMakeFormWithWrongFlag(): void {
+    $model = $this->getModel('testmodelwrongflag');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $form = $crudInstance->makeForm(null, false);
+
+    $this->assertInstanceOf(\codename\core\ui\form::class, $form);
+
+    $fields = $form->getFields();
+    $this->assertCount(2, $fields);
+  }
+
+  /**
    * [testCrudUseFormWithFields description]
    */
   public function testCrudUseFormWithFields(): void {
@@ -346,6 +428,9 @@ class crudTest extends base {
     $crudInstance->useForm('testmodel');
     $crudInstance->useForm('testmodel'); // check for cache
     $crudInstance->outputFormConfig = true;
+    $crudInstance->onFormfieldCreated = function(\codename\core\ui\field &$field) {
+      $field->setProperty('example', 'example');
+    };
     $form = $crudInstance->makeForm(null, false);
 
     $this->assertInstanceOf(\codename\core\ui\form::class, $form);
@@ -356,6 +441,11 @@ class crudTest extends base {
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[2]);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[3]);
+
+    $this->assertEquals('example', $fields[0]->getProperty('example'));
+    $this->assertEquals('example', $fields[1]->getProperty('example'));
+    $this->assertEquals('example', $fields[2]->getProperty('example'));
+    $this->assertEquals('example', $fields[3]->getProperty('example'));
   }
 
   /**

@@ -6,9 +6,9 @@
     "testmodeljoin_text"
   ],
   "required" : [
-
+    "testmodeljoin_text"
   ],
   "readonly" : [
-
+    "testmodeljoin_id"
   ]
 }

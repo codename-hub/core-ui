@@ -170,7 +170,7 @@ class crudCreateTest extends base {
     $this->assertEquals('input', $form->getField('testmodel_text')->getProperty('field_type'));
 
     $fields = $form->getFields();
-    $this->assertCount(7, $fields);
+    $this->assertCount(8, $fields);
   }
 
   /**

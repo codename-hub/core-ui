@@ -18,6 +18,9 @@
         "testmodel_text"
       ]
     },
+    "testmodel_boolean" : {
+      "wildcard" : false
+    },
     "testmodel_created" : {
       "wildcard" : false
     },

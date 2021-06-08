@@ -29,6 +29,7 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_testmodelcollection',
       'testmodel_text',
       'testmodel_number_natural',
+      'testmodel_boolean',
       'testmodel_flag',
       'testmodel_unique_single',
       'testmodel_unique_multi1',
@@ -72,6 +73,9 @@ class testmodel extends \codename\core\test\sqlModel {
         'display' => '{$element["testmodeljoin_text"]}'
       ],
     ],
+    'required' => [
+      'testmodel_text'
+    ],
     'options' => [
       'testmodel_unique_single' => [
         'length' => 16
@@ -92,6 +96,7 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_testmodelcollection' => 'virtual',
       'testmodel_text'              => 'text',
       'testmodel_number_natural'    => 'number_natural',
+      'testmodel_boolean'           => 'boolean',
       'testmodel_flag'              => 'number_natural',
       'testmodel_unique_single'     => 'text',
       'testmodel_unique_multi1'     => 'text',

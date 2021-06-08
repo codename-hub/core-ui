@@ -31,6 +31,12 @@
     "testmodel_unique_multi1",
     "testmodel_unique_multi2"
   ],
+  "required" : [
+    "testmodel_text"
+  ],
+  "readonly" : [
+    "testmodel_id"
+  ],
   "order" : {
   },
   "action" : {

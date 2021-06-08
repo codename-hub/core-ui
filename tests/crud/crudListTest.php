@@ -218,7 +218,6 @@ class crudListTest extends base {
     ], $responseData['visibleFields']);
 
     $this->assertInstanceOf(\codename\core\ui\form::class, $responseData['filterform']);
-
   }
 
   /**
@@ -227,6 +226,16 @@ class crudListTest extends base {
   public function testCrudListConfigWithSeparateConfig(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
+
+    $crudInstance->onCreateFormfield = function(array &$fielddata) {
+      $fielddata['field_example'] = 'example';
+    };
+    $crudInstance->onFormfieldCreated = function(\codename\core\ui\field &$field) {
+      if($field->getProperty('field_example') === 'example') {
+        $field->setProperty('field_example', 'example2');
+      }
+    };
+
     $crudInstance->setConfig('crudtest_testmodel_crudlistconfig');
 
     $crudInstance->addTopaction([
@@ -298,6 +307,12 @@ class crudListTest extends base {
     ], $responseData['visibleFields']);
 
     $this->assertInstanceOf(\codename\core\ui\form::class, $responseData['filterform']);
+
+    $fields = $responseData['filterform']->getFields();
+    $this->assertCount(3, $fields);
+
+    // only by foreign fields
+    $this->assertEquals('example2', $fields[1]->getProperty('field_example'));
 
   }
 
@@ -435,6 +450,39 @@ class crudListTest extends base {
       'crud_pagination_pages'         => $responseData['crud_pagination_pages'],
       'crud_pagination_limit'         => $responseData['crud_pagination_limit'],
     ]);
+  }
+
+  /**
+   * [testCrudListViewWithSetResultData description]
+   */
+  public function testCrudListViewWithSetResultData(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->setResultData([
+      [
+        'testmodel_text'              => 'example',
+      ],
+    ]);
+
+
+    $resultView = $crudInstance->listview();
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertEquals([
+      'testmodel_text',
+      'testmodel_testmodeljoin_id',
+      'testmodel_id',
+    ], $responseData['visibleFields']);
+
+    $this->assertEquals([
+      [
+        'testmodel_text'              => 'example',
+        'testmodel_testmodeljoin_id'  => null,
+        'testmodel_id'                => null,
+      ],
+    ], $responseData['rows']);
   }
 
   /**
