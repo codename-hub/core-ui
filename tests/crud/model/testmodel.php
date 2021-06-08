@@ -26,6 +26,7 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_modified',
       'testmodel_testmodeljoin_id',
       'testmodel_testmodeljoin',
+      'testmodel_testmodelcollection',
       'testmodel_text',
       'testmodel_number_natural',
       'testmodel_flag',
@@ -50,6 +51,17 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_testmodeljoin' => [
         'type' => 'foreign',
         'field' => 'testmodel_testmodeljoin_id',
+      ],
+      'testmodel_testmodelcollection' => [
+        'type' => 'collection',
+        'field' => 'testmodel_testmodeljoin_id',
+      ]
+    ],
+    'collection' => [
+      'testmodel_testmodelcollection' => [
+        'schema' => 'crudtest',
+        'model' => 'testmodelcollection',
+        'key' => 'testmodelcollection_testmodel_id',
       ]
     ],
     'foreign' => [
@@ -77,6 +89,7 @@ class testmodel extends \codename\core\test\sqlModel {
       'testmodel_modified'          => 'text_timestamp',
       'testmodel_testmodeljoin_id'  => 'number_natural',
       'testmodel_testmodeljoin'     => 'virtual',
+      'testmodel_testmodelcollection' => 'virtual',
       'testmodel_text'              => 'text',
       'testmodel_number_natural'    => 'number_natural',
       'testmodel_flag'              => 'number_natural',

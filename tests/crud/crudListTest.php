@@ -34,8 +34,13 @@ class crudListTest extends base {
       ->addFilter('testmodeljoin_id', 0, '>')
       ->delete();
 
-    // overrideableApp::resetRequest();
-    // overrideableApp::resetResponse();
+    $this->getModel('testmodelforcejoin')
+      ->addFilter('testmodelforcejoin_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelcollection')
+      ->addFilter('testmodelcollection_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -126,6 +131,22 @@ class crudListTest extends base {
       \codename\core\ui\tests\crud\model\testmodeljoin::$staticConfig,
       function($schema, $model, $config) {
         return new \codename\core\ui\tests\crud\model\testmodeljoin([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelforcejoin',
+      \codename\core\ui\tests\crud\model\testmodelforcejoin::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelforcejoin([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelcollection',
+      \codename\core\ui\tests\crud\model\testmodelcollection::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelcollection([]);
       }
     );
 
@@ -301,6 +322,26 @@ class crudListTest extends base {
   }
 
   /**
+   * [testCrudListConfigDisplaySelectedFieldsWithForceJoin description]
+   */
+  public function testCrudListConfigDisplaySelectedFieldsWithForceJoin(): void {
+    \codename\core\app::getRequest()->setData('display_selectedfields', [ 'testmodelforcejoin_text' ]);
+
+    $model = $this->getModel('testmodelforcejoin');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $resultConfig = $crudInstance->listconfig();
+    $this->assertEmpty($resultConfig);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertEquals([
+      'testmodelforcejoin_text',
+      'testmodelforcejoin_id',
+    ], $responseData['visibleFields']);
+
+  }
+
+  /**
    * [testCrudListConfigImportAndExport description]
    */
   public function testCrudListConfigImportAndExport(): void {
@@ -375,6 +416,7 @@ class crudListTest extends base {
         'testmodel_testmodeljoin_id'            => '1',
         'testmodel_id'                          => '1',
         'example'                               => 'example',
+        '__modifier'                            => 'example1="omfg!" example2',
       ],
     ], $responseData['rows']);
 

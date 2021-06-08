@@ -33,6 +33,14 @@ class crudShowTest extends base {
     $this->getModel('testmodeljoin')
       ->addFilter('testmodeljoin_id', 0, '>')
       ->delete();
+
+    $this->getModel('testmodelforcejoin')
+      ->addFilter('testmodelforcejoin_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelcollection')
+      ->addFilter('testmodelcollection_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -118,6 +126,22 @@ class crudShowTest extends base {
       }
     );
 
+    static::createModel(
+      'crudtest', 'testmodelforcejoin',
+      \codename\core\ui\tests\crud\model\testmodelforcejoin::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelforcejoin([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelcollection',
+      \codename\core\ui\tests\crud\model\testmodelcollection::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelcollection([]);
+      }
+    );
+
     static::architect('crudtest', 'codename', 'test');
   }
 
@@ -154,7 +178,7 @@ class crudShowTest extends base {
     $this->assertEquals('exampleTag', $form->config['form_tag']);
 
     $fields = $form->getFields();
-    $this->assertCount(6, $fields);
+    $this->assertCount(7, $fields);
 
     foreach($fields as $field) {
       if(

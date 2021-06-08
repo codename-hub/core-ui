@@ -5,31 +5,30 @@
   },
   "displayFieldSelection" : true,
   "customized_fields" : [
-    "testmodel_testmodeljoin_id"
+    "testmodelforcejoin_testmodeljoin_id"
   ],
   "visibleFields" : [
-    "testmodel_text",
-    "testmodel_testmodeljoin_id"
+    "testmodelforcejoin_text",
+    "testmodelforcejoin_testmodeljoin_id"
   ],
   "visibleFilters": {
-    "testmodel_text" : {
+    "testmodelforcejoin_text" : {
       "wildcard" : true
     }
 	},
   "children" : [
-    "testmodel_testmodeljoin",
-    "testmodel_testmodelcollection"
+    "testmodelforcejoin_testmodeljoin"
   ],
   "children_config" : {
-    "testmodel_testmodeljoin" : {
+    "testmodelforcejoin_testmodeljoin" : {
       "crud" : "crudtest_testmodeljoin",
       "form" : "testmodeljoin"
     }
   },
   "disabled" : [
-    "testmodel_unique_single",
-    "testmodel_unique_multi1",
-    "testmodel_unique_multi2"
+    "testmodelforcejoin_unique_single",
+    "testmodelforcejoin_unique_multi1",
+    "testmodelforcejoin_unique_multi2"
   ],
   "order" : {
   },

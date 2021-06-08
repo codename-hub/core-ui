@@ -17,11 +17,10 @@
     }
 	},
   "children" : [
-    "testmodel_testmodeljoin",
-    "testmodel_testmodelcollection"
+    "wrong_children"
   ],
   "children_config" : {
-    "testmodel_testmodeljoin" : {
+    "wrong_children" : {
       "crud" : "crudtest_testmodeljoin",
       "form" : "testmodeljoin"
     }

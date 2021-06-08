@@ -33,6 +33,14 @@ class crudTest extends base {
     $this->getModel('testmodeljoin')
       ->addFilter('testmodeljoin_id', 0, '>')
       ->delete();
+
+    $this->getModel('testmodelforcejoin')
+      ->addFilter('testmodelforcejoin_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelcollection')
+      ->addFilter('testmodelcollection_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -118,6 +126,22 @@ class crudTest extends base {
       }
     );
 
+    static::createModel(
+      'crudtest', 'testmodelforcejoin',
+      \codename\core\ui\tests\crud\model\testmodelforcejoin::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelforcejoin([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelcollection',
+      \codename\core\ui\tests\crud\model\testmodelcollection::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelcollection([]);
+      }
+    );
+
     static::architect('crudtest', 'codename', 'test');
   }
 
@@ -133,6 +157,17 @@ class crudTest extends base {
 
     // just test, if it doesn't crash
     $crudInstance->create();
+  }
+
+  /**
+   * [testCrudInitWrongChildrenConfig description]
+   */
+  public function testCrudInitWrongChildrenConfig(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_CRUD_CHILDREN_CONFIG_MODEL_CONFIG_CHILDREN_IS_NULL');
+
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_children');
   }
 
   /**
@@ -307,6 +342,7 @@ class crudTest extends base {
   public function testCrudUseFormWithFields(): void {
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->setConfigCache(true);
     $crudInstance->useForm('testmodel');
     $crudInstance->useForm('testmodel'); // check for cache
     $crudInstance->outputFormConfig = true;

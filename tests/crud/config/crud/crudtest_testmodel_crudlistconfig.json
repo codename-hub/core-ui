@@ -44,7 +44,8 @@
   ],
   "children_config" : {
     "testmodel_testmodeljoin" : {
-      "crud" : "crudtest_testmodeljoin_crudlistconfig"
+      "crud" : "crudtest_testmodeljoin_crudlistconfig",
+      "form" : "testmodeljoin"
     }
   },
   "disabled" : [
