@@ -2327,7 +2327,7 @@ class crud extends \codename\core\bootstrapInstance {
         }
 
         // Decode object datatypes
-        if(strpos($fielddata['field_type'], 'bject_') != false) {
+        if(strpos($fielddata['field_type'], 'bject_') !== false) {
             $fielddata['field_value'] = app::object2array(json_decode($fielddata['field_value']));
         }
         if ($this->getMyModel()->config->exists("required") && in_array($field, $this->getMymodel()->config->get("required"))) {
