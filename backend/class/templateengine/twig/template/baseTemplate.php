@@ -4,7 +4,7 @@ namespace codename\core\ui\templateengine\twig\template;
 /**
  * Provides integration of the core frameworks routing component with Twig.
  * */
-abstract class baseTemplate extends \Twig_Template
+abstract class baseTemplate extends \Twig\Template
 {
   /**
    * @inheritDoc

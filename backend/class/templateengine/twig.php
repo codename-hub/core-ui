@@ -80,7 +80,8 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
       if($vendor != 'corename' && $app != 'core') {
-        $dir = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
+        $appDir = app::getHomedir($vendor, $app);
+        $dir = $appDir . 'frontend/';
 
         // the frontend root dir has to exist
         // otherwise, we're adding it to the paths
@@ -219,7 +220,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderStringSandboxed(string $template, array $variableContext) : string {
-    $twigTemplate = $this->twigInstance->create($template);
+    $twigTemplate = $this->twigInstance->createTemplate($template);
     return $twigTemplate->render($variableContext);
   }
 
