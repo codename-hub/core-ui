@@ -1,8 +1,6 @@
 {
   "displayFieldSelection" : true,
   "visibleFields" : [
-    "testmodeljoin_text"
-  ],
-  "order" : [
+    "testmodelcollection_text"
   ]
 }

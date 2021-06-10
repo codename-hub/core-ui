@@ -2105,7 +2105,7 @@ class crud extends \codename\core\bootstrapInstance {
 
       // Modify field to be a reference dropdown
       if(array_key_exists('foreign', $modelconfig) && array_key_exists($field, $modelconfig['foreign'])) {
-          if(!app::getValidator('structure_config_modelreference')->isValid($modelconfig['foreign'][$field])) {
+          if(!app::getValidator('structure_config_modelreference')->reset()->isValid($modelconfig['foreign'][$field])) {
               throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDREFERENCEOBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $modelconfig['foreign'][$field]);
           }
 
@@ -2119,7 +2119,7 @@ class crud extends \codename\core\bootstrapInstance {
           if(!($elements instanceof \codename\rest\model\exposesRemoteApiInterface) || !isset($foreign['remote_source'])) {
             if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
                 foreach ($foreign['order'] as $order) {
-                    if(!app::getValidator('structure_config_modelorder')->isValid($order)) {
+                    if(!app::getValidator('structure_config_modelorder')->reset()->isValid($order)) {
                         throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $order);
                     }
                     $elements->addOrder($order['field'], $order['direction']);
@@ -2128,7 +2128,7 @@ class crud extends \codename\core\bootstrapInstance {
 
             if(array_key_exists('filter', $foreign) && is_array($foreign['filter'])) {
                 foreach ($foreign['filter'] as $filter) {
-                    if(!app::getValidator('structure_config_modelfilter')->isValid($filter)) {
+                    if(!app::getValidator('structure_config_modelfilter')->reset()->isValid($filter)) {
                         throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
                     }
                     if($filter['field'] == $elements->getIdentifier() . '_flag') {
@@ -2335,7 +2335,7 @@ class crud extends \codename\core\bootstrapInstance {
 
         // Modify field to be a reference dropdown
         if(array_key_exists('foreign', $modelconfig) && array_key_exists($field, $modelconfig['foreign'])) {
-            if(!app::getValidator('structure_config_modelreference')->isValid($modelconfig['foreign'][$field])) {
+            if(!app::getValidator('structure_config_modelreference')->reset()->isValid($modelconfig['foreign'][$field])) {
                 throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDREFERENCEOBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $modelconfig['foreign'][$field]);
             }
 
@@ -2349,7 +2349,7 @@ class crud extends \codename\core\bootstrapInstance {
             if(!($elements instanceof \codename\rest\model\exposesRemoteApiInterface) || !isset($foreign['remote_source'])) {
               if(array_key_exists('order', $foreign) && is_array($foreign['order'])) {
                   foreach ($foreign['order'] as $order) {
-                      if(!app::getValidator('structure_config_modelorder')->isValid($order)) {
+                      if(!app::getValidator('structure_config_modelorder')->reset()->isValid($order)) {
                           throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $order);
                       }
                       $elements->addOrder($order['field'], $order['direction']);
@@ -2358,7 +2358,7 @@ class crud extends \codename\core\bootstrapInstance {
 
               if(array_key_exists('filter', $foreign) && is_array($foreign['filter'])) {
                   foreach ($foreign['filter'] as $filter) {
-                      if(!app::getValidator('structure_config_modelfilter')->isValid($filter)) {
+                      if(!app::getValidator('structure_config_modelfilter')->reset()->isValid($filter)) {
                           throw new \codename\core\exception(self::EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $filter);
                       }
                       if($filter['field'] == $elements->getIdentifier() . '_flag') {
@@ -2547,7 +2547,7 @@ class crud extends \codename\core\bootstrapInstance {
      * @todo use really abstract and usable action value-object in here.
      */
     protected function addAction(string $type, array $action) {
-        if(count($errors = app::getValidator('structure_config_crud_action')->validate($action)) > 0) {
+        if(count($errors = app::getValidator('structure_config_crud_action')->reset()->validate($action)) > 0) {
             throw new \codename\core\exception(self::EXCEPTION_ADDACTION_INVALIDACTIONOBJECT, \codename\core\exception::$ERRORLEVEL_ERROR, $errors);
         }
 

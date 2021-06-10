@@ -45,6 +45,22 @@ class crudTest extends base {
     $this->getModel('testmodelwrongflag')
       ->addFilter('testmodelwrongflag_id', 0, '>')
       ->delete();
+
+    $this->getModel('testmodelwrongforeign')
+      ->addFilter('testmodelwrongforeign_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelwrongforeignorder')
+      ->addFilter('testmodelwrongforeignorder_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelwrongforeignfilter')
+      ->addFilter('testmodelwrongforeignfilter_id', 0, '>')
+      ->delete();
+
+    $this->getModel('testmodelcollectionforeign')
+      ->addFilter('testmodelcollectionforeign_id', 0, '>')
+      ->delete();
   }
 
   /**
@@ -145,11 +161,44 @@ class crudTest extends base {
         return new \codename\core\ui\tests\crud\model\testmodelcollection([]);
       }
     );
+
     static::createModel(
       'crudtest', 'testmodelwrongflag',
       \codename\core\ui\tests\crud\model\testmodelwrongflag::$staticConfig,
       function($schema, $model, $config) {
         return new \codename\core\ui\tests\crud\model\testmodelwrongflag([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelwrongforeign',
+      \codename\core\ui\tests\crud\model\testmodelwrongforeign::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelwrongforeign([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelwrongforeignorder',
+      \codename\core\ui\tests\crud\model\testmodelwrongforeignorder::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelwrongforeignorder([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelwrongforeignfilter',
+      \codename\core\ui\tests\crud\model\testmodelwrongforeignfilter::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelwrongforeignfilter([]);
+      }
+    );
+
+    static::createModel(
+      'crudtest', 'testmodelcollectionforeign',
+      \codename\core\ui\tests\crud\model\testmodelcollectionforeign::$staticConfig,
+      function($schema, $model, $config) {
+        return new \codename\core\ui\tests\crud\model\testmodelcollectionforeign([]);
       }
     );
 
@@ -376,7 +425,7 @@ class crudTest extends base {
     $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_FIELDNOTFOUNDINMODEL');
 
     $model = $this->getModel('testmodel');
-    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
     $crudInstance->makeFieldForeign($model, 'example');
   }
 
@@ -388,8 +437,102 @@ class crudTest extends base {
     $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_FIELDNOTFOUNDINMODEL');
 
     $model = $this->getModel('testmodel');
-    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
     $crudInstance->makeField('example');
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidReferenceObject description]
+   */
+  public function testCrudMakeFieldForeignInvalidReferenceObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDREFERENCEOBJECT');
+
+    $model = $this->getModel('testmodelwrongforeign');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeFieldForeign($model, 'testmodelwrongforeign_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidOrderObject description]
+   */
+  public function testCrudMakeFieldForeignInvalidOrderObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT');
+
+    $model = $this->getModel('testmodelwrongforeignorder');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeFieldForeign($model, 'testmodelwrongforeignorder_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidFilterObject description]
+   */
+  public function testCrudMakeFieldForeignInvalidFilterObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT');
+
+    $model = $this->getModel('testmodelwrongforeignfilter');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeFieldForeign($model, 'testmodelwrongforeignfilter_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldForeign description]
+   */
+  public function testCrudMakeFieldForeignForeign(): void {
+    $model = $this->getModel('testmodelcollectionforeign');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $field = $crudInstance->makeFieldForeign($model, 'testmodelcollectionforeign_testmodel_id');
+
+    $this->assertInstanceOf(\codename\core\ui\field::class, $field);
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidReferenceObject description]
+   */
+  public function testCrudMakeFieldInvalidReferenceObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDREFERENCEOBJECT');
+
+    $model = $this->getModel('testmodelwrongforeign');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeField('testmodelwrongforeign_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidOrderObject description]
+   */
+  public function testCrudMakeFieldInvalidOrderObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDORDEROBJECT');
+
+    $model = $this->getModel('testmodelwrongforeignorder');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeField('testmodelwrongforeignorder_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldInvalidFilterObject description]
+   */
+  public function testCrudMakeFieldInvalidFilterObject(): void {
+    $this->expectException(\codename\core\exception::class);
+    $this->expectExceptionMessage('EXCEPTION_MAKEFIELD_INVALIDFILTEROBJECT');
+
+    $model = $this->getModel('testmodelwrongforeignfilter');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
+    $crudInstance->makeField('testmodelwrongforeignfilter_testmodeljoin_id');
+  }
+
+  /**
+   * [testCrudMakeFieldForeign description]
+   */
+  public function testCrudMakeFieldForeign(): void {
+    $model = $this->getModel('testmodelcollectionforeign');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $field = $crudInstance->makeField('testmodelcollectionforeign_testmodel_id');
+
+    $this->assertInstanceOf(\codename\core\ui\field::class, $field);
   }
 
   /**
@@ -400,7 +543,7 @@ class crudTest extends base {
     $this->expectExceptionMessage('EXCEPTION_MAKEFORM_FIELDNOTFOUNDINMODEL');
 
     $model = $this->getModel('testmodel');
-    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_wrong_field');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_not_found');
     $form = $crudInstance->makeForm(null, false);
   }
 
