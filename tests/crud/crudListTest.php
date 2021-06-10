@@ -453,32 +453,96 @@ class crudListTest extends base {
   }
 
   /**
-   * [testCrudListViewWithSetResultData description]
+   * [testCrudListViewSmall description]
    */
-  public function testCrudListViewWithSetResultData(): void {
-    $model = $this->getModel('testmodel');
-    $crudInstance = new \codename\core\ui\crud($model);
-    $crudInstance->setResultData([
-      [
-        'testmodel_text'              => 'example',
-      ],
+  public function testCrudListViewSmall(): void {
+    // set demo data
+    $model = $this->getModel('testmodeljoin');
+    $model->save([
+      'testmodeljoin_text'    => 'example',
     ]);
 
-
+    $model = $this->getModel('testmodeljoin');
+    $crudInstance = new \codename\core\ui\crud($model);
     $resultView = $crudInstance->listview();
     $this->assertEmpty($resultView);
 
     $responseData = overrideableApp::getResponse()->getData();
 
     $this->assertEquals([
-      'testmodel_text',
+      'testmodeljoin_text',
+      'testmodeljoin_id',
+    ], $responseData['visibleFields']);
+
+    $this->assertCount(1, $responseData['rows']);
+    $this->assertEquals('example', $responseData['rows'][0]['testmodeljoin_text']);
+
+  }
+
+  /**
+   * [testCrudListViewSmallWithRowModifier description]
+   */
+  public function testCrudListViewSmallWithRowModifier(): void {
+    // set demo data
+    $model = $this->getModel('testmodeljoin');
+    $model->save([
+      'testmodeljoin_text'    => 'example',
+    ]);
+
+    $model = $this->getModel('testmodeljoin');
+    $crudInstance = new \codename\core\ui\crud($model);
+    $crudInstance->addRowModifier(function($row) {
+      return [
+        'example1' => 'omfg!',
+        'example2' => true,
+      ];
+    });
+    $resultView = $crudInstance->listview();
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertEquals([
+      'testmodeljoin_text',
+      'testmodeljoin_id',
+    ], $responseData['visibleFields']);
+
+    $this->assertCount(1, $responseData['rows']);
+    $this->assertEquals('example', $responseData['rows'][0]['testmodeljoin_text']);
+    $this->assertEquals('example1="omfg!" example2', $responseData['rows'][0]['__modifier']);
+
+  }
+
+  /**
+   * [testCrudListViewWithSetResultData description]
+   */
+  public function testCrudListViewWithSetResultData(): void {
+    $model = $this->getModel('testmodel');
+    $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_is_array');
+    $crudInstance->setProvideRawData(true);
+    $crudInstance->setResultData([
+      [
+        'testmodel_text'              => [
+          'example' => 'example',
+        ],
+      ],
+    ]);
+    $resultView = $crudInstance->listview();
+    $this->assertEmpty($resultView);
+
+    $responseData = overrideableApp::getResponse()->getData();
+
+    $this->assertEquals([
+      [ 'testmodel_text', 'example' ],
       'testmodel_testmodeljoin_id',
       'testmodel_id',
     ], $responseData['visibleFields']);
 
     $this->assertEquals([
       [
-        'testmodel_text'              => 'example',
+        'testmodel_text'              => [
+          'example' => 'example',
+        ],
         'testmodel_testmodeljoin_id'  => null,
         'testmodel_id'                => null,
       ],
@@ -547,7 +611,7 @@ class crudListTest extends base {
         'testmodel_id'                          => '2',
         'testmodel_text'                        => 'moepse',
         'testmodel_testmodeljoin_id_FORMATTED'  => 'se',
-        'testmodel_testmodeljoin_id'            => '2',
+        'testmodel_testmodeljoin_id'            => '4',
         'example'                               => 'example',
       ],
     ], $responseData['rows']);
