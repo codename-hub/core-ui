@@ -121,20 +121,21 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     if(!empty($config['sandbox_enabled']) && $config['sandbox_enabled']) {
       $globalSandbox = !empty($config['sandbox_mode']) && $config['sandbox_mode'] == 'global';
 
-      // array $allowedTags = array(),
-      // array $allowedFilters = array(),
-      // array $allowedMethods = array(),
-      // array $allowedProperties = array(),
-      // array $allowedFunctions = array())
+      $allowedTags        = $config['sandbox']['tags'] ?? [];
+      $allowedFilters     = $config['sandbox']['filters'] ?? [ 'escape' ]; // auto-escape needs this at all times
+      $allowedMethods     = $config['sandbox']['methods'] ?? [];
+      $allowedProperties  = $config['sandbox']['properties'] ?? [];
+      $allowedFunctions   = $config['sandbox']['functions'] ?? [];
 
-      $policy = new \Twig_Sandbox_SecurityPolicy([
-        'tags' => $config['sandbox']['tags'] ?? [],
-        'filters' => $config['sandbox']['filters'] ?? [],
-        'methods' => $config['sandbox']['methods'] ?? [],
-        'properties' => $config['sandbox']['properties'] ?? [],
-        'functions' => $config['sandbox']['functions'] ?? []
-      ]);
-      $extensions[] = new \Twig_Extension_Sandbox($policy, $globalSandbox);
+      $policy = new \Twig\Sandbox\SecurityPolicy(
+        $allowedTags,
+        $allowedFilters,
+        $allowedMethods,
+        $allowedProperties,
+        $allowedFunctions
+      );
+
+      $extensions[] = $this->sandboxExtensionInstance = new \Twig\Extension\SandboxExtension($policy, $globalSandbox);
     }
 
     $this->twigInstance->setExtensions($extensions);
@@ -194,6 +195,12 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   }
 
   /**
+   * [protected description]
+   * @var \Twig\Extension\SandboxExtension
+   */
+  protected $sandboxExtensionInstance = null;
+
+  /**
    * adds a function available during the render process
    * @param string   $name     [description]
    * @param callable $function [description]
@@ -209,8 +216,27 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderSandboxed(string $referencePath, array $variableContext) : string {
+    if(!$this->sandboxExtensionInstance) {
+      throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
+    }
+
+    // Store sandbox state
+    $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+
+    // enable sandbox for a brief moment
+    if(!$prevSandboxState) {
+      $this->sandboxExtensionInstance->enableSandbox();
+    }
+
     $twigTemplate = $this->twigInstance->load($referencePath);
-    return $twigTemplate->render($variableContext);
+    $rendered = $twigTemplate->render($variableContext);
+
+    // disable sandbox again, if it has been disabled before
+    if(!$prevSandboxState) {
+      $this->sandboxExtensionInstance->disableSandbox();
+    }
+
+    return $rendered;
   }
 
   /**
@@ -220,8 +246,27 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderStringSandboxed(string $template, array $variableContext) : string {
+    if(!$this->sandboxExtensionInstance) {
+      throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
+    }
+
+    // Store sandbox state
+    $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+
+    // enable sandbox for a brief moment
+    if(!$prevSandboxState) {
+      $this->sandboxExtensionInstance->enableSandbox();
+    }
+
     $twigTemplate = $this->twigInstance->createTemplate($template);
-    return $twigTemplate->render($variableContext);
+    $rendered = $twigTemplate->render($variableContext);
+
+    // disable sandbox again, if it has been disabled before
+    if(!$prevSandboxState) {
+      $this->sandboxExtensionInstance->disableSandbox();
+    }
+
+    return $rendered;
   }
 
   /**
