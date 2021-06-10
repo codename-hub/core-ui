@@ -326,6 +326,18 @@ class twigTest extends base {
   }
 
   /**
+   * Tests dynamic (non-sandboxed) template inclusion
+   * using full context passthrough
+   */
+  public function testIncludeTemplateFromString(): void {
+    $rendered = app::getTemplateEngine()->render('test_templates/test_include_template_from_string', [
+      'template'      => 'TemplateRendered: {{ data.someVariable }}',
+      'someVariable'  => 'def123',
+    ]);
+    $this->assertEquals("TemplateRendered: def123\n", $rendered);
+  }
+
+  /**
    * Tests some core-ui provided Twig-"tests"
    * (usage with varname is <...> )
    */
