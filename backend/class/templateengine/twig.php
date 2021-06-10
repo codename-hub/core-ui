@@ -122,7 +122,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       $globalSandbox = !empty($config['sandbox_mode']) && $config['sandbox_mode'] == 'global';
 
       $allowedTags        = $config['sandbox']['tags'] ?? [];
-      $allowedFilters     = $config['sandbox']['filters'] ?? [ 'escape' ]; // auto-escape needs this at all times
+      $allowedFilters     = array_merge($config['sandbox']['filters'] ?? [], [ 'escape' ]); // auto-escape needs this at all times
       $allowedMethods     = $config['sandbox']['methods'] ?? [];
       $allowedProperties  = $config['sandbox']['properties'] ?? [];
       $allowedFunctions   = $config['sandbox']['functions'] ?? [];
@@ -136,6 +136,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       );
 
       $extensions[] = $this->sandboxExtensionInstance = new \Twig\Extension\SandboxExtension($policy, $globalSandbox);
+    }
+
+    //
+    // Special sandbox overide for compatibility
+    // allows executing renderStringSandboxed without really using the sandbox
+    //
+    if(($config['sandbox_enabled'] ?? null) === false & (($config['sandbox_mode'] ?? null) === 'override')) {
+      $this->sandboxOverride = true;
     }
 
     $this->twigInstance->setExtensions($extensions);
@@ -201,6 +209,12 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   protected $sandboxExtensionInstance = null;
 
   /**
+   * Sandbox mode override
+   * @var bool
+   */
+  protected $sandboxOverride = false;
+
+  /**
    * adds a function available during the render process
    * @param string   $name     [description]
    * @param callable $function [description]
@@ -216,15 +230,18 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderSandboxed(string $referencePath, array $variableContext) : string {
-    if(!$this->sandboxExtensionInstance) {
+
+    if(!$this->sandboxOverride && !$this->sandboxExtensionInstance) {
       throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
     }
 
-    // Store sandbox state
-    $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    if(!$this->sandboxOverride) {
+      // Store sandbox state
+      $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    }
 
     // enable sandbox for a brief moment
-    if(!$prevSandboxState) {
+    if(!$this->sandboxOverride && !$prevSandboxState) {
       $this->sandboxExtensionInstance->enableSandbox();
     }
 
@@ -232,7 +249,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $rendered = $twigTemplate->render($variableContext);
 
     // disable sandbox again, if it has been disabled before
-    if(!$prevSandboxState) {
+    if(!$this->sandboxOverride && !$prevSandboxState) {
       $this->sandboxExtensionInstance->disableSandbox();
     }
 
@@ -246,15 +263,17 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderStringSandboxed(string $template, array $variableContext) : string {
-    if(!$this->sandboxExtensionInstance) {
+    if(!$this->sandboxOverride && !$this->sandboxExtensionInstance) {
       throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
     }
 
-    // Store sandbox state
-    $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    if(!$this->sandboxOverride) {
+      // Store sandbox state
+      $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    }
 
     // enable sandbox for a brief moment
-    if(!$prevSandboxState) {
+    if(!$this->sandboxOverride && !$prevSandboxState) {
       $this->sandboxExtensionInstance->enableSandbox();
     }
 
@@ -262,7 +281,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     $rendered = $twigTemplate->render($variableContext);
 
     // disable sandbox again, if it has been disabled before
-    if(!$prevSandboxState) {
+    if(!$this->sandboxOverride && !$prevSandboxState) {
       $this->sandboxExtensionInstance->disableSandbox();
     }
 

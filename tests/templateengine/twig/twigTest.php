@@ -159,6 +159,19 @@ class twigTest extends base {
   }
 
   /**
+   * Overriding the sandbox
+   */
+  public function testSandboxOverride(): void {
+    $instance = new \codename\core\ui\templateengine\twig([
+      'sandbox_enabled' => false,
+      'sandbox_mode'    => 'override',
+    ]);
+    app::getResponse()->setData('key', 'yes');
+    $rendered = $instance->renderStringSandboxed('{{ sandboxedVariable }} {{ response.getData("key") }}', [ 'sandboxedVariable' => 'foo' ]);
+    $this->assertEquals("foo yes", $rendered);
+  }
+
+  /**
    * [testStringTemplate description]
    */
   public function testStringTemplate(): void {
