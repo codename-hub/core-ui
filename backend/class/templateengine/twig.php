@@ -10,6 +10,49 @@ use \codename\core\ui\templateengine\twig\extension;
 class twig extends \codename\core\templateengine implements \codename\core\clientInterface {
 
   /**
+   * Default global sandbox
+   * with some minimalistic stuff
+   * allowing include + template_from_string
+   * @var array
+   */
+  public const DefaultConfigSandboxGlobalWithIncludes = [
+    'sandbox_enabled' => true,
+    'sandbox_mode'    => 'global',
+    'sandbox' => [
+      'tags' => [
+        'if',
+        'for',
+      ],
+      'functions' => [
+        'include',
+        'template_from_string',
+      ],
+    ]
+  ];
+
+  /**
+   * Default sandbox
+   * with some minimalistic stuff
+   * allowing include + template_from_string
+   * only enabled when using sandbox rendering explicitly
+   * @var array
+   */
+  public const DefaultConfigSandboxWithIncludes = [
+    'sandbox_enabled' => true,
+    'sandbox_mode'    => null,
+    'sandbox' => [
+      'tags' => [
+        'if',
+        'for',
+      ],
+      'functions' => [
+        'include',
+        'template_from_string',
+      ],
+    ]
+  ];
+
+  /**
    * its very own client name
    * @var [type]
    */
