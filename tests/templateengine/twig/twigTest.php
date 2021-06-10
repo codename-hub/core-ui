@@ -208,6 +208,26 @@ class twigTest extends base {
   }
 
   /**
+   * [testDefectiveTemplateSyntaxError description]
+   */
+  public function testDefectiveTemplateSyntaxError(): void {
+    $this->expectException(\Twig\Error\SyntaxError::class);
+    $rendered = app::getTemplateEngine()->render('test_templates/test_defective_syntax_error', []);
+  }
+
+  /**
+   * [testDefectiveTemplateRuntimeError description]
+   */
+  public function testDefectiveTemplateRuntimeError(): void {
+    $this->expectExceptionMessage('Crash');
+    $instance = new \codename\core\ui\templateengine\twig([]);
+    $instance->addFunction('crashingFunction', function() {
+      throw new \Exception('Crash');
+    });
+    $rendered = $instance->render('test_templates/test_defective_crashingFunction', []);
+  }
+
+  /**
    * Tests config with a differing file extension
    */
   public function testOtherTemplateFileExtension(): void {
@@ -328,6 +348,20 @@ class twigTest extends base {
     $this->assertEquals("0", $rendered);
     $rendered = $instance->renderStringSandboxed('{{ value is string ? 1 : 0 }}', [ 'value' => '123' ]);
     $this->assertEquals("1", $rendered);
+  }
+
+  /**
+   * [testRenderView description]
+   */
+  public function testRenderView(): void {
+    $this->markTestIncomplete('renderView makes only sense when used in conjunction with app lifecycle');
+  }
+
+  /**
+   * [testRenderTemplate description]
+   */
+  public function testRenderTemplate(): void {
+    $this->markTestIncomplete('renderView makes only sense when used in conjunction with app lifecycle');
   }
 
 
