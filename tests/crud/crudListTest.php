@@ -517,6 +517,11 @@ class crudListTest extends base {
    * [testCrudListViewWithSetResultData description]
    */
   public function testCrudListViewWithSetResultData(): void {
+    $model = $this->getModel('testmodeljoin');
+    $model->save([
+      'testmodeljoin_text'    => 'example',
+    ]);
+
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model, null, 'crudtest_testmodel_field_is_array');
     $crudInstance->setProvideRawData(true);
@@ -525,6 +530,7 @@ class crudListTest extends base {
         'testmodel_text'              => [
           'example' => 'example',
         ],
+        'testmodel_testmodeljoin_id'  => [ 1, 2, 3, 4, 5 ],
       ],
     ]);
     $resultView = $crudInstance->listview();
@@ -543,10 +549,11 @@ class crudListTest extends base {
         'testmodel_text'              => [
           'example' => 'example',
         ],
-        'testmodel_testmodeljoin_id'  => null,
+        'testmodel_testmodeljoin_id'  => [ 1, 2, 3, 4, 5 ],
+        'testmodel_testmodeljoin_id_FORMATTED' => 'example',
         'testmodel_id'                => null,
       ],
-    ], $responseData['rows']);
+    ], $responseData['rows'], json_encode($responseData['rows']));
   }
 
   /**
@@ -611,7 +618,7 @@ class crudListTest extends base {
         'testmodel_id'                          => '2',
         'testmodel_text'                        => 'moepse',
         'testmodel_testmodeljoin_id_FORMATTED'  => 'se',
-        'testmodel_testmodeljoin_id'            => '4',
+        'testmodel_testmodeljoin_id'            => '5',
         'example'                               => 'example',
       ],
     ], $responseData['rows']);
@@ -700,12 +707,15 @@ class crudListTest extends base {
     $model = $this->getModel('testmodel');
     $model->saveWithChildren([
       'testmodel_text'          => 'moepse1',
+      'testmodel_flag'          => 1,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'moepse2',
+      'testmodel_flag'          => 2,
     ]);
     $model->saveWithChildren([
       'testmodel_text'          => 'moepse3',
+      'testmodel_flag'          => 4,
     ]);
 
     \codename\core\app::getRequest()->setData('crud_pagination_first_id', 1);
@@ -721,7 +731,9 @@ class crudListTest extends base {
 
     $this->assertCount(2, $responseData['rows']);
     $this->assertEquals('moepse1', $responseData['rows'][0]['testmodel_text']);
+    $this->assertEquals(1, $responseData['rows'][0]['testmodel_flag']);
     $this->assertEquals('moepse2', $responseData['rows'][1]['testmodel_text']);
+    $this->assertEquals(2, $responseData['rows'][1]['testmodel_flag']);
 
   }
 

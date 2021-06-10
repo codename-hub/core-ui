@@ -4,7 +4,8 @@
     "limit": 2
   },
   "visibleFields" : [
-    "testmodel_text"
+    "testmodel_text",
+    "testmodel_flag"
   ],
   "disabled" : [
     "testmodel_unique_single",
