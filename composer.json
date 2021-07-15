@@ -15,7 +15,7 @@
       "codename/core" : "*",
       "twig/twig" : "2.13.1",
       "twig/extensions" : "^1.5",
-      "dompdf/dompdf" : "^0.8"
+      "dompdf/dompdf" : "^1.0"
     },
     "require-dev" : {
       "phpunit/phpunit" : "^9.0",

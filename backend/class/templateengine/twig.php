@@ -107,6 +107,10 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       throw new exception("CORE_TEMPLATEENGINE_TWIG_CLASS_DOES_NOT_EXIST", exception::$ERRORLEVEL_FATAL);
     }
 
+    // Default asset dir
+    // required for explicit images, css, etc. referenced from template
+    $config['assets_path'] = $config['assets_path'] ?? 'twig_assets_path';
+
     parent::__construct($config);
 
     if(!empty($config['template_file_extension'])) {
@@ -221,6 +225,57 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       return is_string($value);
     }));
 
+
+    $assetsTempDir = $this->getAssetsPath();
+
+    //
+    // This is meant mostly for internal rendering purposes
+    //
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('asset_path', function(\Twig\Environment $env, $name, bool $ignoreMissing = true) use ($assetsTempDir) {
+
+      $template = null;
+      // TODO: limit debug_backtrace ?
+      foreach (debug_backtrace() as $trace) {
+      if (isset($trace['object']) && $trace['object'] instanceof \Twig\Template && 'Twig_Template' !== get_class($trace['object'])) {
+          $template = $trace['object'];
+        }
+      }
+
+      $path = null;
+      if($template) {
+        $templateName = $template->getTemplateName();
+        $dir = pathinfo($templateName, PATHINFO_DIRNAME);
+        foreach(app::getAppstack() as $app) {
+          $path = realpath($tryPath = app::getHomedir($app['vendor'], $app['app']).'/frontend/'.$dir.'/'.$name);
+          if($path !== false) {
+            break;
+          }
+        }
+      }
+
+      if($path) {
+
+        $hash = md5($path);
+        $filename = pathinfo($name, PATHINFO_BASENAME);
+        $tmpFile = $hash.'_'.$filename;
+        $tmpFilePath = $assetsTempDir.$tmpFile;
+        if(!app::getFilesystem()->fileAvailable($tmpFilePath)) {
+          // copy to temp dir
+          if(!app::getFilesystem()->fileCopy($path, $tmpFilePath)) {
+            throw new exception('ASSET_COPY_FAILED', exception::$ERRORLEVEL_ERROR);
+          }
+        } else {
+          // exists. we MAY check integrity?
+        }
+
+        return $tmpFilePath;
+      } else {
+        // error, not found?
+      }
+    }, [
+      'needs_environment' => true,
+    ]));
+
     $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadleft', function($string, $pad_length, $pad_string = " ") {
       return str_pad($string, $pad_length, $pad_string, STR_PAD_LEFT);
     }));
@@ -243,6 +298,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
         return \codename\core\helper\clicolors::getInstance()->getColoredString($value, $color);
       }));
     }
+  }
+
+  /**
+   * @inheritDoc
+   */
+  public function getAssetsPath(): string
+  {
+    return sys_get_temp_dir() . '/' . ($this->config->get('assets_path') ?? 'twig_assets_path') . '/';
   }
 
   /**
