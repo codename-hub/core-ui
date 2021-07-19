@@ -526,12 +526,18 @@ class form implements \JsonSerializable {
 
     /**
      * Adds a $fieldset to the instance
-     * @param fieldset $fieldset
+     * @param fieldset  $fieldset
+     * @param int       $position [position where to insert the fieldset; -1 is last, -2 the second last]
      * @return form
      */
-    public function addFieldset(fieldset $fieldset) : form {
-        $this->fieldsets[] = $fieldset;
+    public function addFieldset(fieldset $fieldset, int $position = -1) : form {
+      if($position !== -1) {
+        array_splice($this->fieldsets, $position, 0, [ $fieldset ]);
         return $this;
+      } else {
+        array_push($this->fieldsets, $fieldset);
+        return $this;
+      }
     }
 
     /**
