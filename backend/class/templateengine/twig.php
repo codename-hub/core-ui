@@ -236,12 +236,14 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       $template = null;
       // TODO: limit debug_backtrace ?
       foreach (debug_backtrace() as $trace) {
-      if (isset($trace['object']) && $trace['object'] instanceof \Twig\Template && 'Twig_Template' !== get_class($trace['object'])) {
+        if (isset($trace['object']) && $trace['object'] instanceof \Twig\Template && 'Twig_Template' !== get_class($trace['object'])) {
           $template = $trace['object'];
+          break; // break on first one.
         }
       }
 
       $path = null;
+      $dir = null;
       if($template) {
         $templateName = $template->getTemplateName();
         $dir = pathinfo($templateName, PATHINFO_DIRNAME);
@@ -271,6 +273,7 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
         return $tmpFilePath;
       } else {
         // error, not found?
+        throw new exception('ASSET_UNAVAILABLE', exception::$ERRORLEVEL_ERROR, $name);
       }
     }, [
       'needs_environment' => true,
