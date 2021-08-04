@@ -1,0 +1,65 @@
+{
+  "pagination": {
+    "limit": 5
+  },
+  "import" : {
+    "_security" : {
+      "group" : "group_true"
+    }
+  },
+  "export" : {
+    "_security" : {
+      "group" : "group_true"
+    },
+    "allowedTypes" : [
+      "json"
+    ],
+    "allowRaw" : true
+  },
+  "customized_fields" : [
+    "testmodel_testmodeljoin_id"
+  ],
+  "availableFields" : [
+    "testmodel_text"
+  ],
+  "visibleFields" : [
+    "testmodel_text",
+    "testmodel_testmodeljoin_id"
+  ],
+  "visibleFilters": {
+    "testmodel_text" : {
+      "wildcard" : true,
+      "config" : {
+        "field_config" : {
+          "field_title" : "field_config_example_title"
+        }
+      }
+    },
+    "testmodeljoin.testmodeljoin_id" : {
+      "wildcard" : false
+    }
+	},
+  "children" : [
+    "testmodel_testmodeljoin"
+  ],
+  "children_config" : {
+    "testmodel_testmodeljoin" : {
+      "crud" : "crudtest_testmodeljoin_crudlistconfig",
+      "form" : "testmodeljoin"
+    }
+  },
+  "disabled" : [
+    "testmodel_unique_single",
+    "testmodel_unique_multi1",
+    "testmodel_unique_multi2"
+  ],
+  "order" : [
+    {
+      "field" : "testmodel_id",
+      "direction" : "ASC"
+    }
+  ],
+  "action" : {
+    "crud_edit" : "example"
+  }
+}

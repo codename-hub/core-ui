@@ -1,0 +1,20 @@
+{
+  "tag" : "example",
+  "children_config" : {
+    "testmodel_testmodeljoin" : {
+      "crud" : "crudtest_testmodeljoin",
+      "form" : "testmodeljoin"
+    }
+  },
+  "field" : [
+    "testmodel_flag",
+    "testmodel_text",
+    "testmodel_number_natural"
+  ],
+  "required" : [
+
+  ],
+  "readonly" : [
+
+  ]
+}

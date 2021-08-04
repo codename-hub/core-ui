@@ -1,0 +1,45 @@
+{
+  "tag": "exampleTag",
+  "pagination": {
+    "limit": 5
+  },
+  "displayFieldSelection" : true,
+  "customized_fields" : [
+    "testmodel_testmodeljoin_id"
+  ],
+  "visibleFields" : [
+    "testmodel_text",
+    "testmodel_testmodeljoin_id"
+  ],
+  "visibleFilters": {
+    "testmodel_text" : {
+      "wildcard" : true
+    }
+	},
+  "children" : [
+    "testmodel_testmodeljoin",
+    "testmodel_testmodelcollection"
+  ],
+  "children_config" : {
+    "testmodel_testmodeljoin" : {
+      "crud" : "crudtest_testmodeljoin",
+      "form" : "testmodeljoin"
+    }
+  },
+  "disabled" : [
+    "testmodel_unique_single",
+    "testmodel_unique_multi1",
+    "testmodel_unique_multi2"
+  ],
+  "required" : [
+    "testmodel_text"
+  ],
+  "readonly" : [
+    "testmodel_id"
+  ],
+  "order" : {
+  },
+  "action" : {
+    "crud_edit" : "example"
+  }
+}

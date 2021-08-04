@@ -41,7 +41,7 @@ abstract class element {
    * @param array $config [description]
    */
   public function __construct(array $config = array(), array $data = array()) {
-    if(count($errors = $this->getValidator()->validate($config)) === 0) {
+    if(count($errors = $this->getValidator()->reset()->validate($config)) === 0) {
       $this->config = new \codename\core\config($config);
     } else {
       throw new exception(self::EXCEPTION_CORE_UI_FRONTEND_ELEMENT_INVALID_CONFIG, exception::$ERRORLEVEL_ERROR, $config);

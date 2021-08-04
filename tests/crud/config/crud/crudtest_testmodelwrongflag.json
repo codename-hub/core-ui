@@ -1,0 +1,12 @@
+{
+  "tag": "exampleTag",
+  "pagination": {
+    "limit": 5
+  },
+  "visibleFields" : [
+    "testmodel_text",
+    "testmodel_flag"
+  ],
+  "order" : {
+  }
+}

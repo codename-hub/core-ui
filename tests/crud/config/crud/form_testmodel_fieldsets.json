@@ -1,0 +1,22 @@
+{
+  "fieldset" : {
+    "fieldset1" : {
+      "field" : [
+        "testmodel_id",
+        "testmodel_text"
+      ]
+    },
+    "fieldset2" : {
+      "field" : [
+        "testmodel_flag",
+        "testmodel_number_natural"
+      ]
+    }
+  },
+  "required" : [
+
+  ],
+  "readonly" : [
+
+  ]
+}

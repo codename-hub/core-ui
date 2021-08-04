@@ -10,6 +10,49 @@ use \codename\core\ui\templateengine\twig\extension;
 class twig extends \codename\core\templateengine implements \codename\core\clientInterface {
 
   /**
+   * Default global sandbox
+   * with some minimalistic stuff
+   * allowing include + template_from_string
+   * @var array
+   */
+  public const DefaultConfigSandboxGlobalWithIncludes = [
+    'sandbox_enabled' => true,
+    'sandbox_mode'    => 'global',
+    'sandbox' => [
+      'tags' => [
+        'if',
+        'for',
+      ],
+      'functions' => [
+        'include',
+        'template_from_string',
+      ],
+    ]
+  ];
+
+  /**
+   * Default sandbox
+   * with some minimalistic stuff
+   * allowing include + template_from_string
+   * only enabled when using sandbox rendering explicitly
+   * @var array
+   */
+  public const DefaultConfigSandboxWithIncludes = [
+    'sandbox_enabled' => true,
+    'sandbox_mode'    => null,
+    'sandbox' => [
+      'tags' => [
+        'if',
+        'for',
+      ],
+      'functions' => [
+        'include',
+        'template_from_string',
+      ],
+    ]
+  ];
+
+  /**
    * its very own client name
    * @var [type]
    */
@@ -64,6 +107,10 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       throw new exception("CORE_TEMPLATEENGINE_TWIG_CLASS_DOES_NOT_EXIST", exception::$ERRORLEVEL_FATAL);
     }
 
+    // Default asset dir
+    // required for explicit images, css, etc. referenced from template
+    $config['assets_path'] = $config['assets_path'] ?? 'twig_assets_path';
+
     parent::__construct($config);
 
     if(!empty($config['template_file_extension'])) {
@@ -80,7 +127,8 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       $vendor = $parentapp['vendor'];
       $app = $parentapp['app'];
       if($vendor != 'corename' && $app != 'core') {
-        $dir = CORE_VENDORDIR . $vendor . '/' . $app . '/' . 'frontend/';
+        $appDir = app::getHomedir($vendor, $app);
+        $dir = $appDir . 'frontend/';
 
         // the frontend root dir has to exist
         // otherwise, we're adding it to the paths
@@ -120,20 +168,29 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
     if(!empty($config['sandbox_enabled']) && $config['sandbox_enabled']) {
       $globalSandbox = !empty($config['sandbox_mode']) && $config['sandbox_mode'] == 'global';
 
-      // array $allowedTags = array(),
-      // array $allowedFilters = array(),
-      // array $allowedMethods = array(),
-      // array $allowedProperties = array(),
-      // array $allowedFunctions = array())
+      $allowedTags        = $config['sandbox']['tags'] ?? [];
+      $allowedFilters     = array_merge($config['sandbox']['filters'] ?? [], [ 'escape' ]); // auto-escape needs this at all times
+      $allowedMethods     = $config['sandbox']['methods'] ?? [];
+      $allowedProperties  = $config['sandbox']['properties'] ?? [];
+      $allowedFunctions   = $config['sandbox']['functions'] ?? [];
 
-      $policy = new \Twig_Sandbox_SecurityPolicy([
-        'tags' => $config['sandbox']['tags'] ?? [],
-        'filters' => $config['sandbox']['filters'] ?? [],
-        'methods' => $config['sandbox']['methods'] ?? [],
-        'properties' => $config['sandbox']['properties'] ?? [],
-        'functions' => $config['sandbox']['functions'] ?? []
-      ]);
-      $extensions[] = new \Twig_Extension_Sandbox($policy, $globalSandbox);
+      $policy = new \Twig\Sandbox\SecurityPolicy(
+        $allowedTags,
+        $allowedFilters,
+        $allowedMethods,
+        $allowedProperties,
+        $allowedFunctions
+      );
+
+      $extensions[] = $this->sandboxExtensionInstance = new \Twig\Extension\SandboxExtension($policy, $globalSandbox);
+    }
+
+    //
+    // Special sandbox overide for compatibility
+    // allows executing renderStringSandboxed without really using the sandbox
+    //
+    if(($config['sandbox_enabled'] ?? null) === false & (($config['sandbox_mode'] ?? null) === 'override')) {
+      $this->sandboxOverride = true;
     }
 
     $this->twigInstance->setExtensions($extensions);
@@ -168,6 +225,60 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
       return is_string($value);
     }));
 
+
+    $assetsTempDir = $this->getAssetsPath();
+
+    //
+    // This is meant mostly for internal rendering purposes
+    //
+    $this->twigInstance->addFunction(new \Twig\TwigFunction('asset_path', function(\Twig\Environment $env, $name, bool $ignoreMissing = true) use ($assetsTempDir) {
+
+      $template = null;
+      // TODO: limit debug_backtrace ?
+      foreach (debug_backtrace() as $trace) {
+        if (isset($trace['object']) && $trace['object'] instanceof \Twig\Template && 'Twig_Template' !== get_class($trace['object'])) {
+          $template = $trace['object'];
+          break; // break on first one.
+        }
+      }
+
+      $path = null;
+      $dir = null;
+      if($template) {
+        $templateName = $template->getTemplateName();
+        $dir = pathinfo($templateName, PATHINFO_DIRNAME);
+        foreach(app::getAppstack() as $app) {
+          $path = realpath($tryPath = app::getHomedir($app['vendor'], $app['app']).'/frontend/'.$dir.'/'.$name);
+          if($path !== false) {
+            break;
+          }
+        }
+      }
+
+      if($path) {
+
+        $hash = md5($path);
+        $filename = pathinfo($name, PATHINFO_BASENAME);
+        $tmpFile = $hash.'_'.$filename;
+        $tmpFilePath = $assetsTempDir.$tmpFile;
+        if(!app::getFilesystem()->fileAvailable($tmpFilePath)) {
+          // copy to temp dir
+          if(!app::getFilesystem()->fileCopy($path, $tmpFilePath)) {
+            throw new exception('ASSET_COPY_FAILED', exception::$ERRORLEVEL_ERROR);
+          }
+        } else {
+          // exists. we MAY check integrity?
+        }
+
+        return $tmpFilePath;
+      } else {
+        // error, not found?
+        throw new exception('ASSET_UNAVAILABLE', exception::$ERRORLEVEL_ERROR, $name);
+      }
+    }, [
+      'needs_environment' => true,
+    ]));
+
     $this->twigInstance->addFunction(new \Twig\TwigFunction('strpadleft', function($string, $pad_length, $pad_string = " ") {
       return str_pad($string, $pad_length, $pad_string, STR_PAD_LEFT);
     }));
@@ -193,6 +304,26 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
   }
 
   /**
+   * @inheritDoc
+   */
+  public function getAssetsPath(): string
+  {
+    return sys_get_temp_dir() . '/' . ($this->config->get('assets_path') ?? 'twig_assets_path') . '/';
+  }
+
+  /**
+   * [protected description]
+   * @var \Twig\Extension\SandboxExtension
+   */
+  protected $sandboxExtensionInstance = null;
+
+  /**
+   * Sandbox mode override
+   * @var bool
+   */
+  protected $sandboxOverride = false;
+
+  /**
    * adds a function available during the render process
    * @param string   $name     [description]
    * @param callable $function [description]
@@ -208,8 +339,30 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderSandboxed(string $referencePath, array $variableContext) : string {
+
+    if(!$this->sandboxOverride && !$this->sandboxExtensionInstance) {
+      throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
+    }
+
+    if(!$this->sandboxOverride) {
+      // Store sandbox state
+      $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    }
+
+    // enable sandbox for a brief moment
+    if(!$this->sandboxOverride && !$prevSandboxState) {
+      $this->sandboxExtensionInstance->enableSandbox();
+    }
+
     $twigTemplate = $this->twigInstance->load($referencePath);
-    return $twigTemplate->render($variableContext);
+    $rendered = $twigTemplate->render($variableContext);
+
+    // disable sandbox again, if it has been disabled before
+    if(!$this->sandboxOverride && !$prevSandboxState) {
+      $this->sandboxExtensionInstance->disableSandbox();
+    }
+
+    return $rendered;
   }
 
   /**
@@ -219,8 +372,29 @@ class twig extends \codename\core\templateengine implements \codename\core\clien
    * @return string                  [description]
    */
   public function renderStringSandboxed(string $template, array $variableContext) : string {
-    $twigTemplate = $this->twigInstance->create($template);
-    return $twigTemplate->render($variableContext);
+    if(!$this->sandboxOverride && !$this->sandboxExtensionInstance) {
+      throw new exception('TEMPLATEENGINE_TWIG_NO_SANDBOX_INSTANCE', exception::$ERRORLEVEL_ERROR);
+    }
+
+    if(!$this->sandboxOverride) {
+      // Store sandbox state
+      $prevSandboxState = $this->sandboxExtensionInstance->isSandboxed();
+    }
+
+    // enable sandbox for a brief moment
+    if(!$this->sandboxOverride && !$prevSandboxState) {
+      $this->sandboxExtensionInstance->enableSandbox();
+    }
+
+    $twigTemplate = $this->twigInstance->createTemplate($template);
+    $rendered = $twigTemplate->render($variableContext);
+
+    // disable sandbox again, if it has been disabled before
+    if(!$this->sandboxOverride && !$prevSandboxState) {
+      $this->sandboxExtensionInstance->disableSandbox();
+    }
+
+    return $rendered;
   }
 
   /**

@@ -1,0 +1,38 @@
+{
+  "tag": "exampleTag",
+  "pagination": {
+    "limit": 5
+  },
+  "displayFieldSelection" : true,
+  "customized_fields" : [
+    "testmodelforcejoin_testmodeljoin_id"
+  ],
+  "visibleFields" : [
+    "testmodelforcejoin_text",
+    "testmodelforcejoin_testmodeljoin_id"
+  ],
+  "visibleFilters": {
+    "testmodelforcejoin_text" : {
+      "wildcard" : true
+    }
+	},
+  "children" : [
+    "testmodelforcejoin_testmodeljoin"
+  ],
+  "children_config" : {
+    "testmodelforcejoin_testmodeljoin" : {
+      "crud" : "crudtest_testmodeljoin",
+      "form" : "testmodeljoin"
+    }
+  },
+  "disabled" : [
+    "testmodelforcejoin_unique_single",
+    "testmodelforcejoin_unique_multi1",
+    "testmodelforcejoin_unique_multi2"
+  ],
+  "order" : {
+  },
+  "action" : {
+    "crud_edit" : "example"
+  }
+}

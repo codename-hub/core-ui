@@ -113,7 +113,7 @@ class form implements \JsonSerializable {
      * @return form
      */
     public function __CONSTRUCT(array $data) {
-        if (count($errors = app::getValidator('structure_config_form')->validate($data)) > 0) {
+        if (count($errors = app::getValidator('structure_config_form')->reset()->validate($data)) > 0) {
             throw new \codename\core\exception(self::EXCEPTION_CONSTRUCT_CONFIGURATIONINVALID, \codename\core\exception::$ERRORLEVEL_FATAL, $errors);
         }
 
@@ -526,12 +526,18 @@ class form implements \JsonSerializable {
 
     /**
      * Adds a $fieldset to the instance
-     * @param fieldset $fieldset
+     * @param fieldset  $fieldset
+     * @param int       $position [position where to insert the fieldset; -1 is last, -2 the second last]
      * @return form
      */
-    public function addFieldset(fieldset $fieldset) : form {
-        $this->fieldsets[] = $fieldset;
+    public function addFieldset(fieldset $fieldset, int $position = -1) : form {
+      if($position !== -1) {
+        array_splice($this->fieldsets, $position, 0, [ $fieldset ]);
         return $this;
+      } else {
+        array_push($this->fieldsets, $fieldset);
+        return $this;
+      }
     }
 
     /**
