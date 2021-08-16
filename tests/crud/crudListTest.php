@@ -381,13 +381,16 @@ class crudListTest extends base {
    */
   public function testCrudListView(): void {
     // set demo data
-    $model = $this->getModel('testmodel')->addModel($this->getModel('testmodeljoin'));
+    $model = $this->getModel('testmodel')->addModel($joinedModel = $this->getModel('testmodeljoin'));
     $model->saveWithChildren([
       'testmodel_text'          => 'moep',
       'testmodel_testmodeljoin' => [
         'testmodeljoin_text'    => 'se',
       ]
     ]);
+
+    $rootId = $model->lastInsertId();
+    $joinedId = $joinedModel->lastInsertId();
 
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
@@ -428,8 +431,8 @@ class crudListTest extends base {
       [
         'testmodel_text'                        => 'moepse',
         'testmodel_testmodeljoin_id_FORMATTED'  => 'se',
-        'testmodel_testmodeljoin_id'            => '1',
-        'testmodel_id'                          => '1',
+        'testmodel_testmodeljoin_id'            => $joinedId,
+        'testmodel_id'                          => $rootId,
         'example'                               => 'example',
         '__modifier'                            => 'example1="omfg!" example2',
       ],
