@@ -2728,7 +2728,7 @@ class crud extends \codename\core\bootstrapInstance {
                   // field is an array: object path
                   //
                   if(is_array($field)) {
-                    $object = \codename\core\io\helper\deepaccess::set($object, $field, $o[0]);
+                    $object = \codename\core\helper\deepaccess::set($object, $field, $o[0]);
                     continue;
                   }
                   // @NOTE: we're differentiating between a pre-formatted and a raw value here:
@@ -2797,7 +2797,7 @@ class crud extends \codename\core\bootstrapInstance {
     protected function getFieldoutput(array $row, $field) {
 
         if(is_array($field)) {
-          return [\codename\core\io\helper\deepaccess::get($row, $field)];
+          return [\codename\core\helper\deepaccess::get($row, $field)];
         }
 
         if(array_key_exists($field, $this->modifiers)) {
