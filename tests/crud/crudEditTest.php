@@ -57,7 +57,7 @@ class crudEditTest extends base {
     $app->__setApp('crudtest');
     $app->__setVendor('codename');
     $app->__setNamespace('\\codename\\core\\ui\\tests\\crud');
-    $app->__setHomedir('codename/core-ui/tests/crud');
+    $app->__setHomedir(__DIR__);
 
     $app->getAppstack();
 

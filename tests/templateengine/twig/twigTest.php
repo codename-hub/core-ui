@@ -50,7 +50,7 @@ class twigTest extends base {
     $app->__setApp('twigtest');
     $app->__setVendor('codename');
     $app->__setNamespace('\\codename\\core\\ui\\tests\\templateengine\\twig');
-    $app->__setHomedir('codename/core-ui/tests/templateengine/twig');
+    $app->__setHomedir(__DIR__);
 
     $app->getAppstack();
 
