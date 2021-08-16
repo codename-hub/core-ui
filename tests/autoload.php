@@ -25,16 +25,7 @@ if(file_exists($globalBootstrap)) {
   echo("Including autoloader at " . $globalBootstrap . chr(10) );
   require_once $globalBootstrap;
 } else {
-  die("ERROR: No global bootstrap.cli.php found. You might want to initialize your cross-project autoloader using the root composer.json first." . chr(10) );
-}
-
-// core autoloader, to inherit test classes
-$coreAutoload = realpath(__DIR__.'/../../core/vendor/autoload.php');
-if(file_exists($coreAutoload)) {
-  echo("Including autoloader at " . $coreAutoload . chr(10) );
-  require_once $coreAutoload;
-} else {
-  die("ERROR: No core vendor/autoloader.php found. Please call \"composer dump-autoload\" in the core directory." . chr(10) );
+  // die("ERROR: No global bootstrap.cli.php found. You might want to initialize your cross-project autoloader using the root composer.json first." . chr(10) );
 }
 
 // local autoloader
@@ -43,5 +34,36 @@ if(file_exists($localAutoload)) {
   echo("Including autoloader at " . $localAutoload . chr(10) );
   require_once $localAutoload;
 } else {
-  die("ERROR: No local vendor/autoloader.php found. Please call \"composer dump-autoload\" in this directory." . chr(10) );
+  // die("ERROR: No local vendor/autoloader.php found. Please call \"composer dump-autoload\" in this directory." . chr(10) );
 }
+
+//
+// This allows having only a local autoloader and no global one
+// (e.g. single-project unit testing)
+//
+if(!file_exists($globalBootstrap) && !file_exists($localAutoload)){
+  die("ERROR: No global bootstrap.cli.php or local vendor/autoloader.php found. You might want to initialize your cross-project or single-project autoloader first." . chr(10) );
+}
+
+if(!$globalBootstrap) {
+  // Fallback to this project's vendor dir (and add a slash at the end - because realpath doesn't add it)
+  DEFINE("CORE_VENDORDIR", realpath(DIRNAME(__FILE__) . '/../vendor/').'/');
+}
+
+// Explicitly reset any appdata left
+// or implicitly re-init base data.
+\codename\core\test\overrideableApp::reset();
+
+//
+// Special quirk for single-project unit testing
+// We need to override the homedir for this app
+// as the framework itself assumes it resides in composer's vendor dir
+//
+// Additionally, we need to do this every time the appstack gets initialized in the tests
+// and only if this app is used, somehow.
+//
+\codename\core\app::getHook()->add(\codename\core\app::EVENT_APP_APPSTACK_AVAILABLE, function() {
+  \codename\core\test\overrideableApp::__modifyAppstackEntry('codename', 'core-ui', [
+    'homedir' => realpath(__DIR__.'/../'), // One dir up (project root)
+  ]);
+});
