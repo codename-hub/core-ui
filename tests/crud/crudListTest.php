@@ -564,13 +564,16 @@ class crudListTest extends base {
     \codename\core\app::getRequest()->setData('crud_pagination_limit', 10);
 
     // set demo data
-    $model = $this->getModel('testmodel')->addModel($this->getModel('testmodeljoin'));
+    $model = $this->getModel('testmodel')->addModel($joinedModel = $this->getModel('testmodeljoin'));
     $model->saveWithChildren([
       'testmodel_text'          => 'moep',
       'testmodel_testmodeljoin' => [
         'testmodeljoin_text'    => 'se',
       ]
     ]);
+
+    $rootId = $model->lastInsertId();
+    $joinedId = $joinedModel->lastInsertId();
 
     $model = $this->getModel('testmodel');
     $crudInstance = new \codename\core\ui\crud($model);
@@ -615,10 +618,10 @@ class crudListTest extends base {
 
     $this->assertEquals([
       [
-        'testmodel_id'                          => '2',
+        'testmodel_id'                          => $rootId,
         'testmodel_text'                        => 'moepse',
         'testmodel_testmodeljoin_id_FORMATTED'  => 'se',
-        'testmodel_testmodeljoin_id'            => '5',
+        'testmodel_testmodeljoin_id'            => $joinedId,
         'example'                               => 'example',
       ],
     ], $responseData['rows']);
