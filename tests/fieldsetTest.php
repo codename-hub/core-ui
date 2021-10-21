@@ -156,4 +156,36 @@ class fieldsetTest extends base
     $this->assertEquals('frontend/fieldset/default', $output);
   }
 
+  /**
+   * Tests \JsonSerializable Interface integrity
+   */
+  public function testJsonSerialize(): void {
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'             => 'example',
+      'fieldset_name'           => 'example',
+      'fieldset_name_override'  => 'example_override',
+    ]);
+
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'example',
+      'field_type'  => 'text',
+      'field_value' => 'example',
+    ]));
+
+    $fieldset->setType('default');
+
+    $outputData = $fieldset->output(true);
+
+    $jsonData = json_decode(json_encode($fieldset), true);
+
+    $this->assertEquals('example', $jsonData['fieldset_id']);
+    $this->assertEquals('example_override', $jsonData['fieldset_name']);
+
+    $this->assertCount(1, $jsonData['fields']);
+    $fieldData = $jsonData['fields'][0];
+    $this->assertEquals('example', $fieldData['field_name']);
+    $this->assertEquals('text', $fieldData['field_type']);
+    $this->assertEquals('example', $fieldData['field_value']);
+  }
+
 }

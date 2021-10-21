@@ -689,4 +689,46 @@ class formTest extends base
     $this->assertNull($field);
   }
 
+  /**
+   * [testJsonSerialize description]
+   */
+  public function testJsonSerialize(): void {
+    $form = new \codename\core\ui\form([
+      'form_id'     => 'serialized_form',
+      'form_action' => '',
+      'form_method' => '',
+    ]);
+
+    $form->addField(new \codename\core\ui\field([
+      'field_name'  => 'field1',
+      'field_type'  => 'input',
+      'field_value' => 'value1',
+    ]));
+
+    $fieldset = new \codename\core\ui\fieldset([
+      'fieldset_id'   => 'serialized_fieldset',
+      'fieldset_name' => 'serialized_fieldset_name',
+    ]);
+    $form->addFieldset($fieldset);
+
+    $fieldset->addField(new \codename\core\ui\field([
+      'field_name'  => 'field2',
+      'field_type'  => 'input',
+      'field_value' => 'value2',
+    ]));
+
+
+    $jsonData = json_decode(json_encode($form), true);
+    $this->assertEquals('serialized_form', $jsonData['config']['form_id']);
+    $this->assertEquals('', $jsonData['config']['form_action']);
+    $this->assertEquals('', $jsonData['config']['form_method']);
+    $this->assertCount(1, $jsonData['fields']);
+    $this->assertEquals('field1', $jsonData['fields'][0]['field_name']);
+    $this->assertEquals('value1', $jsonData['fields'][0]['field_value']);
+    $this->assertCount(1, $jsonData['fieldsets']);
+    $this->assertCount(1, $jsonData['fieldsets'][0]['fields']);
+    $this->assertEquals('field2', $jsonData['fieldsets'][0]['fields'][0]['field_name']);
+    $this->assertEquals('value2', $jsonData['fieldsets'][0]['fields'][0]['field_value']);
+  }
+
 }
