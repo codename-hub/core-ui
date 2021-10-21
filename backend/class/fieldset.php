@@ -49,15 +49,8 @@ class fieldset implements \JsonSerializable {
      * @return fieldset
      */
     public function addField(field $field, int $position = -1) : fieldset {
-      if($field->getProperty('field_name') === '__mandate_customer_creation') {
-        \codename\core\app::getResponse()->setData('fields_before', $this->data['fields']);
-        \codename\core\app::getResponse()->setData('fields_position!', $position);
-      }
       if($position !== -1) {
         array_splice($this->data['fields'], $position, 0, [ $field ]);
-        if($field->getProperty('field_name') === '__mandate_customer_creation') {
-          \codename\core\app::getResponse()->setData('fields_after', $this->data['fields']);
-        }
         return $this;
       } else {
         array_push($this->data['fields'], $field);
