@@ -29,7 +29,7 @@ class twigTest extends base {
    */
   protected function tearDown(): void
   {
-
+    parent::tearDown();
   }
 
   /**
@@ -54,10 +54,11 @@ class twigTest extends base {
 
     $app->getAppstack();
 
+    // NOTE: if we reset the app in setUp(), we have to execute this initialization routine again, no matter what.
     // avoid re-init
-    if(static::$initialized) {
-      return;
-    }
+    // if(static::$initialized) {
+    //   return;
+    // }
 
     static::$initialized = true;
 
