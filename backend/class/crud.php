@@ -1781,31 +1781,68 @@ class crud extends \codename\core\bootstrapInstance {
                     $options = array();
                     $options['field_required'] = ($formConfig->exists("fieldset>{$key}>required") && in_array($field, $formConfig->get("fieldset>{$key}>required")));
                     $options['field_readonly'] = ($formConfig->exists("fieldset>{$key}>readonly") && in_array($field, $formConfig->get("fieldset>{$key}>readonly")));
+
+                    //
+                    // CHANGED 2021-10-27: flag fields in fieldsets now use the same type/handling as root-level flag fields
+                    //
                     if($field == $this->getMyModel()->table . '_flag') {
                         $flags = $this->getMyModel()->config->get('flag');
-                        foreach($flags as $flagname => $flag) {
-                            $newFieldset->addField(new \codename\core\ui\field(
-                                    array (
-                                        'field_name' => $this->getMyModel()->table . '_flag[' . $flagname . ']',
-                                        'field_type' => 'checkbox',
-                                        'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field . '_' . $flagname),
-                                        'field_value' => !is_null($this->data) ? $this->getMyModel()->isFlag($flag, $this->data->getData()) : false,
-                                        'field_readonly' => $options['field_readonly']
-                                    )
-                                )
-                            );
+                        if(!is_array($flags)) {
+                            continue;
                         }
-                        $newFieldset->addField( new \codename\core\ui\field(
-                            array (
-                                'field_name' => $this->getMyModel()->table . '_flag[__empty]',
-                                'field_type' => 'hidden',
-                                'field_title' => '',
-                                'field_value' => '',
-                                'field_readonly' => $options['field_readonly']
-                            )
-                        ));
+
+                        $value = [];
+                        $elements = [];
+
+                        foreach($flags as $flagname => $flag) {
+                          $value[$flagname] = !is_null($this->data) ? $this->getMyModel()->isFlag($flag, $this->data->getData()) : false;
+                          $elements[] = [
+                            'name'    => $flagname,
+                            'display' => app::getTranslate()->translate('DATAFIELD.' . $field . '_' . $flagname),
+                            'value'   => $flag
+                          ];
+                        }
+
+                        $fielddata = array (
+                            'field_name' => $this->getMyModel()->table . '_flag',
+                            'field_type' => 'multicheckbox',
+                            'field_datatype' => 'structure',
+                            'field_title' => app::getTranslate()->translate('DATAFIELD.' . $field),
+                            'field_multiple' => true,
+                            'field_value' => $value,
+                            'field_elements' => $elements,
+                            'field_idfield' => 'name',
+                            'field_displayfield' => '{$element["display"]}', // todo: translate!
+                            'field_valuefield' => 'value'
+                        );
+
+                        if($this->readOnly
+                          || ($this->config->exists('readonly') && is_array($this->config->get('readonly')) && in_array($field, $this->config->get('readonly')))
+                          || $options['field_readonly']
+                        ) {
+                          $fielddata['field_readonly'] = true;
+                        }
+
+                        if($options['field_required'] ?? false) {
+                          $fielddata['field_required'] = true;
+                        }
+
+                        $c = &$this->onCreateFormfield;
+                        if($c !== null && is_callable($c)) {
+                          $c($fielddata);
+                        }
+
+                        $formField = new \codename\core\ui\field($fielddata);
+
+                        $c = &$this->onFormfieldCreated;
+                        if($c !== null && is_callable($c)) {
+                          $c($formField);
+                        }
+
+                        $newFieldset->addField($formField);
                         continue;
                     }
+
                     $newFieldset->addField($this->makeField($field, $options));
                 }
                 $this->getForm()->addFieldset($newFieldset);

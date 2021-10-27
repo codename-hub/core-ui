@@ -614,13 +614,10 @@ class crudTest extends base {
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
 
     $fields = $fieldsets[1]->getFields();
-    $this->assertCount(6, $fields);
+    // CHANGED 2021-10-27: flag fields in fieldsets have not been handled correctly (legacy type)
+    $this->assertCount(2, $fields);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
     $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[2]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[3]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[4]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[5]);
   }
 
   /**
