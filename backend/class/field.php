@@ -57,6 +57,18 @@ class field implements \JsonSerializable {
         // Create config instance
         $this->config = new \codename\core\config($field);
 
+        if(!empty($this->config->get('field_elements'))) {
+          // Determine parse exceptions
+          // before output by smoke testing
+          try {
+            @eval('$ret = "' . $this->config->get('field_displayfield') . '";');
+          } catch (\Throwable $e) {
+            if($e instanceof \ParseError) {
+              throw new exception('FIELD_DISPLAYFIELD_PARSE_ERROR', exception::$ERRORLEVEL_ERROR, $this->config->get('field_displayfield'));
+            }
+          }
+        }
+
         return $this;
     }
 
