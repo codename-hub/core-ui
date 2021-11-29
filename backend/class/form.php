@@ -248,7 +248,8 @@ class form implements \JsonSerializable {
           $fieldname = $field->getConfig()->get('field_name');
 
           // Check for existance of the field
-          if($field->isRequired() && !$this->fieldSent($field) ) {
+          // and its value (to be not-null and not an empty string (?))
+          if($field->isRequired() && (!$this->fieldSent($field) || empty($this->fieldValue($field))) ) {
               $this->errorstack->addError($fieldname, 'FIELD_NOT_SET');
               continue;
           }
