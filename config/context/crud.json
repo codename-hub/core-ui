@@ -1,35 +1,35 @@
 {
-  "defaultview":"crud_list",
-  "view":{
-    "crud_list":{
-      "icon":"icon-list"
+  "defaultview": "crud_list",
+  "view": {
+    "crud_list": {
+      "icon": "icon-list"
     },
-    "crud_config":{
-      "icon":"icon-list"
+    "crud_config": {
+      "icon": "icon-list"
     },
-    "crud_stats":{
-      "icon":"icon-list"
+    "crud_stats": {
+      "icon": "icon-list"
     },
-    "crud_create":{
-      "icon":"icon-plus"
+    "crud_create": {
+      "icon": "icon-plus"
     },
-    "crud_edit":{
-      "icon":"icon-edit"
+    "crud_edit": {
+      "icon": "icon-edit"
     },
-    "crud_show":{
-      "icon":"icon-eye-open"
+    "crud_show": {
+      "icon": "icon-eye-open"
     },
-    "crud_delete":{
-      "icon":"icon-trash"
+    "crud_delete": {
+      "icon": "icon-trash"
     },
-    "bulk_edit":{
-      "icon":"icon-trash"
+    "bulk_edit": {
+      "icon": "icon-trash"
     },
-    "bulk_delete":{
-      "icon":"icon-trash"
+    "bulk_delete": {
+      "icon": "icon-trash"
     }
   },
-  "action" : {
-    "crud_stats" : {}
+  "action": {
+    "crud_stats": {}
   }
 }

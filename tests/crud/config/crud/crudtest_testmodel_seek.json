@@ -1,21 +1,21 @@
 {
-  "seek" : true,
-  "pagination" : {
+  "seek": true,
+  "pagination": {
     "limit": 2
   },
-  "visibleFields" : [
+  "visibleFields": [
     "testmodel_text",
     "testmodel_flag"
   ],
-  "disabled" : [
+  "disabled": [
     "testmodel_unique_single",
     "testmodel_unique_multi1",
     "testmodel_unique_multi2"
   ],
-  "order" : [
+  "order": [
     {
-      "field" : "testmodel_id",
-      "direction" : "ASC"
+      "field": "testmodel_id",
+      "direction": "ASC"
     }
   ]
 }

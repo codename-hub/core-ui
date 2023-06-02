@@ -1,18 +1,18 @@
 <table>
   <thead>
     <tr>
-    {% for column in data.header %}
-      <td>{{column}}</td>
-    {% endfor %}
+      {% for column in data.header %}
+        <td>{{ column }}</td>
+      {% endfor %}
     </tr>
   </thead>
   <tbody>
 
     {% for row in data.rows %}
       <tr>
-      {% for column in data.header %}
-        <td>{{ row[column] }}</td>
-      {% endfor %}
+        {% for column in data.header %}
+          <td>{{ row[column] }}</td>
+        {% endfor %}
       </tr>
     {% endfor %}
 

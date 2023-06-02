@@ -1,15 +1,15 @@
 {
-  "production" : {
-    "translate" : {
-      "default" : {
-        "inherit" : true
+  "production": {
+    "translate": {
+      "default": {
+        "inherit": true
       }
     }
   },
-  "dev" : {
-    "translate" : {
-      "default" : {
-        "inherit" : true
+  "dev": {
+    "translate": {
+      "default": {
+        "inherit": true
       }
     }
   }

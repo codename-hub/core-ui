@@ -1,32 +1,46 @@
 {
-    "name": "codename/core-ui",
-    "description": "This is going to be the core UI framework.",
-    "type": "library",
-    "keywords": ["codename", "core", "ui"],
-    "authors": [
-        {
-            "name": "Kevin Dargel",
-            "role": "Software Developer"
-        }
-    ],
-    "require": {
-      "codename/core" : "*",
-      "twig/twig" : "2.13.1",
-      "twig/extensions" : "^1.5",
-      "dompdf/dompdf" : "^1.0"
-    },
-    "require-dev" : {
-      "phpunit/phpunit" : "^9.0",
-      "codename/core-test" : "*"
-    },
-    "autoload": {
-      "psr-4": {
-          "codename\\core\\ui\\": "backend/class/"
-      }
-    },
-    "autoload-dev": {
-      "psr-4": {
-          "codename\\core\\io\\tests\\": "tests/"
-      }
+  "name": "codename/core-ui",
+  "description": "This is going to be the core UI framework.",
+  "type": "library",
+  "keywords": [
+    "codename",
+    "core",
+    "ui"
+  ],
+  "authors": [
+    {
+      "name": "Kevin Dargel",
+      "role": "Software Developer"
     }
+  ],
+  "require": {
+    "codename/core": "*",
+    "dompdf/dompdf": "^2.0",
+    "php": "^8.1",
+    "twig/intl-extra": "^3.5.0",
+    "twig/twig": "^3.5.0"
+  },
+  "require-dev": {
+    "codename/core-test": "*",
+    "friendsofphp/php-cs-fixer": "^3.15",
+    "phpunit/phpunit": "^10.0",
+    "vimeo/psalm": "^5.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "codename\\core\\ui\\": "backend/class/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "codename\\core\\ui\\tests\\": "tests/"
+    }
+  },
+  "repositories": [
+    {
+      "__comment": "NOTE: Token/Credentials via auth.json required",
+      "type": "composer",
+      "url": "https://packagist.weltherrschaft.jocoon.de"
+    }
+  ]
 }
