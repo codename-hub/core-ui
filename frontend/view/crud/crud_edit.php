@@ -1,10 +1,14 @@
-<?php namespace codename\core\ui;
+<?php
+
+namespace codename\core\ui;
+
 app::requireAsset('requirecss', [
   '/assets/bootstrap/dist/css/bootstrap.css',
-  '/assets/core-ui-assets/css/coreadmin/stylesheets/application.css'
+  '/assets/core-ui-assets/css/coreadmin/stylesheets/application.css',
 ]);
 app::requireAsset('requirejs', [
-  'bootstrap', 'bootstrap-datepicker'
+  'bootstrap',
+  'bootstrap-datepicker',
 ]);
 ?>
-<?=app::getResponse()->getData('form')?>
+<?= app::getResponse()->getData('form') ?>

@@ -13,13 +13,13 @@
 
 {# table contents #}
 {% for row in data.rows %}{#
-  #}|{% for column in data.header %}{#
-  #} {{ strpadright(row[column], data.max[column]) }} |{#
-  #}{% endfor %}
+#}|{% for column in data.header %}{#
+#} {{ strpadright(row[column], data.max[column]) }} |{#
+#}{% endfor %}
 
-{#
+  {#
   #}+{% for column in data.header %}{#
-  #}-{{ strpadright('-', data.max[column], '-') }}-+{#
-  #}{% endfor %}
+#}-{{ strpadright('-', data.max[column], '-') }}-+{#
+#}{% endfor %}
 
 {% endfor %}

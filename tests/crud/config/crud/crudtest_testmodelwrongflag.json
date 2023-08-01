@@ -3,10 +3,10 @@
   "pagination": {
     "limit": 5
   },
-  "visibleFields" : [
+  "visibleFields": [
     "testmodel_text",
     "testmodel_flag"
   ],
-  "order" : {
+  "order": {
   }
 }

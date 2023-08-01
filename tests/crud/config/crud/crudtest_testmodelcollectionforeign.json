@@ -1,6 +1,6 @@
 {
-  "displayFieldSelection" : true,
-  "visibleFields" : [
+  "displayFieldSelection": true,
+  "visibleFields": [
     "testmodelcollection_text"
   ]
 }

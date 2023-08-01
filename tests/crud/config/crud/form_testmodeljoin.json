@@ -1,14 +1,14 @@
 {
-  "tag" : "example",
-  "children_config" : {
+  "tag": "example",
+  "children_config": {
   },
-  "field" : [
+  "field": [
     "testmodeljoin_text"
   ],
-  "required" : [
+  "required": [
     "testmodeljoin_text"
   ],
-  "readonly" : [
+  "readonly": [
     "testmodeljoin_id"
   ]
 }

@@ -1,63 +1,83 @@
 <?php
+
 namespace codename\core\ui\tests;
 
-use \codename\core\test\base;
-use \codename\core\test\overrideableApp;
+use codename\core\exception;
+use codename\core\generator\restUrlGenerator;
+use codename\core\generator\urlGenerator;
+use codename\core\test\base;
+use codename\core\test\overrideableApp;
+use codename\core\ui\app;
+use ReflectionException;
 
 class appTest extends base
 {
+    /**
+     * [testConstruct description]
+     */
+    public function testConstruct(): void
+    {
+        $this->expectException(exception::class);
+        $this->expectExceptionMessage('EXCEPTION_CORE_UI_APP_ILLEGAL_CALL');
 
-  /**
-   * @inheritDoc
-   */
-  protected function setUp(): void
-  {
-    parent::setUp();
+        new app();
+    }
 
-    $app = static::createApp();
-    overrideableApp::__injectApp([
-      'vendor' => 'codename',
-      'app' => 'core-ui',
-      'namespace' => '\\codename\\core\\ui'
-    ]);
-    $app->getAppstack();
-  }
+    /**
+     * [testRun description]
+     * @throws ReflectionException
+     * @throws exception
+     */
+    public function testRun(): void
+    {
+        $this->expectException(exception::class);
+        $this->expectExceptionMessage('EXCEPTION_CORE_UI_APP_ILLEGAL_CALL');
 
+        (new appRun())->run();
+    }
 
-  /**
-   * [testConstruct description]
-   */
-  public function testConstruct(): void {
-    $this->expectException(\codename\core\exception::class);
-    $this->expectExceptionMessage('EXCEPTION_CORE_UI_APP_ILLEGAL_CALL');
+    /**
+     * [testUrlGenerator description]
+     */
+    public function testUrlGenerator(): void
+    {
+        $urlGenerator = app::getUrlGenerator();
+        static::assertEquals((new urlGenerator()), $urlGenerator);
 
-    $app = new \codename\core\ui\app();
-  }
+        $restUrlGenerator = new restUrlGenerator();
+        app::setUrlGenerator($restUrlGenerator);
 
-  /**
-   * [testRun description]
-   */
-  public function testRun(): void {
-    $this->expectException(\codename\core\exception::class);
-    $this->expectExceptionMessage('EXCEPTION_CORE_UI_APP_ILLEGAL_CALL');
+        $getUrlGenerator = app::getUrlGenerator();
+        static::assertEquals($restUrlGenerator, $getUrlGenerator);
+    }
 
-    $app = \codename\core\ui\app::run();
-  }
+    /**
+     * {@inheritDoc}
+     * @throws ReflectionException
+     * @throws exception
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-  /**
-   * [testUrlGenerator description]
-   */
-  public function testUrlGenerator(): void {
-    $urlGenerator = \codename\core\ui\app::getUrlGenerator();
-    $this->assertEquals((new \codename\core\generator\urlGenerator()), $urlGenerator);
+        $app = static::createApp();
+        overrideableApp::__injectApp([
+          'vendor' => 'codename',
+          'app' => 'core-ui',
+          'namespace' => '\\codename\\core\\ui',
+        ]);
+        $app::getAppstack();
+    }
+}
 
-    $restUrlGenerator = new \codename\core\generator\restUrlGenerator();
-    \codename\core\ui\app::setUrlGenerator($restUrlGenerator);
+class appRun extends app
+{
 
-    $getUrlGenerator = \codename\core\ui\app::getUrlGenerator();
-    $this->assertEquals($restUrlGenerator, $getUrlGenerator);
-
-  }
-
+    /**
+     *
+     */
+    public function __construct()
+    {
+    }
 
 }

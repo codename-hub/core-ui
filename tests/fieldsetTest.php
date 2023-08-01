@@ -1,191 +1,217 @@
 <?php
+
 namespace codename\core\ui\tests;
 
-use \codename\core\test\base;
-use \codename\core\test\overrideableApp;
+use codename\core\exception;
+use codename\core\test\base;
+use codename\core\test\overrideableApp;
+use codename\core\ui\field;
+use codename\core\ui\fieldset;
+use ReflectionException;
 
 class fieldsetTest extends base
 {
+    /**
+     * [testGeneric description]
+     * @throws ReflectionException
+     * @throws exception
+     */
+    public function testGeneric(): void
+    {
+        $fieldset = new fieldset([
+          'fieldset_id' => 'example',
+          'fieldset_name' => 'example',
+        ]);
 
-  /**
-   * @inheritDoc
-   */
-  protected function setUp(): void
-  {
-    parent::setUp();
+        $fieldset->addField(
+            new field([
+              'field_name' => 'example',
+              'field_type' => 'text',
+              'field_value' => 'example',
+            ])
+        );
+        $fieldset->addField(
+            new field([
+              'field_name' => 'example2',
+              'field_type' => 'text',
+              'field_value' => 'example2',
+            ]),
+            0
+        );
 
-    $app = static::createApp();
-    overrideableApp::__injectApp([
-      'vendor' => 'codename',
-      'app' => 'core-ui',
-      'namespace' => '\\codename\\core\\ui'
-    ]);
+        $config = $fieldset->output(true);
 
-    $app->getAppstack();
+        static::assertEquals('example', $config['fieldset_id']);
+        static::assertEquals('FIELDSET_EXAMPLE', $config['fieldset_name']);
 
-    static::setEnvironmentConfig([
-      'test' => [
-        'cache' => [
-          'default' => [
-            'driver' => 'memory'
-          ]
-        ],
-        'translate' => [
-          'default' => [
-            'driver'  => 'json',
-            'inherit' => true,
-          ]
-        ],
-        'templateengine' => [
-          'default' => [
-            'driver' => 'dummy',
-          ]
-        ],
-      ]
-    ]);
-  }
+        static::assertCount(2, $config['fields'] ?? []);
+        static::assertInstanceOf(field::class, $config['fields'][0]);
+        static::assertInstanceOf(field::class, $config['fields'][1]);
 
-  /**
-   * [testGeneric description]
-   */
-  public function testGeneric(): void {
-    $fieldset = new \codename\core\ui\fieldset([
-      'fieldset_id'   => 'example',
-      'fieldset_name' => 'example',
-    ]);
+        static::assertEquals([
+          'field_name' => 'example2',
+          'field_type' => 'text',
+          'field_id' => 'example2',
+          'field_fieldtype' => 'input',
+          'field_class' => 'input',
+          'field_required' => false,
+          'field_readonly' => false,
+          'field_ajax' => false,
+          'field_noninput' => false,
+          'field_placeholder' => '',
+          'field_value' => 'example2',
+          'field_datatype' => 'text',
+          'field_validator' => '',
+          'field_description' => '',
+          'field_title' => '',
+        ], $config['fields'][0]->getConfig()->get());
 
-    $fieldset->addField(new \codename\core\ui\field([
-      'field_name'  => 'example',
-      'field_type'  => 'text',
-      'field_value' => 'example',
-    ]));
-    $fieldset->addField(new \codename\core\ui\field([
-      'field_name'  => 'example2',
-      'field_type'  => 'text',
-      'field_value' => 'example2',
-    ]), 0);
+        $fields = $fieldset->getFields();
+        static::assertCount(2, $fields ?? []);
+        static::assertInstanceOf(field::class, $fields[0]);
+        static::assertInstanceOf(field::class, $fields[1]);
 
-    $config = $fieldset->output(true);
+        static::assertEquals([
+          'field_name' => 'example2',
+          'field_type' => 'text',
+          'field_id' => 'example2',
+          'field_fieldtype' => 'input',
+          'field_class' => 'input',
+          'field_required' => false,
+          'field_readonly' => false,
+          'field_ajax' => false,
+          'field_noninput' => false,
+          'field_placeholder' => '',
+          'field_value' => 'example2',
+          'field_datatype' => 'text',
+          'field_validator' => '',
+          'field_description' => '',
+          'field_title' => '',
+        ], $fields[0]->getConfig()->get());
+    }
 
-    $this->assertEquals('example', $config['fieldset_id']);
-    $this->assertEquals('FIELDSET_EXAMPLE', $config['fieldset_name']);
+    /**
+     * [testFieldsetNameOverride description]
+     * @throws ReflectionException
+     * @throws exception
+     */
+    public function testFieldsetNameOverride(): void
+    {
+        $fieldset = new fieldset([
+          'fieldset_id' => 'example',
+          'fieldset_name' => 'example',
+          'fieldset_name_override' => 'example_override',
+        ]);
 
-    $this->assertCount(2, $config['fields'] ?? []);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $config['fields'][0]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $config['fields'][1]);
+        $config = $fieldset->output(true);
 
-    $this->assertEquals([
-      'field_name'        => 'example2',
-      'field_type'        => 'text',
-      'field_id'          => 'example2',
-      'field_fieldtype'   => 'input',
-      'field_class'       => 'input',
-      'field_required'    => false,
-      'field_readonly'    => false,
-      'field_ajax'        => false,
-      'field_noninput'    => false,
-      'field_placeholder' => '',
-      'field_value'       => 'example2',
-      'field_datatype'    => 'text',
-      'field_validator'   => '',
-      'field_description' => '',
-      'field_title'       => '',
-    ], $config['fields'][0]->getConfig()->get());
+        static::assertEquals('example', $config['fieldset_id']);
+        static::assertEquals('example_override', $config['fieldset_name']);
 
-    $fields = $fieldset->getFields();
-    $this->assertCount(2, $fields ?? []);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[0]);
-    $this->assertInstanceOf(\codename\core\ui\field::class, $fields[1]);
+        static::assertCount(0, $config['fields'] ?? []);
+    }
 
-    $this->assertEquals([
-      'field_name'        => 'example2',
-      'field_type'        => 'text',
-      'field_id'          => 'example2',
-      'field_fieldtype'   => 'input',
-      'field_class'       => 'input',
-      'field_required'    => false,
-      'field_readonly'    => false,
-      'field_ajax'        => false,
-      'field_noninput'    => false,
-      'field_placeholder' => '',
-      'field_value'       => 'example2',
-      'field_datatype'    => 'text',
-      'field_validator'   => '',
-      'field_description' => '',
-      'field_title'       => '',
-    ], $fields[0]->getConfig()->get());
-  }
+    /**
+     * [testOutput description]
+     * @throws ReflectionException
+     * @throws exception
+     */
+    public function testOutput(): void
+    {
+        $fieldset = new fieldset([
+          'fieldset_id' => 'example',
+          'fieldset_name' => 'example',
+          'fieldset_name_override' => 'example_override',
+        ]);
 
-  /**
-   * [testFieldsetNameOverride description]
-   */
-  public function testFieldsetNameOverride(): void {
-    $fieldset = new \codename\core\ui\fieldset([
-      'fieldset_id'             => 'example',
-      'fieldset_name'           => 'example',
-      'fieldset_name_override'  => 'example_override',
-    ]);
+        $fieldset->addField(
+            new field([
+              'field_name' => 'example',
+              'field_type' => 'text',
+              'field_value' => 'example',
+            ])
+        );
 
-    $config = $fieldset->output(true);
+        $fieldset->setType('default');
 
-    $this->assertEquals('example', $config['fieldset_id']);
-    $this->assertEquals('example_override', $config['fieldset_name']);
+        $output = $fieldset->output();
+        static::assertEquals('frontend/fieldset/default', $output);
+    }
 
-    $this->assertCount(0, $config['fields'] ?? []);
-  }
+    /**
+     * Tests \JsonSerializable Interface integrity
+     * @throws ReflectionException
+     * @throws exception
+     */
+    public function testJsonSerialize(): void
+    {
+        $fieldset = new fieldset([
+          'fieldset_id' => 'example',
+          'fieldset_name' => 'example',
+          'fieldset_name_override' => 'example_override',
+        ]);
 
-  /**
-   * [testOutput description]
-   */
-  public function testOutput(): void {
-    $fieldset = new \codename\core\ui\fieldset([
-      'fieldset_id'             => 'example',
-      'fieldset_name'           => 'example',
-      'fieldset_name_override'  => 'example_override',
-    ]);
+        $fieldset->addField(
+            new field([
+              'field_name' => 'example',
+              'field_type' => 'text',
+              'field_value' => 'example',
+            ])
+        );
 
-    $fieldset->addField(new \codename\core\ui\field([
-      'field_name'  => 'example',
-      'field_type'  => 'text',
-      'field_value' => 'example',
-    ]));
+        $fieldset->setType('default');
 
-    $fieldset->setType('default');
+        $fieldset->output(true);
 
-    $output = $fieldset->output();
-    $this->assertEquals('frontend/fieldset/default', $output);
-  }
+        $jsonData = json_decode(json_encode($fieldset), true);
 
-  /**
-   * Tests \JsonSerializable Interface integrity
-   */
-  public function testJsonSerialize(): void {
-    $fieldset = new \codename\core\ui\fieldset([
-      'fieldset_id'             => 'example',
-      'fieldset_name'           => 'example',
-      'fieldset_name_override'  => 'example_override',
-    ]);
+        static::assertEquals('example', $jsonData['fieldset_id']);
+        static::assertEquals('example_override', $jsonData['fieldset_name']);
 
-    $fieldset->addField(new \codename\core\ui\field([
-      'field_name'  => 'example',
-      'field_type'  => 'text',
-      'field_value' => 'example',
-    ]));
+        static::assertCount(1, $jsonData['fields']);
+        $fieldData = $jsonData['fields'][0];
+        static::assertEquals('example', $fieldData['field_name']);
+        static::assertEquals('text', $fieldData['field_type']);
+        static::assertEquals('example', $fieldData['field_value']);
+    }
 
-    $fieldset->setType('default');
+    /**
+     * {@inheritDoc}
+     * @throws ReflectionException
+     * @throws exception
+     */
+    protected function setUp(): void
+    {
+        parent::setUp();
 
-    $outputData = $fieldset->output(true);
+        $app = static::createApp();
+        overrideableApp::__injectApp([
+          'vendor' => 'codename',
+          'app' => 'core-ui',
+          'namespace' => '\\codename\\core\\ui',
+        ]);
 
-    $jsonData = json_decode(json_encode($fieldset), true);
+        $app::getAppstack();
 
-    $this->assertEquals('example', $jsonData['fieldset_id']);
-    $this->assertEquals('example_override', $jsonData['fieldset_name']);
-
-    $this->assertCount(1, $jsonData['fields']);
-    $fieldData = $jsonData['fields'][0];
-    $this->assertEquals('example', $fieldData['field_name']);
-    $this->assertEquals('text', $fieldData['field_type']);
-    $this->assertEquals('example', $fieldData['field_value']);
-  }
-
+        static::setEnvironmentConfig([
+          'test' => [
+            'cache' => [
+              'default' => [
+                'driver' => 'memory',
+              ],
+            ],
+            'translate' => [
+              'default' => [
+                'driver' => 'json',
+                'inherit' => true,
+              ],
+            ],
+            'templateengine' => [
+              'default' => [
+                'driver' => 'dummy',
+              ],
+            ],
+          ],
+        ]);
+    }
 }
