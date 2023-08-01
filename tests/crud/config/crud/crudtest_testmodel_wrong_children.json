@@ -3,36 +3,36 @@
   "pagination": {
     "limit": 5
   },
-  "displayFieldSelection" : true,
-  "customized_fields" : [
+  "displayFieldSelection": true,
+  "customized_fields": [
     "testmodel_testmodeljoin_id"
   ],
-  "visibleFields" : [
+  "visibleFields": [
     "testmodel_text",
     "testmodel_testmodeljoin_id"
   ],
   "visibleFilters": {
-    "testmodel_text" : {
-      "wildcard" : true
-    }
-	},
-  "children" : [
-    "wrong_children"
-  ],
-  "children_config" : {
-    "wrong_children" : {
-      "crud" : "crudtest_testmodeljoin",
-      "form" : "testmodeljoin"
+    "testmodel_text": {
+      "wildcard": true
     }
   },
-  "disabled" : [
+  "children": [
+    "wrong_children"
+  ],
+  "children_config": {
+    "wrong_children": {
+      "crud": "crudtest_testmodeljoin",
+      "form": "testmodeljoin"
+    }
+  },
+  "disabled": [
     "testmodel_unique_single",
     "testmodel_unique_multi1",
     "testmodel_unique_multi2"
   ],
-  "order" : {
+  "order": {
   },
-  "action" : {
-    "crud_edit" : "example"
+  "action": {
+    "crud_edit": "example"
   }
 }

@@ -1,2 +1,6 @@
-<?php namespace codename\core\ui;?>
-<?=app::getResponse()->getData('content')?>
+<?php
+
+namespace codename\core\ui;
+
+?>
+<?= app::getResponse()->getData('content') ?>
